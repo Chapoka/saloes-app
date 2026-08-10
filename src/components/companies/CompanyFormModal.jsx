@@ -1,0 +1,615 @@
+import { useState } from "react";
+import { db } from "@/api/dbClient";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Search, Loader2, Building2, MapPin, Phone, User, MessageCircle, PaintBucket, Image, Palette } from "lucide-react";
+import { toast } from "sonner";
+import { PALETTE_LIST } from "@/lib/colorPalettes";
+
+const emptyForm = {
+  name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
+  data_abertura: "", capital_social: "", porte: "", cnae_principal: "",
+  natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
+  logradouro: "", numero: "", complemento: "", phone: "", email: "",
+  owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
+  branding_primary_color: "", branding_secondary_color: "", branding_accent_color: "", branding_background_color: "", branding_palette: "barbearia",
+};
+
+const ESTABLISHMENT_THEMES = {
+  barbearia: { primary: "#f5c518", secondary: "#1a1a1a", label: "Barbearia" },
+  salao_beleza: { primary: "#ec4899", secondary: "#f9a8d4", label: "Salão" },
+};
+
+function formatPhone(value) {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 10) {
+    return d.replace(/^(\d{2})(\d{0,4})(\d{0,4}).*/, "($1) $2-$3").replace(/-$/, "");
+  }
+  return d.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, "($1) $2-$3").replace(/-$/, "");
+}
+
+function formatCnpj(value) {
+  const d = value.replace(/\D/g, "").slice(0, 14);
+  return d
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3/$4")
+    .replace(/(\d{3})(\d)$/, "$1-$2");
+}
+
+function formatCpf(value) {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  return d
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/(\d{3})(\d)$/, "$1-$2");
+}
+
+function validateCpf(cpf) {
+  const clean = cpf.replace(/\D/g, "");
+  if (clean.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(clean)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(clean.charAt(i)) * (10 - i);
+  let rev = 11 - (sum % 11);
+  if (rev === 10 || rev === 11) rev = 0;
+  if (rev !== parseInt(clean.charAt(9))) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(clean.charAt(i)) * (11 - i);
+  rev = 11 - (sum % 11);
+  if (rev === 10 || rev === 11) rev = 0;
+  return rev === parseInt(clean.charAt(10));
+}
+
+function formatCep(value) {
+  const d = value.replace(/\D/g, "").slice(0, 8);
+  return d.replace(/^(\d{5})(\d)/, "$1-$2");
+}
+
+function formatCurrency(value) {
+  if (value === "" || value == null) return "";
+  const n = Number(value);
+  if (isNaN(n)) return "";
+  return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export default function CompanyFormModal({ editing, form, setForm, onClose, onSave, saving }) {
+  const [docType, setDocType] = useState("cnpj");
+  const [docValue, setDocValue] = useState(editing?.cnpj || "");
+  const [looking, setLooking] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
+
+  const handleCepLookup = async (cepValue) => {
+    const clean = cepValue.replace(/\D/g, "");
+    if (clean.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await db.functions.invoke("lookupCep", { cep: clean });
+      const data = res.data;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+      setForm((prev) => ({
+        ...prev,
+        logradouro: data.street ?? prev.logradouro,
+        bairro: data.neighborhood ?? prev.bairro,
+        cidade: data.city ?? prev.cidade,
+        uf: data.state ?? prev.uf,
+      }));
+    } catch {
+      toast.error("Erro ao consultar CEP");
+    } finally {
+      setCepLoading(false);
+    }
+  };
+
+  const onCepChange = (e) => {
+    const formatted = formatCep(e.target.value);
+    setForm((prev) => ({ ...prev, cep: formatted }));
+    if (formatted.replace(/\D/g, "").length === 8) {
+      handleCepLookup(formatted);
+    }
+  };
+
+  const handleLookup = async () => {
+    if (!docValue) return toast.error("Informe o documento");
+    const cleanDoc = docValue.replace(/\D/g, "");
+    if (docType === "cpf" && !validateCpf(cleanDoc)) {
+      return toast.error("CPF inválido");
+    }
+    if (docType === "cnpj" && cleanDoc.length !== 14) {
+      return toast.error("CNPJ deve ter 14 dígitos");
+    }
+    setLooking(true);
+    try {
+      const res = await db.functions.invoke("lookupCnpj", {
+        document: cleanDoc,
+        type: docType,
+      });
+      const data = res.data;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+      setForm((prev) => ({
+        ...prev,
+        cnpj: data.cnpj ?? prev.cnpj,
+        owner_cpf: docType === "cpf" ? cleanDoc : prev.owner_cpf,
+        tipo: data.tipo ?? prev.tipo,
+        razao_social: data.razao_social ?? prev.razao_social,
+        name: data.nome_fantasia ?? prev.name,
+        situacao_cadastral: data.situacao_cadastral ?? prev.situacao_cadastral,
+        data_abertura: data.data_abertura ?? prev.data_abertura,
+        capital_social: data.capital_social ?? prev.capital_social,
+        porte: data.porte ?? prev.porte,
+        cnae_principal: data.cnae_principal ?? prev.cnae_principal,
+        natureza_juridica: data.natureza_juridica ?? prev.natureza_juridica,
+        cep: data.cep ?? prev.cep,
+        uf: data.uf ?? prev.uf,
+        cidade: data.cidade ?? prev.cidade,
+        bairro: data.bairro ?? prev.bairro,
+        logradouro: data.logradouro ?? prev.logradouro,
+        numero: data.numero ?? prev.numero,
+        complemento: data.complemento ?? prev.complemento,
+        email: data.email ?? prev.email,
+        phone: data.telefone ?? prev.phone,
+      }));
+      toast.success("Dados preenchidos automaticamente!");
+    } catch (err) {
+      toast.error("Erro ao consultar documento");
+    } finally {
+      setLooking(false);
+    }
+  };
+
+  const set = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[92vh] overflow-y-auto">
+        <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-branding-primary" />
+          {editing ? "Editar Salão" : "Novo Salão"}
+        </h3>
+
+        {/* Consulta de documento */}
+        <div className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-100">
+          <Label className="text-sm font-semibold">Consultar Documento</Label>
+          <div className="flex gap-2">
+            <select
+              value={docType}
+              onChange={(e) => setDocType(e.target.value)}
+              className="rounded-xl border border-input bg-white px-3 text-sm h-9"
+            >
+              <option value="cnpj">CNPJ</option>
+              <option value="cpf">CPF</option>
+            </select>
+            <Input
+              value={docType === "cnpj" ? formatCnpj(docValue) : formatCpf(docValue)}
+              onChange={(e) => setDocValue(e.target.value)}
+              placeholder={docType === "cnpj" ? "00.000.000/0000-00" : "000.000.000-00"}
+              className="rounded-xl flex-1"
+            />
+            <Button
+              onClick={handleLookup}
+              disabled={looking}
+              className="rounded-xl btn-branding"
+            >
+              {looking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              Consultar
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500">
+            CNPJ preenche os dados cadastrais. CPF é salvo no campo do responsável.
+          </p>
+        </div>
+
+        {/* Dados Cadastrais */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <Building2 className="w-4 h-4" /> Dados Cadastrais
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1 col-span-2">
+              <Label>CNPJ</Label>
+              <Input value={formatCnpj(form.cnpj)} onChange={(e) => setForm((prev) => ({ ...prev, cnpj: e.target.value }))} placeholder="00.000.000/0000-00" className="rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Label>Tipo</Label>
+              <select value={form.tipo} onChange={set("tipo")} className="rounded-xl border border-input bg-transparent px-3 h-9 text-sm w-full">
+                <option value="">Selecione</option>
+                <option value="MATRIZ">Matriz</option>
+                <option value="FILIAL">Filial</option>
+              </select>
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label>Tipo de Estabelecimento</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(ESTABLISHMENT_THEMES).map(([key, theme]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setForm((prev) => ({
+                      ...prev,
+                      estabelecimento_tipo: key,
+                      branding_primary_color: theme.primary,
+                      branding_secondary_color: theme.secondary,
+                    }))}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
+                      form.estabelecimento_tipo === key
+                        ? "text-gray-900"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                    style={form.estabelecimento_tipo === key ? {
+                      borderColor: theme.primary,
+                      background: `${theme.primary}15`,
+                    } : {}}
+                  >
+                    <span className="flex gap-0.5">
+                      <span className="w-4 h-4 rounded-full border border-gray-200" style={{ background: theme.primary }} />
+                      <span className="w-4 h-4 rounded-full border border-gray-200 -ml-1.5" style={{ background: theme.secondary }} />
+                    </span>
+                    {theme.label}
+                  </button>
+                ))}
+              </div>
+              {form.estabelecimento_tipo && (
+                <p className="text-xs text-gray-500">
+                  Cores aplicadas automaticamente: primária <strong style={{ color: form.branding_primary_color }}>{form.branding_primary_color}</strong> e secundária <strong style={{ color: form.branding_secondary_color }}>{form.branding_secondary_color}</strong>
+                </p>
+              )}
+            </div>
+
+            {/* Palette presets */}
+            <div className="space-y-1 col-span-2">
+              <Label className="flex items-center gap-1.5"><Palette className="w-4 h-4" /> Paleta de Cores</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {PALETTE_LIST.map((palette) => (
+                  <button
+                    key={palette.id}
+                    type="button"
+                    onClick={() => setForm((prev) => ({
+                      ...prev,
+                      branding_palette: palette.id,
+                      branding_primary_color: palette.colors.primary,
+                      branding_secondary_color: palette.colors.secondary,
+                      branding_accent_color: palette.colors.accent,
+                      branding_background_color: palette.colors.background,
+                    }))}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
+                      form.branding_palette === palette.id
+                        ? "border-branding-primary bg-branding-primary/5 text-gray-900 shadow-sm"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    <span className="flex -space-x-1">
+                      {Object.values(palette.colors).map((color, i) => (
+                        <span
+                          key={i}
+                          className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                          style={{ background: color }}
+                        />
+                      ))}
+                    </span>
+                    {palette.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Branding colors */}
+            <div className="space-y-1 col-span-2">
+              <Label className="flex items-center gap-1.5"><PaintBucket className="w-4 h-4" /> Cores da Marca</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-gray-500">Primária</Label>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <input
+                      type="color"
+                      value={form.branding_primary_color || "#0077b6"}
+                      onChange={(e) => setForm((prev) => ({ ...prev, branding_primary_color: e.target.value }))}
+                      className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer"
+                    />
+                    <Input
+                      value={form.branding_primary_color || ""}
+                      onChange={(e) => setForm((prev) => ({ ...prev, branding_primary_color: e.target.value }))}
+                      placeholder="#0077b6"
+                      className="rounded-xl bg-white text-sm font-mono h-9"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Secundária</Label>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <input
+                      type="color"
+                      value={form.branding_secondary_color || "#2a9d8f"}
+                      onChange={(e) => setForm((prev) => ({ ...prev, branding_secondary_color: e.target.value }))}
+                      className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer"
+                    />
+                    <Input
+                      value={form.branding_secondary_color || ""}
+                      onChange={(e) => setForm((prev) => ({ ...prev, branding_secondary_color: e.target.value }))}
+                      placeholder="#2a9d8f"
+                      className="rounded-xl bg-white text-sm font-mono h-9"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Destaque</Label>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <input
+                      type="color"
+                      value={form.branding_accent_color || "#1e293b"}
+                      onChange={(e) => setForm((prev) => ({ ...prev, branding_accent_color: e.target.value }))}
+                      className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer"
+                    />
+                    <Input
+                      value={form.branding_accent_color || ""}
+                      onChange={(e) => setForm((prev) => ({ ...prev, branding_accent_color: e.target.value }))}
+                      placeholder="#1e293b"
+                      className="rounded-xl bg-white text-sm font-mono h-9"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Fundo</Label>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <input
+                      type="color"
+                      value={form.branding_background_color || "#f8fafc"}
+                      onChange={(e) => setForm((prev) => ({ ...prev, branding_background_color: e.target.value }))}
+                      className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer"
+                    />
+                    <Input
+                      value={form.branding_background_color || ""}
+                      onChange={(e) => setForm((prev) => ({ ...prev, branding_background_color: e.target.value }))}
+                      placeholder="#f8fafc"
+                      className="rounded-xl bg-white text-sm font-mono h-9"
+                    />
+                  </div>
+                </div>
+              </div>
+              {form.branding_primary_color && form.branding_secondary_color && (
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_primary_color }} />
+                  <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_secondary_color }} />
+                  <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_accent_color || "#1e293b" }} />
+                  <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_background_color || "#f8fafc" }} />
+                  <span className="text-xs text-gray-500">Pré-visualização</span>
+                </div>
+              )}
+            </div>
+
+            {/* Logo upload */}
+            <div className="space-y-1 col-span-2">
+              <Label className="flex items-center gap-1.5"><Image className="w-4 h-4" /> Logo</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  value={form.branding_logo_url || ""}
+                  onChange={(e) => setForm((prev) => ({ ...prev, branding_logo_url: e.target.value }))}
+                  placeholder="URL da logo"
+                  className="rounded-xl bg-white text-sm flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="shrink-0 rounded-xl"
+                  onClick={async () => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = "image/*";
+                    input.onchange = async () => {
+                      const file = input.files?.[0];
+                      if (!file) return;
+                      try {
+                        const result = await db.integrations.Core.UploadFile({ file });
+                        setForm((prev) => ({ ...prev, branding_logo_url: result.file_url }));
+                      } catch (err) {
+                        toast.error("Erro ao fazer upload: " + (err.message || err));
+                      }
+                    };
+                    input.click();
+                  }}
+                >
+                  <Image className="w-4 h-4 mr-1" />
+                  Upload
+                </Button>
+              </div>
+              {form.branding_logo_url && (
+                <div className="mt-2 p-2 bg-gray-50 rounded-xl border inline-flex items-center gap-2">
+                  <img
+                    src={form.branding_logo_url}
+                    alt="Preview"
+                    className="h-10 object-contain"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, branding_logo_url: "" }))}
+                    className="text-xs text-red-500 hover:underline"
+                  >
+                    Remover
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="space-y-1">
+              <Label>Situação Cadastral</Label>
+              <Input value={form.situacao_cadastral} onChange={set("situacao_cadastral")} placeholder="ATIVA" className="rounded-xl" />
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label>Razão Social</Label>
+              <Input value={form.razao_social} onChange={set("razao_social")} placeholder="Razão social" className="rounded-xl" />
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label>Nome Fantasia *</Label>
+              <Input value={form.name} onChange={set("name")} placeholder="Nome do salão" className="rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Label>Data de Abertura</Label>
+              <Input type="date" value={form.data_abertura} onChange={set("data_abertura")} className="rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Label>Capital Social</Label>
+              <Input
+                value={form.capital_social === "" || form.capital_social == null ? "" : formatCurrency(form.capital_social)}
+                onChange={(e) => setForm((prev) => ({ ...prev, capital_social: e.target.value.replace(/[^\d.,]/g, "") }))}
+                placeholder="0,00"
+                className="rounded-xl"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Porte</Label>
+              <Input value={form.porte} onChange={set("porte")} placeholder="ME, EPP, DEMAIS" className="rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Label>Natureza Jurídica</Label>
+              <Input value={form.natureza_juridica} onChange={set("natureza_juridica")} placeholder="Natureza jurídica" className="rounded-xl" />
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label>CNAE Principal</Label>
+              <Input value={form.cnae_principal} onChange={set("cnae_principal")} placeholder="CNAE principal" className="rounded-xl" />
+            </div>
+          </div>
+        </div>
+
+        {/* Endereço */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <MapPin className="w-4 h-4" /> Endereço
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>CEP</Label>
+              <div className="relative">
+                <Input value={formatCep(form.cep)} onChange={onCepChange} placeholder="00000-000" className="rounded-xl pr-9" />
+                {cepLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-branding-primary" />}
+              </div>
+              <p className="text-xs text-gray-500">Digite o CEP para preencher o endereço</p>
+            </div>
+            <div className="space-y-1">
+              <Label>UF</Label>
+              <Input value={form.uf} onChange={set("uf")} placeholder="SP" className="rounded-xl" maxLength={2} />
+            </div>
+            <div className="space-y-1">
+              <Label>Cidade</Label>
+              <Input value={form.cidade} onChange={set("cidade")} placeholder="Cidade" className="rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Label>Bairro</Label>
+              <Input value={form.bairro} onChange={set("bairro")} placeholder="Bairro" className="rounded-xl" />
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label>Logradouro</Label>
+              <Input value={form.logradouro} onChange={set("logradouro")} placeholder="Rua, avenida" className="rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Label>Número</Label>
+              <Input value={form.numero} onChange={set("numero")} placeholder="Nº" className="rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Label>Complemento</Label>
+              <Input value={form.complemento} onChange={set("complemento")} placeholder="Complemento" className="rounded-xl" />
+            </div>
+          </div>
+        </div>
+
+        {/* Contato */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <Phone className="w-4 h-4" /> Contato
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Telefone</Label>
+              <Input
+                value={formatPhone(form.phone || "")}
+                onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value.replace(/\D/g, "") }))}
+                placeholder="(00) 00000-0000"
+                className="rounded-xl"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Email</Label>
+              <Input type="email" value={form.email} onChange={set("email")} placeholder="salao@email.com" className="rounded-xl" />
+            </div>
+          </div>
+        </div>
+
+        {/* Responsável */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <User className="w-4 h-4" /> Responsável
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1 col-span-2">
+              <Label>Nome do Responsável</Label>
+              <Input value={form.owner_name} onChange={set("owner_name")} placeholder="Nome do responsável" className="rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Label>CPF do Responsável</Label>
+              <Input
+                value={formatCpf(form.owner_cpf || "")}
+                onChange={(e) => setForm((prev) => ({ ...prev, owner_cpf: e.target.value.replace(/\D/g, "") }))}
+                placeholder="000.000.000-00"
+                className="rounded-xl"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>E-mail do Responsável</Label>
+              <Input type="email" value={form.owner_email} onChange={set("owner_email")} placeholder="admin@email.com" className="rounded-xl" />
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label>Telefone / WhatsApp do Responsável</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={formatPhone(form.owner_phone || "")}
+                  onChange={(e) => setForm((prev) => ({ ...prev, owner_phone: e.target.value.replace(/\D/g, "") }))}
+                  placeholder="(00) 00000-0000"
+                  className="rounded-xl flex-1"
+                />
+                {form.owner_phone && form.owner_phone.replace(/\D/g, "").length >= 10 && (
+                  <a
+                    href={`https://wa.me/55${form.owner_phone.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#25D366] text-white px-4 text-sm font-medium hover:bg-[#1ebe5d] transition-colors"
+                    title="Abrir no WhatsApp"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-gray-700">Status</h4>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="active" checked={form.active} onChange={(e) => setForm((prev) => ({ ...prev, active: e.target.checked }))} className="w-4 h-4" />
+              <Label htmlFor="active">Salão ativo</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="has_branch" checked={form.has_branch} onChange={(e) => setForm((prev) => ({ ...prev, has_branch: e.target.checked }))} className="w-4 h-4" />
+              <Label htmlFor="has_branch">Possui filial</Label>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-2 sticky bottom-0 bg-white pb-1">
+          <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl">Cancelar</Button>
+          <Button onClick={onSave} disabled={saving} className="flex-1 btn-branding rounded-xl">
+            {saving ? "Salvando..." : "Salvar"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

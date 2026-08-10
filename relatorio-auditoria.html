@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório de Auditoria — Saloes App</title>
+<style>
+  @page { size: A4; margin: 18mm 15mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a2e; line-height: 1.55; font-size: 11px; }
+  .cover { page-break-after: always; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
+  .cover h1 { font-size: 36px; margin-bottom: 10px; font-weight: 800; }
+  .cover h2 { font-size: 18px; font-weight: 400; opacity: 0.9; margin-bottom: 30px; }
+  .cover .meta { font-size: 13px; opacity: 0.8; }
+  .cover .meta span { display: block; margin: 4px 0; }
+  .toc { page-break-after: always; padding: 30px 0; }
+  .toc h2 { font-size: 22px; color: #667eea; margin-bottom: 20px; border-bottom: 2px solid #667eea; padding-bottom: 8px; }
+  .toc ul { list-style: none; }
+  .toc li { padding: 7px 0; border-bottom: 1px dotted #ddd; font-size: 12px; }
+  .toc li span.num { font-weight: 700; color: #667eea; margin-right: 8px; }
+  h2 { font-size: 20px; color: #667eea; margin: 30px 0 12px; border-bottom: 2px solid #667eea; padding-bottom: 6px; page-break-after: avoid; }
+  h3 { font-size: 14px; color: #333; margin: 18px 0 8px; page-break-after: avoid; }
+  h4 { font-size: 12px; color: #555; margin: 12px 0 6px; }
+  p, li { font-size: 11px; line-height: 1.6; }
+  ul, ol { margin: 4px 0 10px 18px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 10px; page-break-inside: avoid; }
+  th { background: #667eea; color: #fff; padding: 7px 8px; text-align: left; font-weight: 600; }
+  td { padding: 6px 8px; border-bottom: 1px solid #e0e0e0; }
+  tr:nth-child(even) td { background: #f8f9ff; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 700; color: #fff; }
+  .badge-critico { background: #dc2626; }
+  .badge-alto { background: #ea580c; }
+  .badge-medio { background: #ca8a04; }
+  .badge-baixo { background: #2563eb; }
+  .badge-ok { background: #16a34a; }
+  code { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-family: 'Consolas', monospace; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 6px; font-size: 10px; overflow-x: auto; margin: 8px 0 12px; font-family: 'Consolas', monospace; line-height: 1.5; }
+  .section { page-break-inside: avoid; }
+  .page-break { page-break-before: always; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .summary-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; text-align: center; }
+  .summary-card .value { font-size: 28px; font-weight: 800; }
+  .summary-card .label { font-size: 10px; color: #666; margin-top: 2px; }
+  .summary-card.red .value { color: #dc2626; }
+  .summary-card.orange .value { color: #ea580c; }
+  .summary-card.green .value { color: #16a34a; }
+  .summary-card.blue .value { color: #2563eb; }
+  .arch-box { background: #f8f9ff; border: 1px solid #e0e7ff; border-radius: 8px; padding: 14px; margin: 10px 0; font-family: 'Consolas', monospace; font-size: 10px; line-height: 1.7; white-space: pre; }
+  .footer { text-align: center; font-size: 9px; color: #999; margin-top: 40px; padding-top: 10px; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="cover">
+  <h1>Relatório de Auditoria</h1>
+  <h2>Sistesma de Gestão de Salões — Saloes App</h2>
+  <div class="meta">
+    <span>Data: 05 de Agosto de 2026</span>
+    <span>Versão: 0.0.0</span>
+    <span>Ambiente: Produção / Desenvolvimento</span>
+  </div>
+</div>
+
+<!-- SUMÁRIO -->
+<div class="toc">
+  <h2>Sumário</h2>
+  <ul>
+    <li><span class="num">1</span> Visão Geral e Resumo Executivo</li>
+    <li><span class="num">2</span> Arquitetura do Sistema</li>
+    <li><span class="num">3</span> Dependências Não Utilizadas</li>
+    <li><span class="num">4</span> Vulnerabilidades de Segurança</li>
+    <li><span class="num">5</span> Código Duplicado</li>
+    <li><span class="num">6</span> Melhorias de Performance</li>
+    <li><span class="num">7</span> Rotas Sem Autenticação</li>
+    <li><span class="num">8</span> Cobertura de Testes</li>
+    <li><span class="num">9</span> Fluxos Críticos do Negócio</li>
+    <li><span class="num">10</span> Plano de Ação Recomendado</li>
+  </ul>
+</div>
+
+<!-- 1. RESUMO EXECUTIVO -->
+<h2>1. Visão Geral e Resumo Executivo</h2>
+
+<div class="summary-grid">
+  <div class="summary-card red">
+    <div class="value">18</div>
+    <div class="label">Dependências não utilizadas</div>
+  </div>
+  <div class="summary-card red">
+    <div class="value">4</div>
+    <div class="label">Vulnerabilidades críticas</div>
+  </div>
+  <div class="summary-card orange">
+    <div class="value">16+</div>
+    <div class="label">Padrões de código duplicados</div>
+  </div>
+  <div class="summary-card red">
+    <div class="value">0%</div>
+    <div class="label">Cobertura de testes</div>
+  </div>
+</div>
+
+<table>
+  <tr><th>Área</th><th>Nota</th><th>Ações Prioritárias</th></tr>
+  <tr><td>Segurança</td><td><span class="badge badge-critico">CRÍTICO</span></td><td>Remover bypass de service_role, fixar CORS, adicionar rate limiting, remover senhas em plaintext</td></tr>
+  <tr><td>Dependências</td><td><span class="badge badge-critico">CRÍTICO</span></td><td>Remover 34+ pacotes não utilizados (~1.2MB economia no bundle)</td></tr>
+  <tr><td>Testes</td><td><span class="badge badge-critico">CRÍTICO</span></td><td>0% cobertura — implementar testes mínimos para auth e pagamentos</td></tr>
+  <tr><td>Performance</td><td><span class="badge badge-medio">MÉDIO</span></td><td>Code splitting, memoização, paginação, virtualização</td></tr>
+  <tr><td>Código Duplicado</td><td><span class="badge badge-medio">MÉDIO</span></td><td>Refatorar 16+ padrões duplicados em componentes/hooks genéricos</td></tr>
+  <tr><td>Arquitetura</td><td><span class="badge badge-ok">OK</span></td><td>Sólida — multi-tenant, RBAC, Supabase + Express estruturados</td></tr>
+</table>
+
+<!-- 2. ARQUITETURA -->
+<h2 class="page-break">2. Arquitetura do Sistema</h2>
+
+<h3>Stack Tecnológica</h3>
+<table>
+  <tr><th>CAMADA</th><th>TECNOLOGIA</th><th>VERSÃO</th></tr>
+  <tr><td>Frontend</td><td>React + Vite + Tailwind CSS</td><td>React 18 / Vite 6</td></tr>
+  <tr><td>Roteamento</td><td>React Router DOM</td><td>6.26.0</td></tr>
+  <tr><td>Banco de Dados</td><td>Supabase (PostgreSQL)</td><td>2.108.2</td></tr>
+  <tr><td>Backend API</td><td>Express.js</td><td>5.2.1</td></tr>
+  <tr><td>Pagamentos</td><td>Asaas (gateaway brasileiro)</td><td>—</td></tr>
+  <tr><td>UI Components</td><td>Radix UI + shadcn/ui</td><td>24+ pacotes</td></tr>
+  <tr><td>Gráficos</td><td>Recharts</td><td>2.15.4</td></tr>
+  <tr><td>Ícones</td><td>Lucide React</td><td>1.22.0</td></tr>
+</table>
+
+<h3>Estrutura de Diretórios</h3>
+<div class="arch-box">src/
+├── api/          # Camada de dados (Supabase client)
+├── components/   # Componentes reutilizáveis
+│   ├── schedule/ # Calendário, modais de agendamento
+│   ├── settings/ # Configurações da empresa
+│   ├── services/ # Modal de serviços
+│   ├── invoices/ # Modais de faturamento
+│   ├── plans/    # Seletor de modalidades
+│   ├── auth/     # Hook useCurrentUser
+│   ├── dashboard/# StatsCard
+│   ├── companies/# Formulário de empresa
+│   └── ui/       # 40+ componentes shadcn/ui
+├── hooks/        # Hooks customizados
+├── lib/          # AuthContext, NavigationTracker
+├── pages/        # 20 páginas da aplicação
+├── types/        # Definições de tipo
+└── utils/        # Utilitários
+
+server/
+├── index.js      # Pipeline de middleware + rotas
+├── lib/          # Supabase client, Asaas client
+└── routes/       # cep, asaas, whatsapp, email, auth</div>
+
+<h3>Fluxo de Dados</h3>
+<div class="arch-box">Frontend ──→ Supabase (direto, anon key + RLS) ──→ Leituras/Escritas
+Frontend ──→ Express Server (JWT do usuário) ──→ Asaas, WhatsApp, E-mail, Auth Admin
+Express  ──→ Supabase (service_role key) ──→ Operações admin (CRUD usuários)</div>
+
+<h3>Hierarquia de Roles</h3>
+<p><code>super_admin</code> &gt; <code>admin</code> &gt; <code>profissional</code> &gt; <code>cliente</code></p>
+<p>Multi-tenant: Empresas separadas por <code>company_id</code> / <code>company_ids</code>. Usuários podem pertencer a múltiplas empresas via tabela <code>customer_companies</code>.</p>
+
+<!-- 3. DEPENDÊNCIAS NÃO UTILIZADAS -->
+<h2 class="page-break">3. Dependências Não Utilizadas</h2>
+
+<h3>3.1 Dependências Confirmadas como Não Utilizadas (18 pacotes)</h3>
+<p>Nenhum <code>import</code> ou <code>require</code> encontrado em <code>src/</code> ou <code>server/</code>:</p>
+<table>
+  <tr><th>#</th><th>PACOTE</th><th>OBSERVAÇÃO</th></tr>
+  <tr><td>1</td><td><code>three</code></td><td>Biblioteca 3D (~600KB) — nenhum uso</td></tr>
+  <tr><td>2</td><td><code>react-leaflet</code></td><td>Nenhum componente de mapa</td></tr>
+  <tr><td>3</td><td><code>react-quill</code></td><td>Editor rich-text não utilizado</td></tr>
+  <tr><td>4</td><td><code>react-markdown</code></td><td>Nenhum render de markdown</td></tr>
+  <tr><td>5</td><td><code>canvas-confetti</code></td><td>Nenhum efeito de confetti</td></tr>
+  <tr><td>6</td><td><code>html2canvas</code></td><td>Nenhum screenshot</td></tr>
+  <tr><td>7</td><td><code>jspdf</code></td><td>Nenhum PDF gerado</td></tr>
+  <tr><td>8</td><td><code>moment</code></td><td>Projeto usa <code>date-fns</code> (31 imports em 14 arquivos)</td></tr>
+  <tr><td>9</td><td><code>lodash</code></td><td>Nenhum import encontrado</td></tr>
+  <tr><td>10</td><td><code>@hello-pangea/dnd</code></td><td>Nenhum drag-and-drop</td></tr>
+  <tr><td>11</td><td><code>@radix-ui/react-toast</code></td><td>Projeto usa <code>sonner</code></td></tr>
+  <tr><td>12</td><td><code>react-hot-toast</code></td><td>Projeto usa <code>sonner</code> (30+ imports)</td></tr>
+  <tr><td>13</td><td><code>framer-motion</code></td><td>Nenhuma animação (~100KB)</td></tr>
+  <tr><td>14</td><td><code>zod</code></td><td>Nenhuma validação de schema</td></tr>
+  <tr><td>15</td><td><code>@hookform/resolvers</code></td><td><code>react-hook-form</code> usado, mas não o resolver</td></tr>
+  <tr><td>16</td><td><code>@stripe/react-stripe-js</code></td><td>Stripe NÃO é utilizado</td></tr>
+  <tr><td>17</td><td><code>@stripe/stripe-js</code></td><td>Stripe NÃO é utilizado</td></tr>
+  <tr><td>18</td><td><code>jsonwebtoken</code></td><td>Auth usa Supabase Auth, não JWT manual</td></tr>
+</table>
+
+<h3>3.2 Wrappers shadcn/ui Órfãos (15 pacotes)</h3>
+<p>Arquivos wrapper existem em <code>src/components/ui/</code> mas <strong>não são importados</strong> por nenhum componente ou página:</p>
+<table>
+  <tr><th>PACOTE</th><th>ARQUIVO WRAPPER</th></tr>
+  <tr><td><code>@radix-ui/react-context-menu</code></td><td><code>ui/context-menu.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-menubar</code></td><td><code>ui/menubar.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-navigation-menu</code></td><td><code>ui/navigation-menu.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-progress</code></td><td><code>ui/progress.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-scroll-area</code></td><td><code>ui/scroll-area.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-aspect-ratio</code></td><td><code>ui/aspect-ratio.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-avatar</code></td><td><code>ui/avatar.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-collapsible</code></td><td><code>ui/collapsible.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-radio-group</code></td><td><code>ui/radio-group.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-slider</code></td><td><code>ui/slider.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-toggle</code></td><td><code>ui/toggle.jsx</code></td></tr>
+  <tr><td><code>@radix-ui/react-toggle-group</code></td><td><code>ui/toggle-group.jsx</code></td></tr>
+  <tr><td><code>react-resizable-panels</code></td><td><code>ui/resizable.jsx</code></td></tr>
+  <tr><td><code>input-otp</code></td><td><code>ui/input-otp.jsx</code></td></tr>
+  <tr><td><code>next-themes</code></td><td><code>ui/sonner.jsx</code></td></tr>
+</table>
+
+<h3>3.3 Impacto</h3>
+<ul>
+  <li><strong>Bundle JS:</strong> ~1.2MB+ de código desnecessário (mesmo com tree-shaking)</li>
+  <li><strong>node_modules:</strong> Aumento significativo no tempo de instalação e build</li>
+  <li><strong>Manutenção:</strong> Pacotes desatualizados podem gerar alertas de segurança</li>
+</ul>
+
+<!-- 4. VULNERABILIDADES -->
+<h2 class="page-break">4. Vulnerabilidades de Segurança</h2>
+
+<h3>4.1 Crítico</h3>
+
+<table>
+  <tr><th>#</th><th>VULNERABILIDADE</th><th>LOCALIZAÇÃO</th><th>DETALHES</th></tr>
+  <tr>
+    <td><span class="badge badge-critico">C-1</span></td>
+    <td>Service Role Key como bypass de autenticação</td>
+    <td><code>server/index.js:36</code></td>
+    <td>O token SUPABASE_SERVICE_ROLE_KEY é aceito como Bearer token. Qualquer pessoa com a chave ignora toda autenticação e RBAC.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-critico">C-2</span></td>
+    <td>Credenciais em plaintext no disco</td>
+    <td><code>.env.local</code>, <code>server/.env</code></td>
+    <td>Service role key JWT em texto puro. Pode ter sido commitado ao version control.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-critico">C-3</span></td>
+    <td>CORS configurado para permitir todas as origens</td>
+    <td><code>server/index.js:18</code></td>
+    <td><code>cors({ origin: true })</code> reflete a origem do request — qualquer site pode fazer chamadas autenticadas à API.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-critico">C-4</span></td>
+    <td>Senhas armazenadas em texto puro no banco</td>
+    <td><code>server/routes/auth.js:150-155</code></td>
+    <td>Campo <code>temp_password</code> armazena a senha em plaintext na tabela <code>users</code>. Se o banco for comprometido, todas as senhas temporárias ficam expostas.</td>
+  </tr>
+</table>
+
+<h3>4.2 Alto</h3>
+<table>
+  <tr><th>#</th><th>VULNERABILIDADE</th><th>LOCALIZAÇÃO</th></tr>
+  <tr>
+    <td><span class="badge badge-alto">H-1</span></td>
+    <td>Sem rate limiting em nenhum endpoint</td>
+    <td><code>server/index.js</code> — todo o arquivo. Vulnerável a brute-force, enumeration e DoS.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-alto">H-2</span></td>
+    <td>Endpoint de confirmação de email sem verificação de role</td>
+    <td><code>server/routes/auth.js:6</code> — qualquer usuário autenticado (incl. cliente) pode confirmar email de outros.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-alto">H-3</span></td>
+    <td>Política de senha fraca (mínimo 6 caracteres)</td>
+    <td><code>ResetPassword.jsx:98</code>, <code>SetPassword.jsx:49</code></td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-alto">H-4</span></td>
+    <td>Service role usado para todas as requisições autenticadas</td>
+    <td><code>server/lib/supabase.js:33</code> — cliente Supabase com service_role para toda operação, não apenas admin.</td>
+  </tr>
+</table>
+
+<h3>4.3 Médio</h3>
+<table>
+  <tr><th>#</th><th>VULNERABILIDADE</th><th>LOCALIZAÇÃO</th></tr>
+  <tr>
+    <td><span class="badge badge-medio">M-1</span></td>
+    <td>Sem validação de input nos endpoints</td>
+    <td><code>asaas.js</code> (valor/pagamento), <code>whatsapp.js</code> (telefone), <code>email.js</code> (formato)</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-medio">M-2</span></td>
+    <td>console.log com dados sensíveis no frontend</td>
+    <td><code>dbClient.js:516,540,572</code> — emails, senhas temporárias, IDs</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-medio">M-3</span></td>
+    <td>Mensagens de erro expõem detalhes internos</td>
+    <td><code>asaas.js:170</code>, <code>whatsapp.js:64</code>, <code>auth.js:30</code></td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-medio">M-4</span></td>
+    <td>Sem headers de segurança (Helmet)</td>
+    <td><code>server/index.js</code> — ausência de CSP, X-Frame-Options, etc.</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-medio">M-5</span></td>
+    <td>CustomerPortal público sem proteção frontend</td>
+    <td><code>/CustomerPortal</code> e <code>/Portalcliente</code> — login interno, mas sem middleware server-side</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-medio">M-6</span></td>
+    <td>Sem limite de body no Express</td>
+    <td><code>express.json()</code> sem <code>limit</code> configurado — vulnerável a DoS via payloads grandes</td>
+  </tr>
+</table>
+
+<h3>4.4 Dados Expostos</h3>
+<table>
+  <tr><th>ARQUIVO</th><th>CONTEÚDO</th><th>RISCO</th></tr>
+  <tr><td><code>.env.local</code></td><td>VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY</td><td>Anon key é pública por design, mas URL expõe infraestrutura</td></tr>
+  <tr><td><code>server/.env</code></td><td>SUPABASE_SERVICE_ROLE_KEY (JWT completo)</td><td><span class="badge badge-critico">CRÍTICO</span> — acesso irrestrito ao banco</td></tr>
+  <tr><td><code>server/.env.example</code></td><td>URL real do Supabase (não placeholder)</td><td>Expõe infraestrutura em repositórios</td></tr>
+</table>
+
+<!-- 5. CÓDIGO DUPLICADO -->
+<h2 class="page-break">5. Código Duplicado</h2>
+
+<h3>5.1 Crítico</h3>
+
+<h4>5.1.1 NewAppointmentModal / NewLessonModal — 95% idênticos</h4>
+<table>
+  <tr><th>ARQUIVO</th><th>LINHAS</th></tr>
+  <tr><td><code>src/components/schedule/NewAppointmentModal.jsx</code></td><td>457</td></tr>
+  <tr><td><code>src/components/schedule/NewLessonModal.jsx</code></td><td>439</td></tr>
+</table>
+<p>Única diferença: campo <code>modality</code> vs <code>service_category</code>. Todo o resto (imports, lógica, JSX) é idêntico.</p>
+<p><strong>Refatoração:</strong> Extrair componente único <code>NewServiceModal</code> parametrizado pelo nome do campo.</p>
+
+<h4>5.1.2 Normalização de roles — copiado em 7 arquivos</h4>
+<pre>rawRole === "teacher" ? "profissional" : rawRole === "user" ? "cliente" : rawRole</pre>
+<p><strong>Arquivos:</strong> <code>Companies.jsx:57</code>, <code>Layout.jsx:125</code>, <code>Dashboard.jsx:47</code>, <code>Customers.jsx:98</code>, <code>Schedule.jsx:51</code>, <code>Invoices.jsx:89</code>, <code>Settings.jsx:95</code></p>
+<p>O hook <code>useCurrentUser()</code> já implementa <code>normalizeRole()</code> mas é ignorado.</p>
+
+<h4>5.1.3 Fetch de usuário atual — 9 arquivos</h4>
+<p>Padrão <code>db.auth.me()</code> + <code>useState</code> duplicado em: <code>Customers.jsx</code>, <code>Dashboard.jsx</code>, <code>Invoices.jsx</code>, <code>Companies.jsx</code>, <code>Settings.jsx</code>, <code>Schedule.jsx</code>, <code>CalendarSettings.jsx</code>, <code>Home.jsx</code>, <code>Layout.jsx</code>.</p>
+
+<h4>5.1.4 Normalização de company_ids — 16 ocorrências</h4>
+<pre>currentUser?.company_ids?.length
+  ? currentUser.company_ids
+  : (currentUser?.company_id ? [currentUser.company_id] : [])</pre>
+<p>O hook <code>useCurrentUser()</code> já computa <code>companyIds</code> mas é ignorado.</p>
+
+<h3>5.2 Alto</h3>
+<table>
+  <tr><th>PADRÃO</th><th>OCORRÊNCIAS</th><th>REFATORAÇÃO</th></tr>
+  <tr><td>CRUD mutations boilerplate</td><td>6 páginas (Services, Plans, StylistLevels, PunchCards, Companies, Customers)</td><td>Hook <code>useCrudMutation(entityName, queryKey)</code></td></tr>
+  <tr><td>Dialog de confirmação de exclusão</td><td>7+ locais (Services, Plans, StylistLevels, PunchCards, Companies, Customers, Invoices)</td><td>Componente <code>&lt;ConfirmDeleteDialog&gt;</code></td></tr>
+  <tr><td>Loading skeleton / empty state</td><td>7+ páginas</td><td>Componentes <code>&lt;LoadingSkeleton&gt;</code>, <code>&lt;EmptyState&gt;</code></td></tr>
+  <tr><td>Page header</td><td>7+ páginas</td><td>Componente <code>&lt;PageHeader&gt;</code></td></tr>
+  <tr><td>Search/filter bar</td><td>6 páginas</td><td>Componente <code>&lt;SearchFilterBar&gt;</code></td></tr>
+  <tr><td>DropdownMenu de ações</td><td>6+ páginas</td><td>Componente <code>&lt;ActionsMenu&gt;</code></td></tr>
+  <tr><td>Form modal wrapper</td><td>5 páginas</td><td>Componente <code>&lt;FormModal&gt;</code></td></tr>
+  <tr><td>Erro toast em mutations</td><td>27+ ocorrências</td><td>Utilitário <code>handleError</code> padronizado</td></tr>
+</table>
+
+<!-- 6. MELHORIAS DE PERFORMANCE -->
+<h2 class="page-break">6. Melhorias de Performance</h2>
+
+<h3>6.1 P0 — Crítico</h3>
+
+<h4>6.1.1 Zero Code Splitting</h4>
+<p>Todas as 20 páginas são importadas de forma síncrona em <code>pages.config.js</code>. Nenhum uso de <code>React.lazy()</code> ou <code>Suspense</code>.</p>
+<p><strong>Impacto:</strong> Bundle único de <strong>~1.2MB</strong> (<code>dist/assets/index-BMl-5AQE.js</code> = 1.206.884 bytes). Todo usuário baixa código de TODAS as páginas na primeira visita.</p>
+<p><strong>Fix:</strong> Converter imports em <code>pages.config.js</code> para <code>React.lazy()</code>.</p>
+
+<h4>6.1.1 Vite sem otimizações de build</h4>
+<p><code>vite.config.js</code> não configura: <code>manualChunks</code> (separar vendors), <code>build.target</code> (navegadores modernos), <code>cssCodeSplit</code>.</p>
+
+<h4>6.1.3 18 dependências pesadas não utilizadas</h4>
+<p>Pacotes como <code>three</code> (~600KB), <code>moment</code> (~300KB), <code>framer-motion</code> (~100KB), <code>lodash</code> (~70KB) aumentam o bundle mesmo com tree-shaking.</p>
+
+<h3>6.2 P0 — React</h3>
+
+<h4>6.2.1 Zero uso de React.memo</h4>
+<p>Nenhum dos 80+ componentes é otimizado com <code>React.memo</code>. Componentes re-renderizam desnecessariamente.</p>
+
+<h4>6.2.2 Computações custosas sem memoização no Dashboard</h4>
+<p><code>Dashboard.jsx:120-177</code> — <code>companyStats</code> itera companies × customers × invoices a cada render (complexidade O(n×m×k)).</p>
+
+<h4>6.2.3 DayCalendar com complexidade O(n²×m)</h4>
+<p><code>DayCalendar.jsx:30-89</code> — <code>customers.find()</code> dentro de loops múltiplas vezes para o mesmo customer ID.</p>
+
+<h3>6.3 P1 — Alto</h3>
+
+<table>
+  <tr><th>PROBLEMA</th><th>IMPACTO</th><th>LOCALIZAÇÃO</th></tr>
+  <tr><td>AuthContext causa re-render global</td><td>Toda mudança de estado re-renderiza a árvore inteira</td><td><code>AuthContext.jsx</code></td></tr>
+  <tr><td>Fetch duplicado de usuário por página</td><td>2+ requests extras por navegação</td><td>9 páginas</td></tr>
+  <tr><td>Sem paginação — fetch de TODOS os registros</td><td>Cargas lentas e alto consumo de memória</td><td><code>Customers.jsx</code>, <code>Invoices.jsx</code>, <code>Dashboard.jsx</code></td></tr>
+  <tr><td>Sem virtualização de listas</td><td>Centenas de DOM nodes para listas grandes</td><td><code>Customers.jsx</code>, <code>Invoices.jsx</code></td></tr>
+  <tr><td>Sem staleTime no TanStack Query</td><td>Dados considerados stale imediatamente</td><td><code>query-client.js</code></td></tr>
+</table>
+
+<h3>6.4 P2 — Médio</h3>
+
+<table>
+  <tr><th>PROBLEMA</th><th>LOCALIZAÇÃO</th></tr>
+  <tr><td>CSS global com transição em todos os elementos (<code>* { transition: ... }</code>)</td><td><code>index.scss:138-142</code></td></tr>
+  <tr><td>Inline styles em vez de Tailwind — objetos criados a cada render</td><td><code>Layout.jsx</code>, <code>Dashboard.jsx</code></td></tr>
+  <tr><td>Login carrega 4 imagens Unsplash sem <code>loading="lazy"</code></td><td><code>Login.jsx:135</code></td></tr>
+  <tr><td>Invalidation de queries excessivamente ampla</td><td>Múltiplas páginas</td></tr>
+</table>
+
+<!-- 7. ROTAS SEM AUTENTICAÇÃO -->
+<h2 class="page-break">7. Rotas Sem Autenticação</h2>
+
+<h3>7.1 Frontend — Rotas Públicas</h3>
+<table>
+  <tr><th>ROTA</th><th>COMPONENTE</th><th>RISCO</th></tr>
+  <tr><td><code>/login</code></td><td><code>Login.jsx</code></td><td><span class="badge badge-ok">OK</span> — intencional</td></tr>
+  <tr><td><code>/forgot-password</code></td><td><code>ForgotPassword.jsx</code></td><td><span class="badge badge-ok">OK</span> — intencional</td></tr>
+  <tr><td><code>/reset-password</code></td><td><code>ResetPassword.jsx</code></td><td><span class="badge badge-ok">OK</span> — intencional</td></tr>
+  <tr><td><code>/set-password</code></td><td><code>SetPassword.jsx</code></td><td><span class="badge badge-ok">OK</span> — intencional</td></tr>
+  <tr><td><code>/CustomerPortal</code></td><td><code>CustomerPortal.jsx</code></td><td><span class="badge badge-medio">MÉDIO</span> — portal público com login interno</td></tr>
+  <tr><td><code>/Portalcliente</code></td><td><code>CustomerPortal.jsx</code></td><td><span class="badge badge-medio">MÉDIO</span> — alias da rota acima</td></tr>
+</table>
+
+<h3>7.2 Backend — Rotas Públicas</h3>
+<table>
+  <tr><th>MÉTODO</th><th>ROTA</th><th>RISCO</th></tr>
+  <tr><td>POST</td><td><code>/api/cep/</code></td><td><span class="badge badge-medio">MÉDIO</span> — proxy para viacep.com.br sem rate limiting</td></tr>
+</table>
+
+<h3>7.3 Backend — Rotas com Auth mas sem RBAC Adequado</h3>
+<table>
+  <tr><th>MÉTODO</th><th>ROTA</th><th>PROBLEMA</th></tr>
+  <tr><td>POST</td><td><code>/api/auth/confirm-email</code></td><td>Qualquer usuário autenticado (incl. cliente) pode confirmar email de outros</td></tr>
+  <tr><td>GET</td><td><code>/api/health</code></td><td>Retorna email e role do usuário — information disclosure</td></tr>
+</table>
+
+<h3>7.4 Tabela Completa de Rotas Protegidas</h3>
+<table>
+  <tr><th>ROTA</th><th>ROLES PERMITIDAS</th></tr>
+  <tr><td><code>/</code>, <code>/Home</code>, <code>/Dashboard</code></td><td>super_admin, admin, profissional</td></tr>
+  <tr><td><code>/Schedule</code>, <code>/Clientes</code>, <code>/Invoices</code></td><td>super_admin, admin, profissional</td></tr>
+  <tr><td><code>/Services</code>, <code>/Plans</code>, <code>/PunchCards</code></td><td>super_admin, admin, profissional</td></tr>
+  <tr><td><code>/Templates</code>, <code>/WaitingList</code></td><td>super_admin, admin, profissional</td></tr>
+  <tr><td><code>/Settings</code>, <code>/Companies</code>, <code>/CalendarSettings</code></td><td>super_admin, admin</td></tr>
+  <tr><td><code>/StylistLevels</code></td><td>super_admin, admin</td></tr>
+  <tr><td><code>/AuditLogs</code></td><td><strong>super_admin apenas</strong></td></tr>
+  <tr><td><code>/CustomerDetail</code></td><td>super_admin, admin, profissional</td></tr>
+</table>
+
+<!-- 8. COBERTURA DE TESTES -->
+<h2 class="page-break">8. Cobertura de Testes</h2>
+
+<table>
+  <tr><th>ASPECTO</th><th>STATUS</th></tr>
+  <tr><td>Framework de testes</td><td><span class="badge badge-critico">NENHUM</span> — nenhum jest, vitest, cypress, playwright instalado</td></tr>
+  <tr><td>Arquivos de teste</td><td><span class="badge badge-critico">ZERO</span> — nenhum <code>.test.*</code> ou <code>.spec.*</code> no projeto</td></tr>
+  <tr><td>Configuração de testes</td><td><span class="badge badge-critico">NENHUMA</span> — sem <code>jest.config.*</code>, <code>vitest.config.*</code></td></tr>
+  <tr><td>Script de teste</td><td><span class="badge badge-critico">AUSENTE</span> — <code>package.json</code> só tem <code>dev</code>, <code>build</code>, <code>lint</code>, <code>typecheck</code></td></tr>
+  <tr><td>Cobertura estimada</td><td><span class="badge badge-critico">0%</span></td></tr>
+  <tr><td>Ferramenta de qualidade</td><td><span class="badge badge-medio">APENAS ESLint</span> (<code>npm run lint</code>)</td></tr>
+</table>
+
+<h3>Fluxos que deveriam ter testes mínimos:</h3>
+<ol>
+  <li>Autenticação (login, logout, recuperação de senha)</li>
+  <li>CRUD de agendamentos (criar, editar, cancelar, repetir)</li>
+  <li>Processamento de pagamentos (Asaas — criar cobrança, assinatura)</li>
+  <li>RBAC (verificação de permissões por role)</li>
+  <li>Gestão de clientes (criar, editar, associar a empresas)</li>
+</ol>
+
+<!-- 9. FLUXOS CRÍTICOS DO NEGÓCIO -->
+<h2 class="page-break">9. Fluxos Críticos do Negócio</h2>
+
+<h3>9.1 Autenticação</h3>
+<table>
+  <tr><th>COMPONENTE</th><th>ARQUIVO</th><th>DESCRIÇÃO</th></tr>
+  <tr><td>Login</td><td><code>src/pages/Login.jsx</code></td><td>signInWithPassword + Google OAuth via Supabase Auth</td></tr>
+  <tr><td>Auth Context</td><td><code>src/lib/AuthContext.jsx</code></td><td>Gerencia sessão, listening de auth events, normalização de roles</td></tr>
+  <tr><td>RBAC Server</td><td><code>server/index.js:56-118</code></td><td>Middleware <code>attachUserRole</code> + verificação por role</td></tr>
+  <tr><td>Proteção Frontend</td><td><code>src/components/ProtectedRoute.jsx</code></td><td>Verificação de <code>allowedRoles</code> no roteamento</td></tr>
+</table>
+<p><strong>Problemas:</strong> Sem MFA/2FA, sem lockout após tentativas falhas, senha mínima de 6 caracteres.</p>
+
+<h3>9.2 Pagamentos (Asaas)</h3>
+<table>
+  <tr><th>COMPONENTE</th><th>ARQUIVO</th><th>DESCRIÇÃO</th></tr>
+  <tr><td>Rota Server</td><td><code>server/routes/asaas.js</code></td><td>Cliente, cobranças, assinaturas, subcontas</td></tr>
+  <tr><td>Client Asaas</td><td><code>server/lib/asaas.js</code></td><td>Wrapper para API REST do Asaas com cobrança via PIX</td></tr>
+  <tr><td>Faturas</td><td><code>src/pages/Invoices.jsx</code></td><td>CRUD completo com sync Asaas, status, envio via WhatsApp</td></tr>
+  <tr><td>Integrações</td><td><code>src/api/dbClient.js:600-605</code></td><td>Mapeamento das funções de cliente e subcontas</td></tr>
+</table>
+<p><strong>Nota:</strong> Stripe está instalado mas NÃO é utilizado — deve ser removido.</p>
+<p><strong>Problema:</strong> Chaves de API armazenadas em <code>company_integrations</code> sem mecanismo de rotação.</p>
+
+<h3>9.3 Agenda/Agendamentos</h3>
+<table>
+  <tr><th>COMPONENTE</th><th>ARQUIVO</th><th>DESCRIÇÃO</th></tr>
+  <tr><td>Página</td><td><code>src/pages/Schedule.jsx</code></td><td>Visualizações semanal/diária/mensal, criar/editar/repetir</td></tr>
+  <tr><td>Calendários</td><td><code>DayCalendar.jsx</code>, <code>WeeklyCalendar.jsx</code>, <code>MonthCalendar.jsx</code></td><td>3 visualizações de calendário</td></tr>
+  <tr><td>Modais</td><td><code>NewAppointmentModal.jsx</code>, <code>NewLessonModal.jsx</code></td><td>Criação (código 95% duplicado)</td></tr>
+  <tr><td>Sync</td><td><code>src/lib/calendarService.js</code></td><td>Google Calendar e Outlook</td></tr>
+  <tr><td>Portal</td><td><code>src/pages/CustomerPortal.jsx</code></td><td>Visualização e confirmação pelo cliente</td></tr>
+</table>
+
+<h3>9.4 Faturamento</h3>
+<table>
+  <tr><th>COMPONENTE</th><th>ARQUIVO</th></tr>
+  <tr><td>Página</td><td><code>src/pages/Invoices.jsx</code></td></tr>
+  <tr><td>Detalhe</td><td><code>src/components/invoices/InvoiceDetailModal.jsx</code></td></tr>
+  <tr><td>Criação</td><td><code>src/components/invoices/NewInvoiceModal.jsx</code></td></tr>
+</table>
+<p>Fluxo: Criação → Status (pending/received/overdue/cancelled) → Envio via WhatsApp</p>
+
+<h3>9.5 Gestão de Clientes</h3>
+<table>
+  <tr><th>COMPONENTE</th><th>ARQUIVO</th></tr>
+  <tr><td>CRUD</td><td><code>src/pages/Customers.jsx</code>, <code>CustomerDetail.jsx</code></td></tr>
+  <tr><td>Multi-tenant</td><td>Tabela <code>customer_companies</code> — clientes em múltiplas empresas</td></tr>
+  <tr><td>Planos/Créditos</td><td>Sistema de punch cards e créditos</td></tr>
+</table>
+
+<!-- 10. PLANO DE AÇÃO -->
+<h2 class="page-break">10. Plano de Ação Recomendado</h2>
+
+<h3>Semana 1 — Segurança (URGENTE)</h3>
+<ol>
+  <li>Remover bypass de service_role key em <code>server/index.js:36</code></li>
+  <li>Configurar CORS com origens específicas (produção e desenvolvimento)</li>
+  <li>Adicionar <code>express-rate-limit</code> nos endpoints de auth e pagamento</li>
+  <li>Remover armazenamento de senha em plaintext (<code>temp_password</code>)</li>
+  <li>Adicionar validação de input com <code>zod</code> (já instalado) nos endpoints</li>
+  <li>Adicionar <code>helmet</code> para headers de segurança</li>
+  <li>Remover <code>console.log</code> com dados sensíveis do frontend</li>
+</ol>
+
+<h3>Semana 2 — Limpeza de Dependências</h3>
+<ol>
+  <li>Remover 18 dependências não utilizadas do <code>package.json</code></li>
+  <li>Remover 15 wrappers shadcn/ui órfãos e seus imports</li>
+  <li>Mover <code>concurrently</code> para <code>devDependencies</code></li>
+  <li>Executar <code>npm run build</code> e verificar tamanho do bundle</li>
+</ol>
+
+<h3>Semana 3 — Performance</h3>
+<ol>
+  <li>Implementar <code>React.lazy()</code> em <code>pages.config.js</code> para code splitting por rota</li>
+  <li>Configurar <code>manualChunks</code> no <code>vite.config.js</code></li>
+  <li>Adicionar <code>useMemo</code> nas computações custosas do Dashboard</li>
+  <li>Substituir fetch manual de usuário pelo hook <code>useCurrentUser()</code></li>
+  <li>Adicionar paginação nos fetches de dados</li>
+</ol>
+
+<h3>Semana 4 — Refatoração</h3>
+<ol>
+  <li>Mesclar <code>NewAppointmentModal</code> e <code>NewLessonModal</code> em componente único</li>
+  <li>Criar componentes reutilizáveis: <code>&lt;PageHeader&gt;</code>, <code>&lt;ConfirmDeleteDialog&gt;</code>, <code>&lt;EmptyState&gt;</code>, <code>&lt;SearchFilterBar&gt;</code></li>
+  <li>Criar hook <code>useCrudMutation</code> para CRUD genérico</li>
+  <li>Padronizar erro handling com utilitário <code>handleError</code></li>
+</ol>
+
+<h3>Semana 5-6 — Testes</h3>
+<ol>
+  <li>Instalar Vitest + React Testing Library</li>
+  <li>Escrever testes para: autenticação, RBAC, CRUD de agendamentos, pagamentos</li>
+  <li>Configurar CI com <code>npm test</code> e <code>npm run lint</code></li>
+</ol>
+
+<div class="footer">
+  Relatório gerado automaticamente em 05/08/2026 — Saloes App v0.0.0
+</div>
+
+</body>
+</html>

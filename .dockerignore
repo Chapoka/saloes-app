@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.env
+.env.local
+*.md
+*.pdf
+*.png
+*.jpg
+*.log
+screenshots
+mcp-supabase
+mcp-test.log

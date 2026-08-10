@@ -1,0 +1,177 @@
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { supabase } from "@/lib/supabaseClient";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Lock, Loader2, CheckCircle, AlertTriangle } from "lucide-react";
+import AuthLayout from "@/components/AuthLayout";
+
+export default function SetPassword() {
+  const location = useLocation();
+  const isPreview = new URLSearchParams(location.search).get("preview") === "1";
+
+  const [ready, setReady] = useState(isPreview);
+  const [timeoutExpired, setTimeoutExpired] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isPreview) return;
+
+    const timer = setTimeout(() => {
+      if (!ready) setTimeoutExpired(true);
+    }, 5000);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setReady(true);
+        clearTimeout(timer);
+      }
+      if (event === "SIGNED_IN" && session) {
+        setReady(true);
+        clearTimeout(timer);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
+  }, [ready, isPreview]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (password.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+    if (password !== confirm) {
+      setError("As senhas não conferem");
+      return;
+    }
+    if (isPreview) {
+      setSuccess(true);
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      setSuccess(true);
+      setTimeout(() => { window.location.href = "/login"; }, 3000);
+    } catch (err) {
+      setError(err.message || "Falha ao definir senha");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (timeoutExpired) {
+    return (
+      <AuthLayout
+        icon={AlertTriangle}
+        title="Link inválido ou expirado"
+        subtitle="Solicite um novo link de recuperação"
+        footer={
+          <Link to="/login" className="text-primary font-medium hover:underline">
+            Voltar para o login
+          </Link>
+        }
+      >
+        <p className="text-sm text-foreground text-center">
+          O link de acesso está inválido ou expirou. Solicite um novo convite ao administrador.
+        </p>
+      </AuthLayout>
+    );
+  }
+
+  if (!ready && !success) {
+    return (
+      <AuthLayout
+        icon={Loader2}
+        title="Carregando..."
+        subtitle="Aguardando link de recuperação"
+        footer={null}
+      >
+        <div className="flex justify-center py-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (success) {
+    return (
+      <AuthLayout
+        icon={CheckCircle}
+        title="Senha criada com sucesso!"
+        subtitle="Redirecionando para o login..."
+        footer={null}
+      >
+        <div />
+      </AuthLayout>
+    );
+  }
+
+  return (
+      <AuthLayout
+        icon={Lock}
+        title="Bem-vindo! Crie sua senha"
+        subtitle="Defina sua senha de acesso ao sistema"
+        footer={null}
+      >
+        {error && (
+        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          {error}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="password">Nova Senha</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              autoFocus
+              placeholder="Mínimo 6 caracteres"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-10 h-12"
+              required
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirm">Confirmar Senha</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              id="confirm"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Repita a senha"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              className="pl-10 h-12"
+              required
+            />
+          </div>
+        </div>
+        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
+          {loading ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Criando senha...</>
+          ) : (
+            "Criar senha"
+          )}
+        </Button>
+      </form>
+    </AuthLayout>
+  );
+}
