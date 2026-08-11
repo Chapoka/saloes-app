@@ -124,7 +124,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: loginTheme.formBg }}>
+    <div className="min-h-screen flex flex-col lg:flex-row login-light" style={{ background: loginTheme.formBg }}>
       {/* Left Panel — Carousel */}
       <div className="relative lg:w-1/2 h-72 lg:h-screen overflow-hidden">
         {slides.map((slide, i) => (
@@ -197,8 +197,9 @@ export default function Login() {
       </div>
 
       {/* Right Panel — Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 lg:py-0 relative" style={{
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 lg:py-0 relative dark:!bg-white" style={{
         background: loginTheme.formBg,
+        color: loginTheme.formText,
       }}>
         {/* Subtle pattern */}
         <div className="absolute inset-0 opacity-[0.02]" style={{
@@ -271,7 +272,7 @@ export default function Login() {
                   placeholder="seu@email.com.br"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-11 h-12 rounded-xl border-surface-200 focus:border-surface-300 focus:ring-surface-200"
+                  className="pl-11 h-12 rounded-xl border-surface-200 focus:border-surface-300 focus:ring-surface-200 !text-surface-900 dark:!text-surface-900"
                   style={{ borderColor: "#E2E8F0", color: "#0F172A" }}
                   required
                 />
