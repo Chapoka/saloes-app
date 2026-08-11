@@ -1,2 +1,0 @@
-ALTER TABLE plan_items
-ADD COLUMN IF NOT EXISTS manufacturer TEXT;
