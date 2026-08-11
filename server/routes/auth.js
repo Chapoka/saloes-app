@@ -137,14 +137,13 @@ router.post("/admin-reset-password", async (req, res) => {
       return res.status(403).json({ error: "Acesso negado: apenas super_admin pode redefinir senhas" });
     }
 
-    // 2. Atualizar a senha diretamente no auth.users via função security definer
-    // Usa admin_set_user_password (sem checagem de role, pois o servidor já autenticou)
-    const { error: rpcError } = await req.supabase.rpc("admin_set_user_password", {
+    // 2. Atualizar a senha via Supabase Admin API (service_role)
+    const { error: updateAuthError } = await req.supabase.auth.admin.updateUserById(
       user_id,
-      new_password,
-    });
+      { password: new_password }
+    );
 
-    if (rpcError) throw rpcError;
+    if (updateAuthError) throw updateAuthError;
 
     // 3. Confirmar o email e atualizar flags no perfil público
     const { error: updateError } = await req.supabase
