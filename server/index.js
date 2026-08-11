@@ -18,11 +18,19 @@ const distPath = path.resolve(__dirname, "..", "dist");
 app.use(cors({ origin: true }));
 app.use(express.json());
 
+// Serve frontend static files BEFORE auth middleware
+app.use(express.static(distPath));
+
 // CEP lookup is public (no auth needed)
 app.use("/api/cep", cepRouter);
 
-// Auth middleware
-app.use(async (req, res, next) => {
+// Health endpoint is public
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true });
+});
+
+// Auth middleware - only for API routes
+app.use("/api", async (req, res, next) => {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
@@ -122,12 +130,7 @@ app.use("/api/whatsapp", attachUserRole, requireProfessional, whatsappRouter);
 app.use("/api/send-email", attachUserRole, requireProfessional, emailRouter);
 app.use("/api/auth", attachUserRole, authRouter);
 
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true, user: req.user?.email, role: req.userRole });
-});
-
-// Serve frontend static files in production
-app.use(express.static(distPath));
+// SPA fallback - serve index.html for non-API routes
 app.use((req, res) => {
   if (req.path.startsWith("/api")) return res.status(404).json({ error: "API route not found" });
   res.sendFile(path.join(distPath, "index.html"));
