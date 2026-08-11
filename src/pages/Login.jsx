@@ -272,7 +272,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-11 h-12 rounded-xl border-surface-200 focus:border-surface-300 focus:ring-surface-200"
-                  style={{ borderColor: "#E2E8F0" }}
+                  style={{ borderColor: "#E2E8F0", color: "#0F172A" }}
                   required
                 />
               </div>
@@ -294,7 +294,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-11 pr-12 h-12 rounded-xl border-surface-200 focus:border-surface-300 focus:ring-surface-200"
-                  style={{ borderColor: "#E2E8F0" }}
+                  style={{ borderColor: "#E2E8F0", color: "#0F172A" }}
                   required
                 />
                 <button
