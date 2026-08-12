@@ -45,6 +45,9 @@ router.post("/create-professional-services-table", async (req, res) => {
           professional_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           service_id UUID NOT NULL REFERENCES services(id) ON DELETE CASCADE,
           commission_pct NUMERIC(5,2) DEFAULT 0,
+          performs_service BOOLEAN DEFAULT true,
+          price_override NUMERIC(10,2),
+          duration_override INTEGER,
           company_id UUID,
           created_at TIMESTAMPTZ DEFAULT NOW(),
           UNIQUE(professional_id, service_id)
@@ -70,7 +73,7 @@ router.post("/create-professional-services-table", async (req, res) => {
 
     res.json({ 
       success: true,
-      message: "professional_services table created"
+      message: "professional_services table created with performs_service, price_override, duration_override"
     });
   } catch (err) {
     console.error("Migration error:", err);
