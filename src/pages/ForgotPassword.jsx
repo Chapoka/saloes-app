@@ -11,10 +11,12 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -22,6 +24,7 @@ export default function ForgotPassword() {
       if (error) throw error;
     } catch (err) {
       console.error("resetPasswordForEmail error:", err);
+      setError(err.message || "Erro ao enviar e-mail. Tente novamente.");
     } finally {
       setLoading(false);
       setSent(true);
@@ -40,9 +43,24 @@ export default function ForgotPassword() {
       }
     >
       {sent ? (
-        <p className="text-sm text-foreground text-center">
-          Se existir uma conta com esse e-mail, você receberá um link de recuperação em breve.
-        </p>
+        error ? (
+          <div className="space-y-4">
+            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
+              {error}
+            </div>
+            <Button
+              type="button"
+              className="w-full h-12 font-medium"
+              onClick={() => { setSent(false); setError(""); }}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-foreground text-center">
+            Se existir uma conta com esse e-mail, você receberá um link de recuperação em breve.
+          </p>
+        )
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

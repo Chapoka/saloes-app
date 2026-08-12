@@ -100,8 +100,23 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+
+      // Check if user must change password on first login
+      if (data?.user?.id) {
+        const { data: userProfile } = await supabase
+          .from("users")
+          .select("must_change_password")
+          .eq("id", data.user.id)
+          .single();
+
+        if (userProfile?.must_change_password) {
+          window.location.href = "/set-password";
+          return;
+        }
+      }
+
       window.location.href = "/";
     } catch (err) {
       setError(err.message || "E-mail ou senha inválidos");

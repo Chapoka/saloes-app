@@ -107,6 +107,23 @@ export default function ResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
+
+      // Clear temp_password and must_change_password in the public users table
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          await supabase
+            .from("users")
+            .update({
+              temp_password: null,
+              must_change_password: false,
+            })
+            .eq("id", session.user.id);
+        }
+      } catch (clearErr) {
+        console.warn("Failed to clear temp_password flag:", clearErr);
+      }
+
       // Sign out so the user logs in with the new password
       await supabase.auth.signOut();
       setSuccess(true);

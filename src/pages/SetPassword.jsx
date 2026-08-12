@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
@@ -18,30 +18,51 @@ export default function SetPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const recoveryDetected = useRef(false);
 
   useEffect(() => {
     if (isPreview) return;
 
     const timer = setTimeout(() => {
-      if (!ready) setTimeoutExpired(true);
-    }, 5000);
+      if (!recoveryDetected.current && !ready) {
+        setTimeoutExpired(true);
+      }
+    }, 8000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
+        recoveryDetected.current = true;
         setReady(true);
         clearTimeout(timer);
       }
       if (event === "SIGNED_IN" && session) {
+        // Check if this is a recovery flow or an active session (must_change_password redirect)
+        const hash = window.location.hash;
+        if (hash.includes("type=recovery")) {
+          recoveryDetected.current = true;
+          setReady(true);
+          clearTimeout(timer);
+        }
+      }
+    });
+
+    // Check if user already has an active session (redirected from login with must_change_password)
+    const checkActiveSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        recoveryDetected.current = true;
         setReady(true);
         clearTimeout(timer);
       }
-    });
+    };
+
+    checkActiveSession();
 
     return () => {
       subscription.unsubscribe();
       clearTimeout(timer);
     };
-  }, [ready, isPreview]);
+  }, [isPreview]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,10 +81,32 @@ export default function SetPassword() {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError("Sessão expirada. Faça login novamente.");
+        return;
+      }
+
+      // Update the password
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) throw updateError;
+
+      // Clear temp_password and must_change_password in the public users table
+      try {
+        await supabase
+          .from("users")
+          .update({
+            temp_password: null,
+            must_change_password: false,
+          })
+          .eq("id", session.user.id);
+      } catch (clearErr) {
+        // Non-critical: password was updated, just log the error
+        console.warn("Failed to clear temp_password flag:", clearErr);
+      }
+
       setSuccess(true);
-      setTimeout(() => { window.location.href = "/login"; }, 3000);
+      setTimeout(() => { window.location.href = "/"; }, 2000);
     } catch (err) {
       setError(err.message || "Falha ao definir senha");
     } finally {
@@ -95,7 +138,7 @@ export default function SetPassword() {
       <AuthLayout
         icon={Loader2}
         title="Carregando..."
-        subtitle="Aguardando link de recuperação"
+        subtitle="Aguardando autenticação"
         footer={null}
       >
         <div className="flex justify-center py-4">
@@ -110,7 +153,7 @@ export default function SetPassword() {
       <AuthLayout
         icon={CheckCircle}
         title="Senha criada com sucesso!"
-        subtitle="Redirecionando para o login..."
+        subtitle="Redirecionando..."
         footer={null}
       >
         <div />
@@ -121,8 +164,8 @@ export default function SetPassword() {
   return (
       <AuthLayout
         icon={Lock}
-        title="Bem-vindo! Crie sua senha"
-        subtitle="Defina sua senha de acesso ao sistema"
+        title="Defina sua nova senha"
+        subtitle="Crie uma senha segura para sua conta"
         footer={null}
       >
         {error && (
@@ -166,9 +209,9 @@ export default function SetPassword() {
         </div>
         <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
           {loading ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Criando senha...</>
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Salvando senha...</>
           ) : (
-            "Criar senha"
+            "Salvar nova senha"
           )}
         </Button>
       </form>

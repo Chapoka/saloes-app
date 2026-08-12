@@ -1,4 +1,4 @@
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -36,6 +36,7 @@ export function ProtectedRoute({
   children,
 }) {
   const { isAuthenticated, isLoadingAuth, authError, user } = useAuth();
+  const location = useLocation();
 
   if (isLoadingAuth) {
     return fallback;
@@ -50,6 +51,11 @@ export function ProtectedRoute({
 
   if (!isAuthenticated) {
     return unauthenticatedElement ?? <Navigate to={redirectTo} replace />;
+  }
+
+  // Force password change — redirect to /set-password (exclude the page itself)
+  if (user?.must_change_password && location.pathname !== '/set-password') {
+    return <Navigate to="/set-password" replace />;
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
@@ -65,7 +71,8 @@ export function ProtectedRoute({
 }
 
 export default function ProtectedRouteDefault({ fallback = <DefaultFallback />, unauthenticatedElement, children }) {
-  const { isAuthenticated, isLoadingAuth, authError } = useAuth();
+  const { isAuthenticated, isLoadingAuth, authError, user } = useAuth();
+  const location = useLocation();
 
   if (isLoadingAuth) {
     return fallback;
@@ -80,6 +87,11 @@ export default function ProtectedRouteDefault({ fallback = <DefaultFallback />, 
 
   if (!isAuthenticated) {
     return unauthenticatedElement;
+  }
+
+  // Force password change — redirect to /set-password (exclude the page itself)
+  if (user?.must_change_password && location.pathname !== '/set-password') {
+    return <Navigate to="/set-password" replace />;
   }
 
   return children ?? <Outlet />;

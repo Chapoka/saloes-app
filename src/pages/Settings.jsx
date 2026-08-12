@@ -380,9 +380,18 @@ export default function Settings() {
         throw new Error(errorData.error || `Erro HTTP ${response.status}`);
       }
 
-      // Invalidate users query so that the UI updates the updated_at/temp_password list if displayed
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      // Clear temp_password after successful reset (password was changed)
+      try {
+        await supabase
+          .from("users")
+          .update({ temp_password: null })
+          .eq("id", resetTargetUser.id);
+      } catch (clearErr) {
+        console.warn("Failed to clear temp_password:", clearErr);
+      }
 
+      // Invalidate users query so that the UI updates
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("Senha redefinida com sucesso!");
       setShowResetPasswordModal(false);
     } catch (err) {
@@ -592,7 +601,7 @@ export default function Settings() {
           {/* Users Management */}
           <Card className="rounded-2xl shadow-sm border border-gray-100">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-branding-secondary/10">
                     <Users className="w-5 h-5 text-branding-secondary" />
@@ -604,7 +613,7 @@ export default function Settings() {
                 </div>
                 <Button
                   onClick={() => handleOpenUserModal()}
-                  className="bg-branding-secondary hover:bg-branding-secondary/90 rounded-xl"
+                  className="bg-branding-secondary hover:bg-branding-secondary/90 rounded-xl w-full sm:w-auto"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Usuário

@@ -545,6 +545,19 @@ export const db = {
         if (res.ok) {
           const data = await res.json();
           console.log("User created via server:", data);
+
+          // Set must_change_password so the user is forced to change on first login
+          if (data.user_id) {
+            try {
+              await supabase
+                .from("users")
+                .update({ must_change_password: true, temp_password: tempPassword })
+                .eq("id", data.user_id);
+            } catch (flagErr) {
+              console.warn("Failed to set must_change_password:", flagErr);
+            }
+          }
+
           return {
             user_id: data.user_id,
             email,

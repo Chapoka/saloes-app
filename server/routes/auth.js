@@ -121,7 +121,7 @@ router.post("/admin-reset-password", async (req, res) => {
       return res.status(400).json({ error: "user_id e new_password são obrigatórios" });
     }
 
-    // 1. Verificar se o chamador é super_admin no banco
+    // 1. Verificar se o chamador é super_admin ou admin no banco
     const callerId = req.user.id;
     if (!callerId) {
       return res.status(401).json({ error: "Não autorizado" });
@@ -133,11 +133,36 @@ router.post("/admin-reset-password", async (req, res) => {
       .eq("id", callerId)
       .single();
 
-    if (profileError || profile?.role !== "super_admin") {
-      return res.status(403).json({ error: "Acesso negado: apenas super_admin pode redefinir senhas" });
+    const callerRole = profile?.role;
+    const isSuperAdmin = callerRole === "super_admin";
+    const isAdmin = callerRole === "admin";
+
+    if (profileError || (!isSuperAdmin && !isAdmin)) {
+      return res.status(403).json({ error: "Acesso negado: apenas super_admin ou admin pode redefinir senhas" });
     }
 
-    // 2. Atualizar a senha via Supabase Admin API (service_role)
+    // 2. If admin (not super_admin), verify they share at least one company with the target user
+    if (isAdmin && !isSuperAdmin) {
+      const { data: callerCompanies } = await req.supabase
+        .from("user_companies")
+        .select("company_id")
+        .eq("user_id", callerId);
+
+      const { data: targetCompanies } = await req.supabase
+        .from("user_companies")
+        .select("company_id")
+        .eq("user_id", user_id);
+
+      const callerCompanyIds = (callerCompanies || []).map(c => c.company_id);
+      const targetCompanyIds = (targetCompanies || []).map(c => c.company_id);
+      const sharedCompany = callerCompanyIds.some(id => targetCompanyIds.includes(id));
+
+      if (!sharedCompany) {
+        return res.status(403).json({ error: "Acesso negado: você só pode redefinir senhas de usuários da mesma empresa" });
+      }
+    }
+
+    // 3. Atualizar a senha via Supabase Admin API (service_role)
     const { error: updateAuthError } = await req.supabase.auth.admin.updateUserById(
       user_id,
       { password: new_password }
@@ -145,7 +170,7 @@ router.post("/admin-reset-password", async (req, res) => {
 
     if (updateAuthError) throw updateAuthError;
 
-    // 3. Confirmar o email e atualizar flags no perfil público
+    // 4. Atualizar flags no perfil público
     const { error: updateError } = await req.supabase
       .from("users")
       .update({
