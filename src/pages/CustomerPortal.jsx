@@ -52,6 +52,7 @@ const cancellationReasons = [
 ];
 
 const TABS = [
+  { id: "services", label: "Serviços", icon: Droplets },
   { id: "scheduled", label: "Agendadas", icon: Calendar },
   { id: "history", label: "Histórico", icon: History },
   { id: "payments", label: "Pagamentos", icon: CreditCard },
@@ -65,7 +66,9 @@ export default function CustomerPortal() {
   const [appointments, setAppointments] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [plan, setPlan] = useState(null);
-  const [activeTab, setActiveTab] = useState("scheduled");
+  const [services, setServices] = useState([]);
+  const [salonInfo, setSalonInfo] = useState(null);
+  const [activeTab, setActiveTab] = useState("services");
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancellingAppointment, setCancellingAppointment] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
@@ -148,13 +151,17 @@ export default function CustomerPortal() {
   };
 
   const loadCustomerData = async (customerId) => {
-    const [customerAppointments, customerInvoices, targetCustomer] = await Promise.all([
+    const [customerAppointments, customerInvoices, targetCustomer, salonServices, companyData] = await Promise.all([
       db.entities.Appointment.filter({ customer_id: customerId }),
       db.entities.Invoice.filter({ customer_id: customerId }),
       db.entities.Customer.filter({ id: customerId }),
+      db.entities.Service.list(),
+      db.entities.Company.list(),
     ]);
     setAppointments(customerAppointments.sort((a, b) => a.date.localeCompare(b.date)));
     setInvoices(customerInvoices.sort((a, b) => b.due_date?.localeCompare(a.due_date) || 0));
+    setServices(salonServices.filter(s => s.active !== false && s.type === "service"));
+    if (companyData.length > 0) setSalonInfo(companyData[0]);
     // Atualiza o dependente nos arrays se for um dependente
     if (targetCustomer.length > 0) {
       const updated = targetCustomer[0];
@@ -530,6 +537,39 @@ export default function CustomerPortal() {
             </button>
           ))}
         </div>
+
+        {/* Tab: Serviços Disponíveis */}
+        {activeTab === "services" && (
+          <div className="space-y-4">
+            {salonInfo && (
+              <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                <h3 className="font-semibold text-gray-900 mb-2">{salonInfo.branding_app_name || "Salão"}</h3>
+                {salonInfo.address && <p className="text-sm text-gray-500">{salonInfo.address}</p>}
+                {salonInfo.phone && <p className="text-sm text-gray-500">Tel: {salonInfo.phone}</p>}
+              </div>
+            )}
+            {services.length === 0 ? (
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+                <Droplets className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                <p className="text-gray-500 font-medium">Nenhum serviço disponível</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {services.map((svc) => (
+                  <div key={svc.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">{svc.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {Math.floor((svc.duration_mins || 0) / 60)}h{(svc.duration_mins || 0) % 60 > 0 ? ` ${(svc.duration_mins || 0) % 60}min` : ""} • {svc.category}
+                      </p>
+                    </div>
+                    <span className="font-bold text-branding-primary">R$ {Number(svc.price || 0).toFixed(2).replace(".", ",")}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Tab: Aulas Agendadas */}
         {activeTab === "scheduled" && (

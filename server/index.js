@@ -8,6 +8,7 @@ import whatsappRouter from "./routes/whatsapp.js";
 import emailRouter from "./routes/email.js";
 import authRouter from "./routes/auth.js";
 import cepRouter from "./routes/cep.js";
+import migrateRouter from "./routes/migrate.js";
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -129,6 +130,7 @@ app.use("/api/asaas", attachUserRole, requireProfessional, asaasRouter);
 app.use("/api/whatsapp", attachUserRole, requireProfessional, whatsappRouter);
 app.use("/api/send-email", attachUserRole, requireProfessional, emailRouter);
 app.use("/api/auth", attachUserRole, authRouter);
+app.use("/api/migrate", attachUserRole, requireAdmin, migrateRouter);
 
 // SPA fallback - serve index.html for non-API routes
 app.use((req, res) => {

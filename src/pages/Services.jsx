@@ -71,6 +71,7 @@ const getCategoryInfo = (cat) => {
 
   const EMPTY_SERVICE = {
     type: "service",
+    service_type: "Normal",
     name: "",
     category: "Corte",
     duration_mins: 30,
@@ -100,6 +101,7 @@ export default function Services() {
   const [tab, setTab] = useState("services");
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterServiceType, setFilterServiceType] = useState("all");
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [deletingService, setDeletingService] = useState(null);
@@ -146,7 +148,8 @@ export default function Services() {
   const filteredServices = services.filter(s => {
     const matchSearch = !search || s.name?.toLowerCase().includes(search.toLowerCase());
     const matchCategory = filterCategory === "all" || s.category === filterCategory;
-    return matchSearch && matchCategory;
+    const matchServiceType = filterServiceType === "all" || s.service_type === filterServiceType;
+    return matchSearch && matchCategory && matchServiceType;
   });
 
   const createService = useMutation({
@@ -253,6 +256,7 @@ export default function Services() {
     const isCustom = svc.category && !CATEGORIES.some(c => c.label === svc.category);
     setServiceForm({
       type: svc.type || "service",
+      service_type: svc.service_type || "Normal",
       name: svc.name || "",
       category: svc.category || "Corte",
       duration_mins: svc.duration_mins || 30,
@@ -358,6 +362,16 @@ Novo Item
                 ))}
               </SelectContent>
             </Select>
+            <Select value={filterServiceType} onValueChange={setFilterServiceType}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                <SelectItem value="Normal">Normal</SelectItem>
+                <SelectItem value="Pacote de serviço">Pacote de serviço</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Service Cards */}
@@ -398,9 +412,16 @@ Novo Item
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 text-sm">{svc.name}</h3>
-                          <Badge variant="outline" className={cn("text-[10px] mt-0.5", cat.color)}>
-                            {cat.label}
-                          </Badge>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <Badge variant="outline" className={cn("text-[10px]", cat.color)}>
+                              {cat.label}
+                            </Badge>
+                            {svc.service_type === "Pacote de serviço" && (
+                              <Badge variant="outline" className="text-[10px] bg-purple-100 text-purple-700 border-purple-200">
+                                Pacote
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <DropdownMenu>
@@ -466,13 +487,18 @@ Novo Item
                       ) : (
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <Clock className="w-3.5 h-3.5" />
-                          {svc.duration_mins} min
+                          {Math.floor((svc.duration_mins || 0) / 60)}h{(svc.duration_mins || 0) % 60 > 0 ? ` ${(svc.duration_mins || 0) % 60}min` : ""}
                         </div>
                       )}
                       <div className="text-right">
                         <span className="text-lg font-bold text-gray-900 block">
                           R$ {Number(svc.price || 0).toFixed(2).replace(".", ",")}
                         </span>
+                        {svc.comissao > 0 && (
+                          <span className="text-[10px] text-blue-600 block">
+                            Comissão: {svc.comissao}%
+                          </span>
+                        )}
                         {svc.preco_custo > 0 && (
                           <span className="text-[10px] text-gray-500 block">
                             Custo: R$ {Number(svc.preco_custo).toFixed(2).replace(".", ",")}
@@ -571,6 +597,18 @@ Novo Item
                 </SelectContent>
               </Select>
             </div>
+            {serviceForm.type === "service" && (
+              <div>
+                <Label>Tipo de Serviço</Label>
+                <Select value={serviceForm.service_type} onValueChange={v => setServiceForm(f => ({ ...f, service_type: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Normal">Normal</SelectItem>
+                    <SelectItem value="Pacote de serviço">Pacote de serviço</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label>Nome *</Label>
               <Input
