@@ -76,8 +76,8 @@ export default function Profissionais() {
   const [deletingProf, setDeletingProf] = useState(null);
   const [profForm, setProfForm] = useState(EMPTY_PROFESSIONAL);
   const [editingServices, setEditingServices] = useState(null);
-  const [serviceCommissions, setServiceCommissions] = useState([]);
-  const [newServiceId, setNewServiceId] = useState("");
+  const [serviceTab, setServiceTab] = useState("services");
+  const [newItemId, setNewItemId] = useState("");
   const [newCommission, setNewCommission] = useState(0);
 
   const effectiveCompanyId = companyId;
@@ -91,6 +91,18 @@ export default function Profissionais() {
   const { data: allServices = [] } = useQuery({
     queryKey: ["services"],
     queryFn: () => db.entities.Service.list(),
+    enabled: ready,
+  });
+
+  const { data: allCombos = [] } = useQuery({
+    queryKey: ["service_combos"],
+    queryFn: () => db.entities.ServiceCombo.list(),
+    enabled: ready,
+  });
+
+  const { data: allPlans = [] } = useQuery({
+    queryKey: ["plans"],
+    queryFn: () => db.entities.Plan.list(),
     enabled: ready,
   });
 
@@ -113,18 +125,64 @@ export default function Profissionais() {
     ? allServices.filter(s => s.company_id === effectiveCompanyId && s.active !== false)
     : allServices.filter(s => s.active !== false);
 
+  const onlyServices = services.filter(s => s.type === "service");
+  const onlyProducts = services.filter(s => s.type === "product");
+
+  const combos = effectiveCompanyId
+    ? allCombos.filter(c => c.company_id === effectiveCompanyId)
+    : allCombos;
+
+  const plans = effectiveCompanyId
+    ? allPlans.filter(p => p.company_id === effectiveCompanyId)
+    : allPlans;
+
   const proServForProf = (profId) => {
     return allProServ.filter(ps => ps.professional_id === profId);
   };
 
-  const getServiceName = (serviceId) => {
-    const svc = allServices.find(s => s.id === serviceId);
-    return svc?.name || "Serviço não encontrado";
+  const proServByType = (profId, type) => {
+    const links = allProServ.filter(ps => ps.professional_id === profId);
+    if (type === "services") {
+      return links.filter(l => {
+        const svc = allServices.find(s => s.id === l.service_id);
+        return svc?.type === "service";
+      });
+    }
+    if (type === "products") {
+      return links.filter(l => {
+        const svc = allServices.find(s => s.id === l.service_id);
+        return svc?.type === "product";
+      });
+    }
+    if (type === "combos") {
+      return links.filter(l => {
+        return allCombos.some(c => c.id === l.service_id);
+      });
+    }
+    if (type === "plans") {
+      return links.filter(l => {
+        return allPlans.some(p => p.id === l.service_id);
+      });
+    }
+    return links;
   };
 
-  const getServiceType = (serviceId) => {
-    const svc = allServices.find(s => s.id === serviceId);
-    return svc?.type || "service";
+  const getItemName = (id) => {
+    const svc = allServices.find(s => s.id === id);
+    if (svc) return svc.name;
+    const combo = allCombos.find(c => c.id === id);
+    if (combo) return combo.name;
+    const plan = allPlans.find(p => p.id === id);
+    if (plan) return plan.name;
+    return "Não encontrado";
+  };
+
+  const getItemType = (id) => {
+    const svc = allServices.find(s => s.id === id);
+    if (svc) return svc.type === "product" ? "product" : "service";
+    if (allCombos.some(c => c.id === id)) return "combo";
+    if (allPlans.some(p => p.id === id)) return "plan";
+    return "unknown";
   };
 
   const createProf = useMutation({
@@ -243,22 +301,33 @@ export default function Profissionais() {
 
   const openEditServices = (prof) => {
     setEditingServices(prof);
-    setNewServiceId("");
+    setServiceTab("services");
+    setNewItemId("");
     setNewCommission(0);
   };
 
-  const handleAddService = () => {
-    if (!newServiceId) return toast.error("Selecione um serviço");
+  const handleAddItem = () => {
+    if (!newItemId) return toast.error("Selecione um item");
     saveServiceCommission.mutate({
       professionalId: editingServices.id,
-      serviceId: newServiceId,
+      serviceId: newItemId,
       commission: newCommission,
     });
-    setNewServiceId("");
+    setNewItemId("");
     setNewCommission(0);
   };
 
   const profServices = editingServices ? proServForProf(editingServices.id) : [];
+  const profTabItems = editingServices ? proServByType(editingServices.id, serviceTab) : [];
+
+  const getAvailableItems = () => {
+    const linkedIds = profServices.map(ps => ps.service_id);
+    if (serviceTab === "services") return onlyServices.filter(s => !linkedIds.includes(s.id));
+    if (serviceTab === "products") return onlyProducts.filter(s => !linkedIds.includes(s.id));
+    if (serviceTab === "combos") return combos.filter(c => !linkedIds.includes(c.id));
+    if (serviceTab === "plans") return plans.filter(p => !linkedIds.includes(p.id));
+    return [];
+  };
 
   return (
     <div className={cn("max-w-6xl mx-auto p-4 sm:p-6 space-y-6", theme.pageBg)}>
@@ -318,7 +387,11 @@ export default function Profissionais() {
       ) : (
         <div className="space-y-3">
           {professionals.map(prof => {
-            const profSvcCount = proServForProf(prof.id).length;
+            const profLinks = proServForProf(prof.id);
+            const svcCount = proServByType(prof.id, "services").length;
+            const prodCount = proServByType(prof.id, "products").length;
+            const comboCount = proServByType(prof.id, "combos").length;
+            const planCount = proServByType(prof.id, "plans").length;
             return (
               <div
                 key={prof.id}
@@ -339,16 +412,31 @@ export default function Profissionais() {
                       {prof.phone && <p className="text-xs text-gray-500">{prof.phone}</p>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
                     <Badge variant="outline" className={cn(
                       "text-xs",
                       prof.active !== false ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-500 border-gray-200"
                     )}>
                       {prof.active !== false ? "Ativo" : "Inativo"}
                     </Badge>
-                    {profSvcCount > 0 && (
+                    {svcCount > 0 && (
                       <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                        {profSvcCount} {profSvcCount === 1 ? "serviço" : "serviços"}
+                        {svcCount} {svcCount === 1 ? "serviço" : "serviços"}
+                      </Badge>
+                    )}
+                    {prodCount > 0 && (
+                      <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                        {prodCount} {prodCount === 1 ? "produto" : "produtos"}
+                      </Badge>
+                    )}
+                    {comboCount > 0 && (
+                      <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
+                        {comboCount} {comboCount === 1 ? "combo" : "combos"}
+                      </Badge>
+                    )}
+                    {planCount > 0 && (
+                      <Badge variant="outline" className="text-xs bg-pink-50 text-pink-700 border-pink-200">
+                        {planCount} {planCount === 1 ? "plano" : "planos"}
                       </Badge>
                     )}
                     <DropdownMenu>
@@ -445,27 +533,51 @@ export default function Profissionais() {
         </DialogContent>
       </Dialog>
 
-      {/* SERVICES & COMMISSIONS MODAL */}
+      {/* SERVICES, PRODUCTS, COMBOS & COMMISSIONS MODAL */}
       <Dialog open={!!editingServices} onOpenChange={() => setEditingServices(null)}>
-        <DialogContent className="sm:max-w-lg rounded-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl rounded-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Serviços e Comissões - {editingServices?.full_name}</DialogTitle>
+            <DialogTitle>{editingServices?.full_name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            {/* Add new service */}
+
+          {/* Tabs */}
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-1" style={{ background: theme.isDark ? "rgba(255,255,255,0.06)" : "#f3f4f6" }}>
+            {[
+              { key: "services", label: "Serviços", icon: Scissors, color: "text-blue-600" },
+              { key: "products", label: "Produtos", icon: Package, color: "text-purple-600" },
+              { key: "combos", label: "Combos", icon: Package, color: "text-amber-600" },
+              { key: "plans", label: "Planos", icon: Package, color: "text-pink-600" },
+            ].map(t => (
+              <button
+                key={t.key}
+                onClick={() => { setServiceTab(t.key); setNewItemId(""); setNewCommission(0); }}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all",
+                  serviceTab === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                )}
+              >
+                <t.icon className={cn("w-4 h-4", serviceTab === t.key ? t.color : "")} />
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-4 mt-2">
+            {/* Add new item */}
             <div className="flex gap-2 items-end">
               <div className="flex-1">
-                <Label>Serviço</Label>
-                <Select value={newServiceId} onValueChange={setNewServiceId}>
+                <Label>{serviceTab === "services" ? "Serviço" : serviceTab === "products" ? "Produto" : serviceTab === "combos" ? "Combo" : "Plano"}</Label>
+                <Select value={newItemId} onValueChange={setNewItemId}>
                   <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                   <SelectContent>
-                    {services
-                      .filter(s => !profServices.some(ps => ps.service_id === s.id))
-                      .map(s => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.name} ({s.type === "product" ? "Produto" : "Serviço"})
-                        </SelectItem>
-                      ))}
+                    {getAvailableItems().map(item => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                    {getAvailableItems().length === 0 && (
+                      <SelectItem value="__none" disabled>Nenhum disponível</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -480,54 +592,55 @@ export default function Profissionais() {
                   onChange={e => setNewCommission(parseFloat(e.target.value) || 0)}
                 />
               </div>
-              <Button onClick={handleAddService} className="bg-branding-primary text-white" size="sm">
+              <Button onClick={handleAddItem} className="bg-branding-primary text-white" size="sm">
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
 
-            {/* Linked services list */}
-            {profServices.length === 0 ? (
+            {/* Linked items list */}
+            {profTabItems.length === 0 ? (
               <div className="text-center py-6 text-gray-500 text-sm">
-                Nenhum serviço vinculado. Adicione serviços acima.
+                Nenhum item vinculado nesta aba.
               </div>
             ) : (
               <div className="space-y-2">
-                {profServices.map(ps => (
-                  <div key={ps.id} className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: theme.cardBorder }}>
-                    <div className="flex items-center gap-2">
-                      {getServiceType(ps.service_id) === "product" ? (
-                        <Package className="w-4 h-4 text-purple-500" />
-                      ) : (
-                        <Scissors className="w-4 h-4 text-blue-500" />
-                      )}
-                      <span className="text-sm font-medium">{getServiceName(ps.service_id)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Input
-                          type="number"
-                          min={0}
-                          max={100}
-                          step={0.5}
-                          value={ps.commission_pct || 0}
-                          onChange={e => saveServiceCommission.mutate({
-                            professionalId: editingServices.id,
-                            serviceId: ps.service_id,
-                            commission: parseFloat(e.target.value) || 0,
-                          })}
-                          className="w-20 h-8 text-xs text-center"
-                        />
-                        <Percent className="w-3 h-3 text-gray-400" />
+                {profTabItems.map(ps => {
+                  const type = getItemType(ps.service_id);
+                  const TypeIcon = type === "product" ? Package : type === "combo" ? Package : type === "plan" ? Package : Scissors;
+                  const typeColor = type === "product" ? "text-purple-500" : type === "combo" ? "text-amber-500" : type === "plan" ? "text-pink-500" : "text-blue-500";
+                  return (
+                    <div key={ps.id} className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: theme.cardBorder }}>
+                      <div className="flex items-center gap-2">
+                        <TypeIcon className={cn("w-4 h-4", typeColor)} />
+                        <span className="text-sm font-medium">{getItemName(ps.service_id)}</span>
                       </div>
-                      <button
-                        onClick={() => removeServiceCommission.mutate(ps.id)}
-                        className="p-1 rounded hover:bg-red-50 text-red-500"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={0.5}
+                            value={ps.commission_pct || 0}
+                            onChange={e => saveServiceCommission.mutate({
+                              professionalId: editingServices.id,
+                              serviceId: ps.service_id,
+                              commission: parseFloat(e.target.value) || 0,
+                            })}
+                            className="w-20 h-8 text-xs text-center"
+                          />
+                          <Percent className="w-3 h-3 text-gray-400" />
+                        </div>
+                        <button
+                          onClick={() => removeServiceCommission.mutate(ps.id)}
+                          className="p-1 rounded hover:bg-red-50 text-red-500"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
