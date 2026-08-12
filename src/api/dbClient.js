@@ -279,6 +279,7 @@ const ENTITY_TABLE_MAP = {
   PlanItem: "plan_items",
   StylistLevel: "stylist_levels",
   PunchCard: "punch_cards",
+  ProfessionalService: "professional_services",
 };
 
 const CUSTOMER_COLUMN_MAP = {

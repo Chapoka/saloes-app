@@ -55,6 +55,7 @@ import Home from './pages/Home';
 import Invoices from './pages/Invoices';
 import Plans from './pages/Plans.jsx';
 import PunchCards from './pages/PunchCards.jsx';
+import Profissionais from './pages/Profissionais.jsx';
 import Schedule from './pages/Schedule';
 import Services from './pages/Services.jsx';
 import Settings from './pages/Settings';
@@ -75,6 +76,7 @@ export const PAGES = {
     "Invoices": Invoices,
     "Plans": Plans,
     "PunchCards": PunchCards,
+    "Profissionais": Profissionais,
     "Schedule": Schedule,
     "Services": Services,
     "Settings": Settings,

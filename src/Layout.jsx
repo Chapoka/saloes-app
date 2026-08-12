@@ -20,6 +20,7 @@ import {
   Link2,
   Sun,
   Moon,
+  UserCog,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ const allNavItems = [
   { name: "Dashboard",       icon: LayoutDashboard, page: "Dashboard",   roles: ["super_admin","admin","profissional"] },
   { name: "Agenda",          icon: Calendar,        page: "Schedule",    roles: ["super_admin","admin","profissional"] },
   { name: "Clientes",        icon: Users,           page: "Clientes",    roles: ["super_admin","admin","profissional"] },
+  { name: "Profissionais",   icon: UserCog,         page: "Profissionais", roles: ["super_admin","admin"] },
   { name: "Planos",          icon: Package,         page: "Plans",       roles: ["super_admin","admin"] },
   { name: "Punch Cards",      icon: CreditCard,      page: "PunchCards",  roles: ["super_admin","admin"] },
   { name: "Produtos e Serviços", icon: Package,       page: "Services",    roles: ["super_admin","admin","profissional"] },

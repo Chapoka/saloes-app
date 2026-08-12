@@ -34,4 +34,48 @@ router.post("/set-defaults", async (req, res) => {
   }
 });
 
+router.post("/create-professional-services-table", async (req, res) => {
+  try {
+    const sb = createServerSupabase();
+    
+    const { error } = await sb.rpc("exec_sql", {
+      sql: `
+        CREATE TABLE IF NOT EXISTS professional_services (
+          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+          professional_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          service_id UUID NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+          commission_pct NUMERIC(5,2) DEFAULT 0,
+          company_id UUID,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          UNIQUE(professional_id, service_id)
+        );
+        
+        ALTER TABLE professional_services ENABLE ROW LEVEL SECURITY;
+        
+        CREATE POLICY "Users can view professional_services" ON professional_services
+          FOR SELECT USING (true);
+        
+        CREATE POLICY "Admins can manage professional_services" ON professional_services
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE users.id = auth.uid() 
+              AND users.role IN ('super_admin', 'admin')
+            )
+          );
+      `
+    });
+
+    if (error) throw error;
+
+    res.json({ 
+      success: true,
+      message: "professional_services table created"
+    });
+  } catch (err) {
+    console.error("Migration error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

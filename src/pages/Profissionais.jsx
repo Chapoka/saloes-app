@@ -1,0 +1,559 @@
+import { useState } from "react";
+import { db } from "@/api/dbClient";
+import { supabase } from "@/lib/supabaseClient";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCurrentUser } from "@/components/auth/useCurrentUser";
+import { useThemeMode } from "@/hooks/useThemeMode";
+import {
+  UserCog,
+  Plus,
+  Edit,
+  Trash2,
+  MoreVertical,
+  Search,
+  Scissors,
+  Package,
+  Power,
+  PowerOff,
+  Save,
+  X,
+  Check,
+  Percent,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+const EMPTY_PROFESSIONAL = {
+  name: "",
+  email: "",
+  phone: "",
+  role: "profissional",
+  active: true,
+};
+
+export default function Profissionais() {
+  const queryClient = useQueryClient();
+  const theme = useThemeMode();
+  const { companyId, isSuperAdmin, isAdmin, ready } = useCurrentUser();
+
+  const [search, setSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editingProf, setEditingProf] = useState(null);
+  const [deletingProf, setDeletingProf] = useState(null);
+  const [profForm, setProfForm] = useState(EMPTY_PROFESSIONAL);
+  const [editingServices, setEditingServices] = useState(null);
+  const [serviceCommissions, setServiceCommissions] = useState([]);
+  const [newServiceId, setNewServiceId] = useState("");
+  const [newCommission, setNewCommission] = useState(0);
+
+  const effectiveCompanyId = companyId;
+
+  const { data: allUsers = [], isLoading: loadingUsers } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => db.entities.User.list(),
+    enabled: ready,
+  });
+
+  const { data: allServices = [] } = useQuery({
+    queryKey: ["services"],
+    queryFn: () => db.entities.Service.list(),
+    enabled: ready,
+  });
+
+  const { data: allProServ = [] } = useQuery({
+    queryKey: ["professional_services"],
+    queryFn: () => db.entities.ProfessionalService.list(),
+    enabled: ready,
+  });
+
+  const professionals = allUsers.filter(u => {
+    const rawRole = u.role || "";
+    const role = rawRole === "teacher" ? "profissional" : rawRole;
+    const isProf = role === "profissional";
+    const matchCompany = !effectiveCompanyId || u.company_id === effectiveCompanyId || (u.company_ids || []).includes(effectiveCompanyId);
+    const matchSearch = !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase());
+    return isProf && matchCompany && matchSearch;
+  });
+
+  const services = effectiveCompanyId
+    ? allServices.filter(s => s.company_id === effectiveCompanyId && s.active !== false)
+    : allServices.filter(s => s.active !== false);
+
+  const proServForProf = (profId) => {
+    return allProServ.filter(ps => ps.professional_id === profId);
+  };
+
+  const getServiceName = (serviceId) => {
+    const svc = allServices.find(s => s.id === serviceId);
+    return svc?.name || "Serviço não encontrado";
+  };
+
+  const getServiceType = (serviceId) => {
+    const svc = allServices.find(s => s.id === serviceId);
+    return svc?.type || "service";
+  };
+
+  const createProf = useMutation({
+    mutationFn: async (data) => {
+      const { data: result, error } = await supabase.auth.admin.createUser({
+        email: data.email,
+        password: data.temporary_password || "123456",
+        email_confirm: true,
+      });
+      if (error) throw error;
+
+      const { error: profileError } = await supabase.from("users").insert({
+        id: result.user.id,
+        full_name: data.name,
+        email: data.email,
+        phone: data.phone,
+        role: "profissional",
+        company_id: effectiveCompanyId,
+        must_change_password: true,
+      });
+      if (profileError) throw profileError;
+
+      return result.user;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["users"]);
+      toast.success("Profissional criado! Senha: 123456");
+      setShowForm(false);
+      setProfForm(EMPTY_PROFESSIONAL);
+    },
+    onError: (err) => toast.error("Erro ao criar profissional: " + err.message),
+  });
+
+  const updateProf = useMutation({
+    mutationFn: async ({ id, ...data }) => {
+      const { error } = await supabase.from("users").update({
+        full_name: data.name,
+        phone: data.phone,
+        active: data.active,
+      }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["users"]);
+      toast.success("Profissional atualizado!");
+      setShowForm(false);
+      setEditingProf(null);
+      setProfForm(EMPTY_PROFESSIONAL);
+    },
+    onError: (err) => toast.error("Erro ao atualizar: " + err.message),
+  });
+
+  const deleteProf = useMutation({
+    mutationFn: async (id) => {
+      await supabase.from("professional_services").delete().eq("professional_id", id);
+      const { error } = await supabase.from("users").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["users"]);
+      queryClient.invalidateQueries(["professional_services"]);
+      toast.success("Profissional removido!");
+      setDeletingProf(null);
+    },
+    onError: (err) => toast.error("Erro ao remover: " + err.message),
+  });
+
+  const saveServiceCommission = useMutation({
+    mutationFn: async ({ professionalId, serviceId, commission }) => {
+      const existing = allProServ.find(
+        ps => ps.professional_id === professionalId && ps.service_id === serviceId
+      );
+      if (existing) {
+        const { error } = await supabase.from("professional_services").update({
+          commission_pct: commission,
+        }).eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("professional_services").insert({
+          professional_id: professionalId,
+          service_id: serviceId,
+          commission_pct: commission,
+          company_id: effectiveCompanyId,
+        });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["professional_services"]);
+      toast.success("Comissão salva!");
+    },
+    onError: (err) => toast.error("Erro ao salvar comissão: " + err.message),
+  });
+
+  const removeServiceCommission = useMutation({
+    mutationFn: async (id) => {
+      const { error } = await supabase.from("professional_services").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["professional_services"]);
+      toast.success("Vínculo removido!");
+    },
+    onError: (err) => toast.error("Erro ao remover: " + err.message),
+  });
+
+  const handleSaveProf = () => {
+    if (!profForm.name) return toast.error("Nome é obrigatório");
+    if (!profForm.email) return toast.error("E-mail é obrigatório");
+    if (editingProf) {
+      updateProf.mutate({ id: editingProf.id, ...profForm });
+    } else {
+      createProf.mutate(profForm);
+    }
+  };
+
+  const openEditServices = (prof) => {
+    setEditingServices(prof);
+    setNewServiceId("");
+    setNewCommission(0);
+  };
+
+  const handleAddService = () => {
+    if (!newServiceId) return toast.error("Selecione um serviço");
+    saveServiceCommission.mutate({
+      professionalId: editingServices.id,
+      serviceId: newServiceId,
+      commission: newCommission,
+    });
+    setNewServiceId("");
+    setNewCommission(0);
+  };
+
+  const profServices = editingServices ? proServForProf(editingServices.id) : [];
+
+  return (
+    <div className={cn("max-w-6xl mx-auto p-4 sm:p-6 space-y-6", theme.pageBg)}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: theme.cardText }}>Profissionais</h1>
+          <p className="text-sm mt-1" style={{ color: theme.mutedText }}>Gerencie profissionais, serviços e comissões</p>
+        </div>
+        <Button
+          onClick={() => { setEditingProf(null); setProfForm(EMPTY_PROFESSIONAL); setShowForm(true); }}
+          className="bg-branding-primary text-white hover:opacity-90"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Novo Profissional
+        </Button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {[
+          { label: "Profissionais Ativos", value: professionals.filter(p => p.active !== false).length, color: "text-blue-600" },
+          { label: "Inativos", value: professionals.filter(p => p.active === false).length, color: "text-gray-500" },
+          { label: "Serviços Vinculados", value: allProServ.length, color: "text-emerald-600" },
+        ].map((stat, i) => (
+          <div key={i} className="rounded-xl border p-4" style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
+            <span className="text-xs" style={{ color: theme.mutedText }}>{stat.label}</span>
+            <span className={cn("text-xl font-bold block mt-1", stat.color)} style={{ color: theme.cardText }}>{stat.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <Input
+          placeholder="Buscar profissional..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      {/* Professional List */}
+      {loadingUsers ? (
+        <div className="text-center py-12 text-gray-500">Carregando...</div>
+      ) : professionals.length === 0 ? (
+        <div className="text-center py-12">
+          <UserCog className="w-12 h-12 mx-auto text-gray-500 mb-3" />
+          <p className="text-gray-500">Nenhum profissional encontrado</p>
+          <Button
+            onClick={() => { setEditingProf(null); setProfForm(EMPTY_PROFESSIONAL); setShowForm(true); }}
+            className="mt-4 bg-branding-primary text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" /> Criar primeiro profissional
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {professionals.map(prof => {
+            const profSvcCount = proServForProf(prof.id).length;
+            return (
+              <div
+                key={prof.id}
+                className={cn(
+                  "rounded-xl border p-4 transition-all hover:shadow-md",
+                  prof.active === false ? "opacity-60" : ""
+                )}
+                style={{ background: theme.cardBg, borderColor: theme.cardBorder }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-branding-primary/10 flex items-center justify-center text-branding-primary font-bold text-lg">
+                      {(prof.full_name || prof.email || "?")[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{prof.full_name || "Sem nome"}</h3>
+                      <p className="text-xs text-gray-500">{prof.email}</p>
+                      {prof.phone && <p className="text-xs text-gray-500">{prof.phone}</p>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={cn(
+                      "text-xs",
+                      prof.active !== false ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-500 border-gray-200"
+                    )}>
+                      {prof.active !== false ? "Ativo" : "Inativo"}
+                    </Badge>
+                    {profSvcCount > 0 && (
+                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                        {profSvcCount} {profSvcCount === 1 ? "serviço" : "serviços"}
+                      </Badge>
+                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                          <MoreVertical className="w-4 h-4 text-gray-500" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => {
+                          setEditingProf(prof);
+                          setProfForm({
+                            name: prof.full_name || "",
+                            email: prof.email || "",
+                            phone: prof.phone || "",
+                            role: "profissional",
+                            active: prof.active !== false,
+                          });
+                          setShowForm(true);
+                        }}>
+                          <Edit className="w-4 h-4 mr-2" /> Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openEditServices(prof)}>
+                          <Scissors className="w-4 h-4 mr-2" /> Serviços e Comissões
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setDeletingProf(prof)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" /> Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* PROFESSIONAL FORM MODAL */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>{editingProf ? "Editar Profissional" : "Novo Profissional"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Nome *</Label>
+              <Input
+                value={profForm.name}
+                onChange={e => setProfForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="Nome completo"
+              />
+            </div>
+            <div>
+              <Label>E-mail *</Label>
+              <Input
+                type="email"
+                value={profForm.email}
+                onChange={e => setProfForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="email@exemplo.com"
+                disabled={!!editingProf}
+              />
+            </div>
+            <div>
+              <Label>Telefone</Label>
+              <Input
+                value={profForm.phone}
+                onChange={e => setProfForm(f => ({ ...f, phone: e.target.value }))}
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+            {!editingProf && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p className="text-sm text-amber-700">Senha temporária: <strong>123456</strong></p>
+                <p className="text-xs text-amber-600 mt-1">O profissional será obrigado a trocar a senha no primeiro login.</p>
+              </div>
+            )}
+            {editingProf && (
+              <div className="flex items-center gap-2">
+                <Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} />
+                <Label className="text-sm">Ativo</Label>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
+              <Button onClick={handleSaveProf} className="bg-branding-primary text-white">
+                {editingProf ? "Salvar" : "Criar"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* SERVICES & COMMISSIONS MODAL */}
+      <Dialog open={!!editingServices} onOpenChange={() => setEditingServices(null)}>
+        <DialogContent className="sm:max-w-lg rounded-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Serviços e Comissões - {editingServices?.full_name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Add new service */}
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <Label>Serviço</Label>
+                <Select value={newServiceId} onValueChange={setNewServiceId}>
+                  <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectContent>
+                    {services
+                      .filter(s => !profServices.some(ps => ps.service_id === s.id))
+                      .map(s => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name} ({s.type === "product" ? "Produto" : "Serviço"})
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-28">
+                <Label>Comissão %</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.5}
+                  value={newCommission}
+                  onChange={e => setNewCommission(parseFloat(e.target.value) || 0)}
+                />
+              </div>
+              <Button onClick={handleAddService} className="bg-branding-primary text-white" size="sm">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Linked services list */}
+            {profServices.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 text-sm">
+                Nenhum serviço vinculado. Adicione serviços acima.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {profServices.map(ps => (
+                  <div key={ps.id} className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: theme.cardBorder }}>
+                    <div className="flex items-center gap-2">
+                      {getServiceType(ps.service_id) === "product" ? (
+                        <Package className="w-4 h-4 text-purple-500" />
+                      ) : (
+                        <Scissors className="w-4 h-4 text-blue-500" />
+                      )}
+                      <span className="text-sm font-medium">{getServiceName(ps.service_id)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={0.5}
+                          value={ps.commission_pct || 0}
+                          onChange={e => saveServiceCommission.mutate({
+                            professionalId: editingServices.id,
+                            serviceId: ps.service_id,
+                            commission: parseFloat(e.target.value) || 0,
+                          })}
+                          className="w-20 h-8 text-xs text-center"
+                        />
+                        <Percent className="w-3 h-3 text-gray-400" />
+                      </div>
+                      <button
+                        onClick={() => removeServiceCommission.mutate(ps.id)}
+                        className="p-1 rounded hover:bg-red-50 text-red-500"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE DIALOG */}
+      <AlertDialog open={!!deletingProf} onOpenChange={() => setDeletingProf(null)}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir profissional?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{deletingProf?.full_name}" será removido permanentemente. Todos os vínculos de serviços também serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteProf.mutate(deletingProf.id)}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

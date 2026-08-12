@@ -30,6 +30,7 @@ const PAGE_ROLES = {
   Dashboard: ['super_admin', 'admin', 'profissional'],
   Schedule: ['super_admin', 'admin', 'profissional'],
   Clientes: ['super_admin', 'admin', 'profissional'],
+  Profissionais: ['super_admin', 'admin'],
   Plans: ['super_admin', 'admin'],
   PunchCards: ['super_admin', 'admin'],
   Services: ['super_admin', 'admin', 'profissional'],
