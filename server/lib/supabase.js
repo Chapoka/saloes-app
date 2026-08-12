@@ -32,6 +32,7 @@ export function createServerSupabase() {
   }
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: { persistSession: false },
+    realtime: { params: { eventsPerSecondLimit: 1 } },
   });
 }
 
