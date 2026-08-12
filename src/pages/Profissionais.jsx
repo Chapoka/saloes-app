@@ -104,18 +104,22 @@ export default function Profissionais() {
 
   const createProf = useMutation({
     mutationFn: async (data) => {
-      const { data: result, error } = await supabase.auth.admin.createUser({
-        email: data.email, password: "123456", email_confirm: true,
-      });
-      if (error) throw error;
-      const { error: pe } = await supabase.from("users").insert({
-        id: result.user.id, full_name: data.name, email: data.email,
-        phone: data.phone, role: "profissional", company_id: effectiveCompanyId,
-        must_change_password: true,
-      });
-      if (pe) throw pe;
+      const result = await db.auth.inviteUser(data.email, "profissional", data.name);
+      if (result?.user_id) {
+        await supabase.from("users").update({
+          phone: data.phone,
+          company_id: effectiveCompanyId,
+          must_change_password: true,
+        }).eq("id", result.user_id);
+      }
+      return result;
     },
-    onSuccess: () => { queryClient.invalidateQueries(["users"]); toast.success("Profissional criado! Senha: 123456"); setShowForm(false); setProfForm(EMPTY_PROFESSIONAL); },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries(["users"]);
+      toast.success(`Profissional criado! Senha: ${result?.temp_password || "123456"}`);
+      setShowForm(false);
+      setProfForm(EMPTY_PROFESSIONAL);
+    },
     onError: (err) => toast.error("Erro: " + err.message),
   });
 
