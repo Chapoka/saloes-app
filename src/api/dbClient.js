@@ -556,7 +556,7 @@ export const db = {
     },
   },
   users: {
-    inviteUser: async (email, role, full_name) => {
+    inviteUser: async (email, role, full_name, extra = {}) => {
       console.log("=== inviteUser ===", { email, role, full_name });
       const tempPassword = (crypto.randomUUID?.() || Math.random().toString(36).slice(2, 14)) + "!Aa1";
 
@@ -576,6 +576,13 @@ export const db = {
             password: tempPassword,
             full_name: full_name || "",
             role: role || "cliente",
+            phone: extra.phone,
+            commission_pct: extra.commission_pct,
+            specialty: extra.specialty,
+            photo_url: extra.photo_url,
+            work_days: extra.work_days,
+            company_id: extra.company_id,
+            company_ids: extra.company_ids,
           }),
         });
 
@@ -647,6 +654,23 @@ export const db = {
         email,
         message: "Conta criada! O usuário receberá um e-mail para definir a senha.",
       };
+    },
+    updateUser: async (userId, data) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiBase = import.meta.env.VITE_API_URL || "";
+      const res = await fetch(`${apiBase || window.location.origin}/api/auth/admin-update-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({ user_id: userId, ...data }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Erro ao atualizar" }));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      return res.json();
     },
   },
   functions: {

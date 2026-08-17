@@ -34,7 +34,7 @@ router.post("/confirm-email", async (req, res) => {
 // POST /api/auth/admin-create-user — criar um usuário (auth + public)
 router.post("/admin-create-user", async (req, res) => {
   try {
-    const { email, password, full_name, role } = req.body;
+    const { email, password, full_name, role, phone, commission_pct, specialty, photo_url, work_days, company_id, company_ids } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "email e password são obrigatórios" });
     }
@@ -64,14 +64,61 @@ router.post("/admin-create-user", async (req, res) => {
 
     // O trigger handle_new_user já deve ter criado o registro em public.users,
     // mas confirmamos e atualizamos o role se necessário
-    await req.supabase.from("users").update({
+    const updateData = {
       full_name: full_name || "",
       role: role || "cliente",
-    }).eq("id", userData.user.id);
+    };
+    if (phone) updateData.phone = phone;
+    if (commission_pct != null) updateData.commission_pct = commission_pct;
+    if (specialty != null) updateData.specialty = specialty;
+    if (photo_url) updateData.photo_url = photo_url;
+    if (work_days) updateData.work_days = work_days;
+    if (company_id) updateData.company_id = company_id;
+    if (company_ids) updateData.company_ids = company_ids;
+
+    await req.supabase.from("users").update(updateData).eq("id", userData.user.id);
 
     res.json({ user_id: userData.user.id, email });
   } catch (err) {
     console.error("admin-create-user error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/auth/admin-update-user — atualizar dados de um usuário (service_role bypasses RLS)
+router.post("/admin-update-user", async (req, res) => {
+  try {
+    const { user_id, full_name, phone, email, active, commission_pct, specialty, photo_url, work_days } = req.body;
+    if (!user_id) return res.status(400).json({ error: "user_id é obrigatório" });
+
+    const callerId = req.user.id;
+    if (!callerId) return res.status(401).json({ error: "Não autorizado" });
+
+    const { data: profile } = await req.supabase
+      .from("users")
+      .select("role")
+      .eq("id", callerId)
+      .single();
+
+    if (profile?.role !== "super_admin" && profile?.role !== "admin") {
+      return res.status(403).json({ error: "Acesso negado" });
+    }
+
+    const updateData = {};
+    if (full_name != null) updateData.full_name = full_name;
+    if (phone != null) updateData.phone = phone;
+    if (active != null) updateData.active = active;
+    if (commission_pct != null) updateData.commission_pct = commission_pct;
+    if (specialty != null) updateData.specialty = specialty;
+    if (photo_url != null) updateData.photo_url = photo_url;
+    if (work_days != null) updateData.work_days = work_days;
+
+    const { error } = await req.supabase.from("users").update(updateData).eq("id", user_id);
+    if (error) throw error;
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("admin-update-user error:", err);
     res.status(500).json({ error: err.message });
   }
 });

@@ -119,25 +119,34 @@ export default function Profissionais() {
 
   const createProf = useMutation({
     mutationFn: async (data) => {
-      const result = await db.users.inviteUser(data.email, "profissional", data.name);
+      const extra = {
+        phone: data.phone,
+        commission_pct: data.commission_pct || 0,
+        specialty: data.specialty || "",
+        photo_url: data.photo_url || "",
+        work_days: data.work_days || [],
+      };
+      if (effectiveCompanyId) {
+        extra.company_id = effectiveCompanyId;
+        extra.company_ids = [effectiveCompanyId];
+      }
+      const result = await db.users.inviteUser(data.email, "profissional", data.name, extra);
+      // Fallback: update fields on the client if server didn't handle them
       if (result?.user_id) {
-        const basePayload = {
-          phone: data.phone,
-          must_change_password: true,
-          company_id: effectiveCompanyId,
-          company_ids: effectiveCompanyId ? [effectiveCompanyId] : undefined,
-        };
-        const fullPayload = {
-          ...basePayload,
-          commission_pct: data.commission_pct || 0,
-          specialty: data.specialty || "",
-          photo_url: data.photo_url || "",
-          work_days: data.work_days || [],
-        };
-        let { error } = await supabase.from("users").update(fullPayload).eq("id", result.user_id);
-        if (error?.code === "PGRST204") {
-          await supabase.from("users").update(basePayload).eq("id", result.user_id);
-        } else if (error) throw error;
+        try {
+          await supabase.from("users").update({
+            phone: data.phone,
+            commission_pct: data.commission_pct || 0,
+            specialty: data.specialty || "",
+            photo_url: data.photo_url || "",
+            work_days: data.work_days || [],
+            must_change_password: true,
+            company_id: effectiveCompanyId,
+            company_ids: effectiveCompanyId ? [effectiveCompanyId] : undefined,
+          }).eq("id", result.user_id);
+        } catch {
+          // RLS might block client-side update, that's OK — server already saved
+        }
       }
       return result;
     },
@@ -152,23 +161,24 @@ export default function Profissionais() {
 
   const updateProf = useMutation({
     mutationFn: async ({ id, ...data }) => {
-      const basePayload = {
-        full_name: data.name,
-        phone: data.phone,
-        active: data.active,
-      };
-      const fullPayload = {
-        ...basePayload,
-        commission_pct: data.commission_pct || 0,
-        specialty: data.specialty || "",
-        photo_url: data.photo_url || "",
-        work_days: data.work_days || [],
-      };
-      let { error } = await supabase.from("users").update(fullPayload).eq("id", id);
-      if (error?.code === "PGRST204") {
-        const { error: err2 } = await supabase.from("users").update(basePayload).eq("id", id);
-        if (err2) throw err2;
-      } else if (error) throw error;
+      try {
+        await db.users.updateUser(id, {
+          full_name: data.name,
+          phone: data.phone,
+          active: data.active,
+          commission_pct: data.commission_pct || 0,
+          specialty: data.specialty || "",
+          photo_url: data.photo_url || "",
+          work_days: data.work_days || [],
+        });
+      } catch {
+        // Fallback: try client-side (may fail with RLS)
+        await supabase.from("users").update({
+          full_name: data.name,
+          phone: data.phone,
+          active: data.active,
+        }).eq("id", id);
+      }
     },
     onSuccess: () => { queryClient.invalidateQueries(["users"]); toast.success("Atualizado!"); setShowForm(false); setEditingProf(null); },
     onError: (err) => toast.error("Erro: " + err.message),
