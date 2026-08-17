@@ -174,7 +174,6 @@ router.post("/admin-delete-user", async (req, res) => {
     // 2. Deleta registros nas tabelas de dependência direta
     const deleteSteps = [
       { table: "professional_services", col: "professional_id" },
-      { table: "appointments", col: "professional_id" },
       { table: "user_companies", col: "user_id" },
     ];
 
