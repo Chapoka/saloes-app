@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { db } from "@/api/dbClient";
+import { supabase } from "@/lib/supabaseClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/components/auth/useCurrentUser";
 import { useThemeMode } from "@/hooks/useThemeMode";
@@ -119,6 +120,23 @@ export default function Services() {
     enabled: ready,
   });
 
+  const { data: allOverrides = [] } = useQuery({
+    queryKey: ["company_service_overrides", effectiveCompanyId],
+    queryFn: async () => {
+      const { data } = await supabase.from("company_service_overrides").select("*");
+      return data || [];
+    },
+    enabled: ready && !!effectiveCompanyId,
+  });
+
+  const getEffectiveActive = (svc) => {
+    if (!svc.company_id && effectiveCompanyId) {
+      const override = allOverrides.find(o => o.service_id === svc.id && o.company_id === effectiveCompanyId);
+      if (override) return override.active;
+    }
+    return svc.active !== false;
+  };
+
   const { data: allCombos = [], isLoading: loadingCombos } = useQuery({
     queryKey: ["service_combos", effectiveCompanyId],
     queryFn: () => db.entities.ServiceCombo.list("-created_at"),
@@ -138,7 +156,7 @@ export default function Services() {
   });
 
   const services = effectiveCompanyId
-    ? allServices.filter(s => s.company_id === effectiveCompanyId)
+    ? allServices.filter(s => s.company_id === effectiveCompanyId || s.company_id === null)
     : allServices;
 
   const combos = effectiveCompanyId
@@ -176,8 +194,20 @@ export default function Services() {
   });
 
   const toggleServiceActive = useMutation({
-    mutationFn: ({ id, active }) => db.entities.Service.update(id, { active }),
-    onSuccess: () => queryClient.invalidateQueries(["services"]),
+    mutationFn: async ({ id, active }) => {
+      const svc = allServices.find(s => s.id === id);
+      if (!svc.company_id && effectiveCompanyId) {
+        const existing = allOverrides.find(o => o.service_id === id && o.company_id === effectiveCompanyId);
+        if (existing) {
+          await supabase.from("company_service_overrides").update({ active }).eq("id", existing.id);
+        } else {
+          await supabase.from("company_service_overrides").insert({ company_id: effectiveCompanyId, service_id: id, active });
+        }
+      } else {
+        await db.entities.Service.update(id, { active });
+      }
+    },
+    onSuccess: () => { queryClient.invalidateQueries(["services"]); queryClient.invalidateQueries(["company_service_overrides"]); },
   });
 
   const deleteService = useMutation({
@@ -323,7 +353,7 @@ export default function Services() {
       price: svc.price || 0,
       preco_custo: svc.preco_custo || 0,
       description: svc.description || "",
-      active: svc.active !== false,
+      active: getEffectiveActive(svc),
       unidade_medida: svc.unidade_medida || "unidade",
       quantidade_estoque: svc.quantidade_estoque || 0,
       desconto: svc.desconto || 0,
@@ -359,8 +389,8 @@ Novo Item
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Serviços Ativos", value: services.filter(s => s.active !== false).length, icon: Scissors, color: "text-blue-600" },
-          { label: "Inativos", value: services.filter(s => s.active === false).length, icon: PowerOff, color: "text-gray-500" },
+          { label: "Serviços Ativos", value: services.filter(s => getEffectiveActive(s)).length, icon: Scissors, color: "text-blue-600" },
+          { label: "Inativos", value: services.filter(s => !getEffectiveActive(s)).length, icon: PowerOff, color: "text-gray-500" },
           { label: "Preço Médio", value: `R$ ${avgPrice}`, icon: DollarSign, color: "text-emerald-600" },
           { label: "Margem Média", value: avgMargin !== "-" ? `${avgMargin}%` : "-", icon: DollarSign, color: "text-blue-600" },
           { label: "Vinculados a Planos", value: [...new Set(planServices.map(ps => ps.service_id))].length, icon: Package, color: "text-purple-600" },
@@ -452,12 +482,13 @@ Novo Item
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredServices.map(svc => {
                 const cat = getCategoryInfo(svc.category);
+                const isActive = getEffectiveActive(svc);
                 return (
                   <div
                     key={svc.id}
                     className={cn(
                       "rounded-xl border p-4 transition-all hover:shadow-md",
-                      svc.active === false ? "opacity-60" : ""
+                      !isActive ? "opacity-60" : ""
                     )}
                     style={{ background: theme.cardBg, borderColor: theme.cardBorder }}
                   >
@@ -471,7 +502,7 @@ Novo Item
                           )}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900 text-sm">{svc.name}</h3>
+                          <h3 className="font-semibold text-gray-900 text-sm">{svc.name} {!svc.company_id && <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 ml-1">Global</Badge>}</h3>
                           <div className="flex items-center gap-1 mt-0.5">
                             <Badge variant="outline" className={cn("text-[10px]", cat.color)}>
                               {cat.label}
@@ -495,9 +526,9 @@ Novo Item
                             <Edit className="w-4 h-4 mr-2" /> Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => toggleServiceActive.mutate({ id: svc.id, active: svc.active === false })}
+                            onClick={() => toggleServiceActive.mutate({ id: svc.id, active: !isActive })}
                           >
-                            {svc.active === false ? (
+                            {!isActive ? (
                               <><Power className="w-4 h-4 mr-2" /> Ativar</>
                             ) : (
                               <><PowerOff className="w-4 h-4 mr-2" /> Desativar</>
@@ -822,7 +853,7 @@ Novo Item
             <div>
               <Label>Serviços Incluídos (mín. 2)</Label>
               <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2">
-                {services.filter(s => s.active !== false).map(svc => (
+                {services.filter(s => getEffectiveActive(s)).map(svc => (
                   <label key={svc.id} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer">
                     <input
                       type="checkbox"
@@ -843,7 +874,7 @@ Novo Item
                     </span>
                   </label>
                 ))}
-                {services.filter(s => s.active !== false).length === 0 && (
+                {services.filter(s => getEffectiveActive(s)).length === 0 && (
                   <p className="text-xs text-gray-500 text-center py-2">Crie serviços primeiro</p>
                 )}
               </div>

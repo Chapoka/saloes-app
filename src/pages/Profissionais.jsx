@@ -39,8 +39,9 @@ import { User } from "lucide-react";
 
 const EMPTY_PROFESSIONAL = {
   name: "", email: "", phone: "", active: true,
-  commission_pct: 0, specialty: "", photo_url: "",
+  commission_pct: 0, photo_url: "",
   work_days: ["seg", "ter", "qua", "qui", "sex", "sab"],
+  service_ids: [],
 };
 
 const WORK_DAYS = [
@@ -86,6 +87,23 @@ export default function Profissionais() {
     enabled: ready,
   });
 
+  const { data: allOverrides = [] } = useQuery({
+    queryKey: ["company_service_overrides", effectiveCompanyId],
+    queryFn: async () => {
+      const { data } = await supabase.from("company_service_overrides").select("*");
+      return data || [];
+    },
+    enabled: ready && !!effectiveCompanyId,
+  });
+
+  const getEffectiveActive = (svc) => {
+    if (!svc.company_id && effectiveCompanyId) {
+      const override = allOverrides.find(o => o.service_id === svc.id && o.company_id === effectiveCompanyId);
+      if (override) return override.active;
+    }
+    return svc.active !== false;
+  };
+
   const { data: allProServ = [] } = useQuery({
     queryKey: ["professional_services"],
     queryFn: () => db.entities.ProfessionalService.list(),
@@ -102,11 +120,8 @@ export default function Profissionais() {
   });
 
   const services = effectiveCompanyId
-    ? allServices.filter(s => s.company_id === effectiveCompanyId && s.active !== false)
-    : allServices.filter(s => s.active !== false);
-
-  const onlyServices = services.filter(s => s.type === "service");
-  const onlyProducts = services.filter(s => s.type === "product");
+    ? allServices.filter(s => (s.company_id === effectiveCompanyId || s.company_id === null) && getEffectiveActive(s))
+    : allServices.filter(s => getEffectiveActive(s));
 
   const proServForProf = (profId) => allProServ.filter(ps => ps.professional_id === profId);
 
@@ -122,7 +137,6 @@ export default function Profissionais() {
       const extra = {
         phone: data.phone,
         commission_pct: data.commission_pct || 0,
-        specialty: data.specialty || "",
         photo_url: data.photo_url || "",
         work_days: data.work_days || [],
       };
@@ -137,7 +151,6 @@ export default function Profissionais() {
           await supabase.from("users").update({
             phone: data.phone,
             commission_pct: data.commission_pct || 0,
-            specialty: data.specialty || "",
             photo_url: data.photo_url || "",
             work_days: data.work_days || [],
             must_change_password: true,
@@ -150,8 +163,24 @@ export default function Profissionais() {
       }
       return result;
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
+      if (result?.user_id && profForm.service_ids?.length > 0) {
+        const svcLinks = profForm.service_ids.map(sid => {
+          const svc = allServices.find(s => s.id === sid);
+          return {
+            professional_id: result.user_id,
+            service_id: sid,
+            company_id: effectiveCompanyId,
+            commission_pct: svc?.comissao || 0,
+            performs_service: true,
+            price_override: svc?.price || 0,
+            duration_override: svc?.duration_mins || 30,
+          };
+        });
+        await supabase.from("professional_services").insert(svcLinks);
+      }
       queryClient.invalidateQueries(["users"]);
+      queryClient.invalidateQueries(["professional_services"]);
       toast.success(`Profissional criado! Senha: ${result?.temp_password || "123456"}`);
       setShowForm(false);
       setProfForm(EMPTY_PROFESSIONAL);
@@ -160,27 +189,49 @@ export default function Profissionais() {
   });
 
   const updateProf = useMutation({
-    mutationFn: async ({ id, ...data }) => {
+    mutationFn: async ({ id, service_ids, ...data }) => {
       try {
         await db.users.updateUser(id, {
           full_name: data.name,
           phone: data.phone,
           active: data.active,
           commission_pct: data.commission_pct || 0,
-          specialty: data.specialty || "",
           photo_url: data.photo_url || "",
           work_days: data.work_days || [],
         });
       } catch {
-        // Fallback: try client-side (may fail with RLS)
         await supabase.from("users").update({
           full_name: data.name,
           phone: data.phone,
           active: data.active,
         }).eq("id", id);
       }
+      if (service_ids != null) {
+        const { data: existing } = await supabase.from("professional_services").select("id, service_id").eq("professional_id", id);
+        const existingIds = (existing || []).map(e => e.service_id);
+        const toAdd = service_ids.filter(sid => !existingIds.includes(sid));
+        const toRemove = (existing || []).filter(e => !service_ids.includes(e.service_id));
+        if (toRemove.length > 0) {
+          await supabase.from("professional_services").delete().in("id", toRemove.map(e => e.id));
+        }
+        if (toAdd.length > 0) {
+          const inserts = toAdd.map(sid => {
+            const svc = allServices.find(s => s.id === sid);
+            return {
+              professional_id: id,
+              service_id: sid,
+              company_id: effectiveCompanyId,
+              commission_pct: svc?.comissao || 0,
+              performs_service: true,
+              price_override: svc?.price || 0,
+              duration_override: svc?.duration_mins || 30,
+            };
+          });
+          await supabase.from("professional_services").insert(inserts);
+        }
+      }
     },
-    onSuccess: () => { queryClient.invalidateQueries(["users"]); toast.success("Atualizado!"); setShowForm(false); setEditingProf(null); },
+    onSuccess: () => { queryClient.invalidateQueries(["users"]); queryClient.invalidateQueries(["professional_services"]); toast.success("Atualizado!"); setShowForm(false); setEditingProf(null); },
     onError: (err) => toast.error("Erro: " + err.message),
   });
 
@@ -243,8 +294,8 @@ export default function Profissionais() {
   const selectedProfServices = selectedProf ? proServByType(selectedProf.id, activeTab) : [];
   const linkedIds = selectedProfServices.map(ps => ps.service_id);
   const availableItems = activeTab === "services"
-    ? onlyServices.filter(s => !linkedIds.includes(s.id))
-    : onlyProducts.filter(s => !linkedIds.includes(s.id));
+    ? services.filter(s => !linkedIds.includes(s.id))
+    : [];
 
   // --- LIST VIEW ---
   if (!selectedProf) {
@@ -399,10 +450,43 @@ export default function Profissionais() {
                 <Input type="email" value={profForm.email} onChange={e => setProfForm(f => ({ ...f, email: e.target.value }))} placeholder="email@exemplo.com" disabled={!!editingProf} className="mt-1" />
               </div>
 
-              {/* Especialidade */}
+              {/* Serviços */}
               <div>
-                <Label className="text-sm font-medium">Especialidade</Label>
-                <Input value={profForm.specialty} onChange={e => setProfForm(f => ({ ...f, specialty: e.target.value }))} placeholder="Ex: Cortes modernos, Barbas" className="mt-1" />
+                <Label className="text-sm font-medium">Serviços Vinculados</Label>
+              {allServices.filter(s => getEffectiveActive(s)).length === 0 ? (
+                  <p className="text-xs text-gray-400 mt-1">Nenhum serviço criado ainda. Deseja <a href="/Servicos" className="text-branding-primary underline">criar um</a>?</p>
+                ) : (
+                  <div className="space-y-2 mt-2">
+                    <Select onValueChange={(v) => {
+                      if (v && !(profForm.service_ids || []).includes(v)) {
+                        setProfForm(f => ({ ...f, service_ids: [...(f.service_ids || []), v] }));
+                      }
+                    }}>
+                      <SelectTrigger><SelectValue placeholder="Adicionar serviço..." /></SelectTrigger>
+                      <SelectContent>
+                        {allServices.filter(s => getEffectiveActive(s) && !(profForm.service_ids || []).includes(s.id)).map(svc => (
+                          <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
+                        ))}
+                        {allServices.filter(s => getEffectiveActive(s) && !(profForm.service_ids || []).includes(s.id)).length === 0 && (
+                          <SelectItem value="__" disabled>Todos já adicionados</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {(profForm.service_ids || []).length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {(profForm.service_ids || []).map(sid => {
+                          const svc = allServices.find(s => s.id === sid);
+                          return svc ? (
+                            <Badge key={sid} variant="outline" className="text-xs gap-1">
+                              {svc.name}
+                              <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-gray-400 hover:text-red-500 ml-1">&times;</button>
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Dias de Trabalho */}
@@ -489,11 +573,11 @@ export default function Profissionais() {
               <img src={selectedProf.photo_url} alt={selectedProf.full_name} className="w-20 h-20 rounded-full object-cover border-2 border-gray-200" />
             </div>
           )}
-          {[["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Especialidade", selectedProf.specialty || "-"], ["Comissão", `${selectedProf.commission_pct || 0}%`], ["Dias", (selectedProf.work_days || []).map(d => WORK_DAYS.find(w => w.key === d)?.label).filter(Boolean).join(", ") || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
+          {[["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Serviços", allProServ.filter(ps => ps.professional_id === selectedProf.id).map(ps => allServices.find(s => s.id === ps.service_id)?.name).filter(Boolean).join(", ") || "-"], ["Comissão", `${selectedProf.commission_pct || 0}%`], ["Dias", (selectedProf.work_days || []).map(d => WORK_DAYS.find(w => w.key === d)?.label).filter(Boolean).join(", ") || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
             <div key={l}><p className="text-xs text-gray-500">{l}</p><p className="text-sm font-medium">{v}</p></div>
           ))}
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" onClick={() => { setEditingProf(selectedProf); setProfForm({ name: selectedProf.full_name || "", email: selectedProf.email || "", phone: selectedProf.phone || "", active: selectedProf.active !== false, commission_pct: selectedProf.commission_pct || 0, specialty: selectedProf.specialty || "", photo_url: selectedProf.photo_url || "", work_days: selectedProf.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"] }); setShowForm(true); }}>
+            <Button variant="outline" onClick={() => { const profServiceIds = allProServ.filter(ps => ps.professional_id === selectedProf.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id); setEditingProf(selectedProf); setProfForm({ name: selectedProf.full_name || "", email: selectedProf.email || "", phone: selectedProf.phone || "", active: selectedProf.active !== false, commission_pct: selectedProf.commission_pct || 0, photo_url: selectedProf.photo_url || "", work_days: selectedProf.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: profServiceIds }); setShowForm(true); }}>
               <Edit className="w-4 h-4 mr-2" /> Editar
             </Button>
             <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setDeletingProf(selectedProf)}>
@@ -673,10 +757,43 @@ export default function Profissionais() {
               <Input type="email" value={profForm.email} disabled className="mt-1" />
             </div>
 
-            {/* Especialidade */}
+            {/* Serviços */}
             <div>
-              <Label className="text-sm font-medium">Especialidade</Label>
-              <Input value={profForm.specialty} onChange={e => setProfForm(f => ({ ...f, specialty: e.target.value }))} placeholder="Ex: Cortes modernos, Barbas" className="mt-1" />
+              <Label className="text-sm font-medium">Serviços Vinculados</Label>
+              {allServices.filter(s => getEffectiveActive(s)).length === 0 ? (
+                <p className="text-xs text-gray-400 mt-1">Nenhum serviço criado ainda. Deseja <a href="/Servicos" className="text-branding-primary underline">criar um</a>?</p>
+              ) : (
+                <div className="space-y-2 mt-2">
+                  <Select onValueChange={(v) => {
+                    if (v && !(profForm.service_ids || []).includes(v)) {
+                      setProfForm(f => ({ ...f, service_ids: [...(f.service_ids || []), v] }));
+                    }
+                  }}>
+                    <SelectTrigger><SelectValue placeholder="Adicionar serviço..." /></SelectTrigger>
+                    <SelectContent>
+                      {allServices.filter(s => getEffectiveActive(s) && !(profForm.service_ids || []).includes(s.id)).map(svc => (
+                        <SelectItem key={svc.id} value={svc.id}>{svc.name}</SelectItem>
+                      ))}
+                      {allServices.filter(s => getEffectiveActive(s) && !(profForm.service_ids || []).includes(s.id)).length === 0 && (
+                        <SelectItem value="__" disabled>Todos já adicionados</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {(profForm.service_ids || []).length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {(profForm.service_ids || []).map(sid => {
+                        const svc = allServices.find(s => s.id === sid);
+                        return svc ? (
+                          <Badge key={sid} variant="outline" className="text-xs gap-1">
+                            {svc.name}
+                            <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-gray-400 hover:text-red-500 ml-1">&times;</button>
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Dias de Trabalho */}
