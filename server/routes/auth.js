@@ -151,32 +151,42 @@ router.post("/admin-delete-user", async (req, res) => {
 
       const { data: targetUser } = await req.supabase
         .from("users")
-        .select("company_id")
+        .select("company_id, company_ids")
         .eq("id", user_id)
         .single();
 
       const callerCompanyIds = (callerCompanies || []).map(c => c.company_id);
-      if (targetUser?.company_id && !callerCompanyIds.includes(targetUser.company_id)) {
+      const targetCompanyIds = [targetUser?.company_id, ...(targetUser?.company_ids || [])].filter(Boolean);
+      const hasAccess = targetCompanyIds.some(id => callerCompanyIds.includes(id));
+      if (targetCompanyIds.length > 0 && !hasAccess) {
         return res.status(403).json({ error: "Acesso negado: usuário não pertence à sua empresa" });
       }
     }
 
-    // Deleta das tabelas públicas primeiro (ordem importa por FK)
-    const steps = [
+    // Limpa referências FK em tabelas dependentes (ordem importa)
+    // 1. Zera FKs em customers (teacher_id, guardian_id) — não deleta o customer
+    const { error: custErr } = await req.supabase
+      .from("customers")
+      .update({ teacher_id: null, guardian_id: null })
+      .or(`teacher_id.eq.${user_id},guardian_id.eq.${user_id}`);
+    if (custErr) console.warn("update customers FKs:", custErr.message);
+
+    // 2. Deleta registros nas tabelas de dependência direta
+    const deleteSteps = [
       { table: "professional_services", col: "professional_id" },
       { table: "appointments", col: "professional_id" },
       { table: "user_companies", col: "user_id" },
     ];
 
-    for (const { table, col } of steps) {
-      try {
-        const { error: delErr } = await req.supabase.from(table).delete().eq(col, user_id);
-        if (delErr) console.warn(`delete ${table}:`, delErr.message);
-      } catch (e) {
-        console.warn(`delete ${table} exception:`, e.message);
+    for (const { table, col } of deleteSteps) {
+      const { error: delErr } = await req.supabase.from(table).delete().eq(col, user_id);
+      if (delErr) {
+        console.error(`delete ${table} error:`, delErr.message);
+        return res.status(500).json({ error: `Erro ao limpar tabela ${table}: ${delErr.message}` });
       }
     }
 
+    // 3. Deleta o usuário da tabela pública
     const { error: userDelErr } = await req.supabase.from("users").delete().eq("id", user_id);
     if (userDelErr) {
       console.error("delete users error:", userDelErr);
@@ -184,10 +194,9 @@ router.post("/admin-delete-user", async (req, res) => {
     }
 
     // Deleta do auth.users via admin API (service_role bypasses)
-    try {
-      await req.supabase.auth.admin.deleteUser(user_id);
-    } catch (authErr) {
-      console.warn("auth delete fallback:", authErr.message);
+    const { error: authDelErr } = await req.supabase.auth.admin.deleteUser(user_id);
+    if (authDelErr) {
+      console.error("auth.users delete error:", authDelErr.message);
     }
 
     res.json({ ok: true });

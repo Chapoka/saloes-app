@@ -409,6 +409,17 @@ export default function Profissionais() {
           </div>
         )}
 
+        <Dialog open={!!deletingProf} onOpenChange={() => setDeletingProf(null)}>
+          <DialogContent className="sm:max-w-md rounded-2xl">
+            <DialogHeader><DialogTitle>Excluir profissional?</DialogTitle></DialogHeader>
+            <p className="text-sm text-gray-500">"{deletingProf?.full_name}" será removido permanentemente.</p>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setDeletingProf(null)}>Cancelar</Button>
+              <Button onClick={() => deleteProf.mutate(deletingProf.id)} className="bg-red-600 text-white hover:bg-red-700">Excluir</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent className="sm:max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editingProf ? "Editar" : "Novo Profissional"}</DialogTitle></DialogHeader>
