@@ -13,6 +13,9 @@ import {
   ArrowLeft,
   Camera,
   Upload,
+  MoreVertical,
+  Power,
+  PowerOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +28,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -250,6 +259,14 @@ export default function Profissionais() {
     onError: (err) => toast.error("Erro: " + err.message),
   });
 
+  const toggleActive = useMutation({
+    mutationFn: async ({ id, active }) => {
+      await db.users.updateUser(id, { active });
+    },
+    onSuccess: () => { queryClient.invalidateQueries(["users"]); toast.success("Status atualizado!"); },
+    onError: (err) => toast.error("Erro: " + err.message),
+  });
+
   const saveLink = useMutation({
     mutationFn: async ({ professionalId, serviceId, commission, performs_service, price_override, duration_override }) => {
       const existing = allProServ.find(ps => ps.professional_id === professionalId && ps.service_id === serviceId);
@@ -352,6 +369,24 @@ export default function Profissionais() {
                       </Badge>
                       {svcCount > 0 && <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">{svcCount} serviços</Badge>}
                       {prodCount > 0 && <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">{prodCount} produtos</Badge>}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button onClick={e => e.stopPropagation()} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                            <MoreVertical className="w-4 h-4 text-gray-500" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingProf(prof); setProfForm({ name: prof.full_name || "", email: prof.email || "", phone: prof.phone || "", active: prof.active !== false, commission_pct: prof.commission_pct || 0, photo_url: prof.photo_url || "", work_days: prof.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: allProServ.filter(ps => ps.professional_id === prof.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id) }); setShowForm(true); }}>
+                            <Edit className="w-4 h-4 mr-2" /> Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); toggleActive.mutate({ id: prof.id, active: prof.active === false }); }}>
+                            {prof.active === false ? <><Power className="w-4 h-4 mr-2" /> Ativar</> : <><PowerOff className="w-4 h-4 mr-2" /> Desativar</>}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDeletingProf(prof); }} className="text-red-600">
+                            <Trash2 className="w-4 h-4 mr-2" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
