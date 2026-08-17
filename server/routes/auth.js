@@ -138,19 +138,39 @@ router.post("/admin-delete-user", async (req, res) => {
       .eq("id", callerId)
       .single();
 
-    if (profile?.role !== "super_admin") {
+    if (profile?.role !== "super_admin" && profile?.role !== "admin") {
       return res.status(403).json({ error: "Acesso negado" });
     }
 
+    // Admin só pode excluir profissionais vinculados à sua empresa
+    if (profile?.role === "admin") {
+      const { data: callerCompanies } = await req.supabase
+        .from("user_companies")
+        .select("company_id")
+        .eq("user_id", callerId);
+
+      const { data: targetUser } = await req.supabase
+        .from("users")
+        .select("company_id")
+        .eq("id", user_id)
+        .single();
+
+      const callerCompanyIds = (callerCompanies || []).map(c => c.company_id);
+      if (targetUser?.company_id && !callerCompanyIds.includes(targetUser.company_id)) {
+        return res.status(403).json({ error: "Acesso negado: usuário não pertence à sua empresa" });
+      }
+    }
+
     // Deleta das tabelas públicas primeiro
+    await req.supabase.from("professional_services").delete().eq("professional_id", user_id);
     await req.supabase.from("user_companies").delete().eq("user_id", user_id);
     await req.supabase.from("users").delete().eq("id", user_id);
 
-    // Deleta do auth.users via RPC ou fallback admin API
+    // Deleta do auth.users via admin API (service_role bypasses)
     try {
-      await req.supabase.rpc("delete_user_direct", { p_user_id: user_id });
-    } catch {
       await req.supabase.auth.admin.deleteUser(user_id);
+    } catch (authErr) {
+      console.warn("auth delete fallback:", authErr.message);
     }
 
     res.json({ ok: true });

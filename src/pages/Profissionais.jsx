@@ -246,13 +246,19 @@ export default function Profissionais() {
 
   const deleteProf = useMutation({
     mutationFn: async (id) => {
-      await supabase.from("professional_services").delete().eq("professional_id", id);
-      // Delete from auth.users via RPC
-      try {
-        await supabase.rpc("delete_user_direct", { p_user_id: id });
-      } catch {
-        // Fallback: delete from public users only
-        await supabase.from("users").delete().eq("id", id);
+      const { data: { session } } = await supabase.auth.getSession();
+      const apiBase = import.meta.env.VITE_API_URL || "";
+      const res = await fetch(`${apiBase || window.location.origin}/api/auth/admin-delete-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({ user_id: id }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Erro ao excluir" }));
+        throw new Error(err.error || `HTTP ${res.status}`);
       }
     },
     onSuccess: () => { queryClient.invalidateQueries(["users"]); queryClient.invalidateQueries(["professional_services"]); toast.success("Removido!"); setDeletingProf(null); setSelectedProf(null); },
