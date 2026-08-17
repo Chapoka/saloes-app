@@ -10,9 +10,9 @@ import {
   Edit,
   Trash2,
   Search,
-  Scissors,
-  Package,
   ArrowLeft,
+  Camera,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,8 +35,23 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { User } from "lucide-react";
 
-const EMPTY_PROFESSIONAL = { name: "", email: "", phone: "", active: true };
+const EMPTY_PROFESSIONAL = {
+  name: "", email: "", phone: "", active: true,
+  commission_pct: 0, specialty: "", photo_url: "",
+  work_days: ["seg", "ter", "qua", "qui", "sex", "sab"],
+};
+
+const WORK_DAYS = [
+  { key: "seg", label: "Segunda" },
+  { key: "ter", label: "Terça" },
+  { key: "qua", label: "Quarta" },
+  { key: "qui", label: "Quinta" },
+  { key: "sex", label: "Sexta" },
+  { key: "sab", label: "Sábado" },
+  { key: "dom", label: "Domingo" },
+];
 
 const TABS = [
   { key: "info", label: "Informações" },
@@ -106,15 +121,23 @@ export default function Profissionais() {
     mutationFn: async (data) => {
       const result = await db.users.inviteUser(data.email, "profissional", data.name);
       if (result?.user_id) {
-        const updatePayload = {
+        const basePayload = {
           phone: data.phone,
           must_change_password: true,
+          company_id: effectiveCompanyId,
+          company_ids: effectiveCompanyId ? [effectiveCompanyId] : undefined,
         };
-        if (effectiveCompanyId) {
-          updatePayload.company_id = effectiveCompanyId;
-          updatePayload.company_ids = [effectiveCompanyId];
-        }
-        await supabase.from("users").update(updatePayload).eq("id", result.user_id);
+        const fullPayload = {
+          ...basePayload,
+          commission_pct: data.commission_pct || 0,
+          specialty: data.specialty || "",
+          photo_url: data.photo_url || "",
+          work_days: data.work_days || [],
+        };
+        let { error } = await supabase.from("users").update(fullPayload).eq("id", result.user_id);
+        if (error?.code === "PGRST204") {
+          await supabase.from("users").update(basePayload).eq("id", result.user_id);
+        } else if (error) throw error;
       }
       return result;
     },
@@ -129,8 +152,23 @@ export default function Profissionais() {
 
   const updateProf = useMutation({
     mutationFn: async ({ id, ...data }) => {
-      const { error } = await supabase.from("users").update({ full_name: data.name, phone: data.phone, active: data.active }).eq("id", id);
-      if (error) throw error;
+      const basePayload = {
+        full_name: data.name,
+        phone: data.phone,
+        active: data.active,
+      };
+      const fullPayload = {
+        ...basePayload,
+        commission_pct: data.commission_pct || 0,
+        specialty: data.specialty || "",
+        photo_url: data.photo_url || "",
+        work_days: data.work_days || [],
+      };
+      let { error } = await supabase.from("users").update(fullPayload).eq("id", id);
+      if (error?.code === "PGRST204") {
+        const { error: err2 } = await supabase.from("users").update(basePayload).eq("id", id);
+        if (err2) throw err2;
+      } else if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries(["users"]); toast.success("Atualizado!"); setShowForm(false); setEditingProf(null); },
     onError: (err) => toast.error("Erro: " + err.message),
@@ -175,7 +213,7 @@ export default function Profissionais() {
 
   const handleSaveProf = () => {
     if (!profForm.name) return toast.error("Nome é obrigatório");
-    if (!profForm.email) return toast.error("E-mail é obrigatório");
+    if (!editingProf && !profForm.email) return toast.error("E-mail é obrigatório");
     if (editingProf) updateProf.mutate({ id: editingProf.id, ...profForm });
     else createProf.mutate(profForm);
   };
@@ -235,9 +273,13 @@ export default function Profissionais() {
                   style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-branding-primary/10 flex items-center justify-center text-branding-primary font-bold text-lg">
-                        {(prof.full_name || prof.email || "?")[0].toUpperCase()}
-                      </div>
+                      {prof.photo_url ? (
+                        <img src={prof.photo_url} alt="" className="w-11 h-11 rounded-xl object-cover" />
+                      ) : (
+                        <div className="w-11 h-11 rounded-xl bg-branding-primary/10 flex items-center justify-center text-branding-primary font-bold text-lg">
+                          {(prof.full_name || prof.email || "?")[0].toUpperCase()}
+                        </div>
+                      )}
                       <div>
                         <h3 className="font-semibold text-gray-900">{prof.full_name || "Sem nome"}</h3>
                         <p className="text-xs text-gray-500">{prof.email}</p>
@@ -258,17 +300,138 @@ export default function Profissionais() {
         )}
 
         <Dialog open={showForm} onOpenChange={setShowForm}>
-          <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogContent className="sm:max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editingProf ? "Editar" : "Novo Profissional"}</DialogTitle></DialogHeader>
-            <div className="space-y-4">
-              <div><Label>Nome *</Label><Input value={profForm.name} onChange={e => setProfForm(f => ({ ...f, name: e.target.value }))} /></div>
-              <div><Label>E-mail *</Label><Input type="email" value={profForm.email} onChange={e => setProfForm(f => ({ ...f, email: e.target.value }))} disabled={!!editingProf} /></div>
-              <div><Label>Telefone</Label><Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: e.target.value }))} /></div>
-              {!editingProf && <p className="text-sm text-amber-600">Senha: <strong>123456</strong></p>}
-              {editingProf && <div className="flex items-center gap-2"><Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} /><Label className="text-sm">Ativo</Label></div>}
+            <div className="space-y-5">
+              {/* Photo */}
+              <div className="flex flex-col items-center gap-3">
+                <Label className="text-sm font-medium">Foto do Profissional</Label>
+                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200">
+                  {profForm.photo_url ? (
+                    <img src={profForm.photo_url} alt="Foto" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-10 h-10 text-gray-400" />
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" className="rounded-xl"
+                    onClick={async () => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*";
+                      input.onchange = async () => {
+                        const file = input.files?.[0];
+                        if (!file) return;
+                        try {
+                          const result = await db.integrations.Core.UploadFile({ file });
+                          setProfForm(f => ({ ...f, photo_url: result.file_url }));
+                        } catch (err) {
+                          toast.error("Erro ao fazer upload: " + (err.message || err));
+                        }
+                      };
+                      input.click();
+                    }}>
+                    <Upload className="w-4 h-4 mr-1" /> Escolher Foto
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" className="rounded-xl"
+                    onClick={async () => {
+                      try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                        const video = document.createElement("video");
+                        video.srcObject = stream;
+                        video.play();
+                        await new Promise(r => setTimeout(r, 2000));
+                        const canvas = document.createElement("canvas");
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas.getContext("2d").drawImage(video, 0, 0);
+                        stream.getTracks().forEach(t => t.stop());
+                        canvas.toBlob(async (blob) => {
+                          if (!blob) return;
+                          const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+                          try {
+                            const result = await db.integrations.Core.UploadFile({ file });
+                            setProfForm(f => ({ ...f, photo_url: result.file_url }));
+                          } catch (err) {
+                            toast.error("Erro ao enviar selfie: " + (err.message || err));
+                          }
+                        }, "image/jpeg", 0.8);
+                      } catch {
+                        toast.error("Câmera não disponível");
+                      }
+                    }}>
+                    <Camera className="w-4 h-4 mr-1" /> Tirar Selfie
+                  </Button>
+                </div>
+              </div>
+
+              {/* Nome */}
+              <div>
+                <Label className="text-sm font-medium">Nome Completo <span className="text-red-500">*</span></Label>
+                <Input value={profForm.name} onChange={e => setProfForm(f => ({ ...f, name: e.target.value }))} placeholder="Nome do profissional" className="mt-1" />
+              </div>
+
+              {/* Telefone + Comissão */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Telefone</Label>
+                  <Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: e.target.value }))} placeholder="(00) 00000-0000" className="mt-1" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Comissão (%)</Label>
+                  <Input type="number" min={0} max={100} value={profForm.commission_pct || 0} onChange={e => setProfForm(f => ({ ...f, commission_pct: parseFloat(e.target.value) || 0 }))} className="mt-1" />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <Label className="text-sm font-medium">E-mail</Label>
+                <Input type="email" value={profForm.email} onChange={e => setProfForm(f => ({ ...f, email: e.target.value }))} placeholder="email@exemplo.com" disabled={!!editingProf} className="mt-1" />
+              </div>
+
+              {/* Especialidade */}
+              <div>
+                <Label className="text-sm font-medium">Especialidade</Label>
+                <Input value={profForm.specialty} onChange={e => setProfForm(f => ({ ...f, specialty: e.target.value }))} placeholder="Ex: Cortes modernos, Barbas" className="mt-1" />
+              </div>
+
+              {/* Dias de Trabalho */}
+              <div>
+                <Label className="text-sm font-medium">Dias de Trabalho</Label>
+                <div className="grid grid-cols-4 gap-3 mt-2">
+                  {WORK_DAYS.map(day => (
+                    <label key={day.key} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={(profForm.work_days || []).includes(day.key)}
+                        onCheckedChange={(checked) => {
+                          setProfForm(f => ({
+                            ...f,
+                            work_days: checked
+                              ? [...(f.work_days || []), day.key]
+                              : (f.work_days || []).filter(d => d !== day.key),
+                          }));
+                        }}
+                      />
+                      {day.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="flex items-center justify-between p-3 rounded-xl border" style={{ borderColor: "var(--border, #e5e7eb)" }}>
+                <div>
+                  <p className="text-sm font-medium">Profissional Ativo</p>
+                  <p className="text-xs text-gray-500">Disponível para agendamento</p>
+                </div>
+                <Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} />
+              </div>
+
+              {!editingProf && <p className="text-sm text-amber-600">Senha padrão: <strong>123456</strong></p>}
+
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-                <Button onClick={handleSaveProf} className="bg-branding-primary text-white">{editingProf ? "Salvar" : "Criar"}</Button>
+                <Button variant="outline" onClick={() => setShowForm(false)} className="rounded-xl">Cancelar</Button>
+                <Button onClick={handleSaveProf} className="bg-branding-primary text-white rounded-xl">{editingProf ? "Salvar" : "Criar"}</Button>
               </div>
             </div>
           </DialogContent>
@@ -285,9 +448,13 @@ export default function Profissionais() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-branding-primary/10 flex items-center justify-center text-branding-primary font-bold">
-            {(selectedProf.full_name || "?")[0].toUpperCase()}
-          </div>
+          {selectedProf.photo_url ? (
+            <img src={selectedProf.photo_url} alt="" className="w-10 h-10 rounded-xl object-cover" />
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-branding-primary/10 flex items-center justify-center text-branding-primary font-bold">
+              {(selectedProf.full_name || "?")[0].toUpperCase()}
+            </div>
+          )}
           <div>
             <h1 className="text-xl font-bold" style={{ color: theme.cardText }}>{selectedProf.full_name}</h1>
             <p className="text-sm" style={{ color: theme.mutedText }}>{selectedProf.email}</p>
@@ -307,11 +474,16 @@ export default function Profissionais() {
       {activeTab === "info" && (
         <div className="rounded-xl border p-6 space-y-4" style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
           <h2 className="text-lg font-semibold" style={{ color: theme.cardText }}>Dados do Profissional</h2>
-          {[["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
+          {selectedProf.photo_url && (
+            <div className="flex justify-center mb-4">
+              <img src={selectedProf.photo_url} alt={selectedProf.full_name} className="w-20 h-20 rounded-full object-cover border-2 border-gray-200" />
+            </div>
+          )}
+          {[["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Especialidade", selectedProf.specialty || "-"], ["Comissão", `${selectedProf.commission_pct || 0}%`], ["Dias", (selectedProf.work_days || []).map(d => WORK_DAYS.find(w => w.key === d)?.label).filter(Boolean).join(", ") || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
             <div key={l}><p className="text-xs text-gray-500">{l}</p><p className="text-sm font-medium">{v}</p></div>
           ))}
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" onClick={() => { setEditingProf(selectedProf); setProfForm({ name: selectedProf.full_name || "", email: selectedProf.email || "", phone: selectedProf.phone || "", active: selectedProf.active !== false }); setShowForm(true); }}>
+            <Button variant="outline" onClick={() => { setEditingProf(selectedProf); setProfForm({ name: selectedProf.full_name || "", email: selectedProf.email || "", phone: selectedProf.phone || "", active: selectedProf.active !== false, commission_pct: selectedProf.commission_pct || 0, specialty: selectedProf.specialty || "", photo_url: selectedProf.photo_url || "", work_days: selectedProf.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"] }); setShowForm(true); }}>
               <Edit className="w-4 h-4 mr-2" /> Editar
             </Button>
             <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setDeletingProf(selectedProf)}>
@@ -402,16 +574,136 @@ export default function Profissionais() {
       )}
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="sm:max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Editar Profissional</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>Nome *</Label><Input value={profForm.name} onChange={e => setProfForm(f => ({ ...f, name: e.target.value }))} /></div>
-            <div><Label>E-mail *</Label><Input type="email" value={profForm.email} disabled /></div>
-            <div><Label>Telefone</Label><Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: e.target.value }))} /></div>
-            <div className="flex items-center gap-2"><Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} /><Label className="text-sm">Ativo</Label></div>
+          <div className="space-y-5">
+            {/* Photo */}
+            <div className="flex flex-col items-center gap-3">
+              <Label className="text-sm font-medium">Foto do Profissional</Label>
+              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200">
+                {profForm.photo_url ? (
+                  <img src={profForm.photo_url} alt="Foto" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-10 h-10 text-gray-400" />
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" size="sm" className="rounded-xl"
+                  onClick={async () => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = "image/*";
+                    input.onchange = async () => {
+                      const file = input.files?.[0];
+                      if (!file) return;
+                      try {
+                        const result = await db.integrations.Core.UploadFile({ file });
+                        setProfForm(f => ({ ...f, photo_url: result.file_url }));
+                      } catch (err) {
+                        toast.error("Erro ao fazer upload: " + (err.message || err));
+                      }
+                    };
+                    input.click();
+                  }}>
+                  <Upload className="w-4 h-4 mr-1" /> Escolher Foto
+                </Button>
+                <Button type="button" variant="outline" size="sm" className="rounded-xl"
+                  onClick={async () => {
+                    try {
+                      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                      const video = document.createElement("video");
+                      video.srcObject = stream;
+                      video.play();
+                      await new Promise(r => setTimeout(r, 2000));
+                      const canvas = document.createElement("canvas");
+                      canvas.width = video.videoWidth;
+                      canvas.height = video.videoHeight;
+                      canvas.getContext("2d").drawImage(video, 0, 0);
+                      stream.getTracks().forEach(t => t.stop());
+                      canvas.toBlob(async (blob) => {
+                        if (!blob) return;
+                        const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+                        try {
+                          const result = await db.integrations.Core.UploadFile({ file });
+                          setProfForm(f => ({ ...f, photo_url: result.file_url }));
+                        } catch (err) {
+                          toast.error("Erro ao enviar selfie: " + (err.message || err));
+                        }
+                      }, "image/jpeg", 0.8);
+                    } catch {
+                      toast.error("Câmera não disponível");
+                    }
+                  }}>
+                  <Camera className="w-4 h-4 mr-1" /> Tirar Selfie
+                </Button>
+              </div>
+            </div>
+
+            {/* Nome */}
+            <div>
+              <Label className="text-sm font-medium">Nome Completo <span className="text-red-500">*</span></Label>
+              <Input value={profForm.name} onChange={e => setProfForm(f => ({ ...f, name: e.target.value }))} placeholder="Nome do profissional" className="mt-1" />
+            </div>
+
+            {/* Telefone + Comissão */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Telefone</Label>
+                <Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: e.target.value }))} placeholder="(00) 00000-0000" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Comissão (%)</Label>
+                <Input type="number" min={0} max={100} value={profForm.commission_pct || 0} onChange={e => setProfForm(f => ({ ...f, commission_pct: parseFloat(e.target.value) || 0 }))} className="mt-1" />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <Label className="text-sm font-medium">E-mail</Label>
+              <Input type="email" value={profForm.email} disabled className="mt-1" />
+            </div>
+
+            {/* Especialidade */}
+            <div>
+              <Label className="text-sm font-medium">Especialidade</Label>
+              <Input value={profForm.specialty} onChange={e => setProfForm(f => ({ ...f, specialty: e.target.value }))} placeholder="Ex: Cortes modernos, Barbas" className="mt-1" />
+            </div>
+
+            {/* Dias de Trabalho */}
+            <div>
+              <Label className="text-sm font-medium">Dias de Trabalho</Label>
+              <div className="grid grid-cols-4 gap-3 mt-2">
+                {WORK_DAYS.map(day => (
+                  <label key={day.key} className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={(profForm.work_days || []).includes(day.key)}
+                      onCheckedChange={(checked) => {
+                        setProfForm(f => ({
+                          ...f,
+                          work_days: checked
+                            ? [...(f.work_days || []), day.key]
+                            : (f.work_days || []).filter(d => d !== day.key),
+                        }));
+                      }}
+                    />
+                    {day.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Status */}
+            <div className="flex items-center justify-between p-3 rounded-xl border" style={{ borderColor: "var(--border, #e5e7eb)" }}>
+              <div>
+                <p className="text-sm font-medium">Profissional Ativo</p>
+                <p className="text-xs text-gray-500">Disponível para agendamento</p>
+              </div>
+              <Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} />
+            </div>
+
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-              <Button onClick={handleSaveProf} className="bg-branding-primary text-white">Salvar</Button>
+              <Button variant="outline" onClick={() => setShowForm(false)} className="rounded-xl">Cancelar</Button>
+              <Button onClick={handleSaveProf} className="bg-branding-primary text-white rounded-xl">Salvar</Button>
             </div>
           </div>
         </DialogContent>
