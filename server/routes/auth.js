@@ -161,10 +161,27 @@ router.post("/admin-delete-user", async (req, res) => {
       }
     }
 
-    // Deleta das tabelas públicas primeiro
-    await req.supabase.from("professional_services").delete().eq("professional_id", user_id);
-    await req.supabase.from("user_companies").delete().eq("user_id", user_id);
-    await req.supabase.from("users").delete().eq("id", user_id);
+    // Deleta das tabelas públicas primeiro (ordem importa por FK)
+    const steps = [
+      { table: "professional_services", col: "professional_id" },
+      { table: "appointments", col: "professional_id" },
+      { table: "user_companies", col: "user_id" },
+    ];
+
+    for (const { table, col } of steps) {
+      try {
+        const { error: delErr } = await req.supabase.from(table).delete().eq(col, user_id);
+        if (delErr) console.warn(`delete ${table}:`, delErr.message);
+      } catch (e) {
+        console.warn(`delete ${table} exception:`, e.message);
+      }
+    }
+
+    const { error: userDelErr } = await req.supabase.from("users").delete().eq("id", user_id);
+    if (userDelErr) {
+      console.error("delete users error:", userDelErr);
+      return res.status(500).json({ error: "Erro ao remover do banco: " + userDelErr.message });
+    }
 
     // Deleta do auth.users via admin API (service_role bypasses)
     try {

@@ -96,6 +96,12 @@ export default function Profissionais() {
     enabled: ready,
   });
 
+  const { data: allCompanies = [] } = useQuery({
+    queryKey: ["companies"],
+    queryFn: () => db.entities.Company.list(),
+    enabled: ready,
+  });
+
   const { data: allOverrides = [] } = useQuery({
     queryKey: ["company_service_overrides", effectiveCompanyId],
     queryFn: async () => {
@@ -256,10 +262,9 @@ export default function Profissionais() {
         },
         body: JSON.stringify({ user_id: id }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Erro ao excluir" }));
-        throw new Error(err.error || `HTTP ${res.status}`);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
     },
     onSuccess: () => { queryClient.invalidateQueries(["users"]); queryClient.invalidateQueries(["professional_services"]); toast.success("Removido!"); setDeletingProf(null); setSelectedProf(null); },
     onError: (err) => toast.error("Erro: " + err.message),
@@ -367,6 +372,9 @@ export default function Profissionais() {
                       <div>
                         <h3 className="font-semibold text-gray-900">{prof.full_name || "Sem nome"}</h3>
                         <p className="text-xs text-gray-500">{prof.email}</p>
+                        {prof.company_id && (
+                          <p className="text-xs text-gray-400">{allCompanies.find(c => c.id === prof.company_id)?.name || ""}</p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -614,7 +622,7 @@ export default function Profissionais() {
               <img src={selectedProf.photo_url} alt={selectedProf.full_name} className="w-20 h-20 rounded-full object-cover border-2 border-gray-200" />
             </div>
           )}
-          {[["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Serviços", allProServ.filter(ps => ps.professional_id === selectedProf.id).map(ps => allServices.find(s => s.id === ps.service_id)?.name).filter(Boolean).join(", ") || "-"], ["Comissão", `${selectedProf.commission_pct || 0}%`], ["Dias", (selectedProf.work_days || []).map(d => WORK_DAYS.find(w => w.key === d)?.label).filter(Boolean).join(", ") || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
+          {[["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Empresa", allCompanies.find(c => c.id === selectedProf.company_id)?.name || "-"], ["Serviços", allProServ.filter(ps => ps.professional_id === selectedProf.id).map(ps => allServices.find(s => s.id === ps.service_id)?.name).filter(Boolean).join(", ") || "-"], ["Comissão", `${selectedProf.commission_pct || 0}%`], ["Dias", (selectedProf.work_days || []).map(d => WORK_DAYS.find(w => w.key === d)?.label).filter(Boolean).join(", ") || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
             <div key={l}><p className="text-xs text-gray-500">{l}</p><p className="text-sm font-medium">{v}</p></div>
           ))}
           <div className="flex gap-2 pt-2">
