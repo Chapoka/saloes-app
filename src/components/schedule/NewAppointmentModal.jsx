@@ -29,7 +29,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
     start_time: "08:00",
     duration_mins: 60,
-    modality: "corte",
+    service_category: "corte",
     original_appointment_id: "",
   });
 
@@ -45,26 +45,26 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     }
   }, [selectedTime]);
 
-  // Auto-fill modality/duration from customer's plan
+  // Auto-fill service_category/duration from customer's plan
   const handleCustomerChange = (customerId) => {
     const customer = customers.find(s => s.id === customerId);
     if (!customer) return setFormData(prev => ({ ...prev, customer_id: customerId, original_appointment_id: "" }));
     
-    let modality = formData.modality;
+    let service_category = formData.service_category;
     let duration_mins = formData.duration_mins;
     
     if (customer.custom_plan) {
-      modality = customer.custom_plan.modality || modality;
+      service_category = customer.custom_plan.modality || service_category;
       duration_mins = customer.custom_plan.duration_mins || duration_mins;
     } else if (customer.plan_id) {
       const plan = plans.find(p => p.id === customer.plan_id);
       if (plan) {
-        modality = plan.modality || modality;
+        service_category = plan.modality || service_category;
         duration_mins = plan.duration_mins || duration_mins;
       }
     }
     
-    setFormData(prev => ({ ...prev, customer_id: customerId, modality, duration_mins, original_appointment_id: "" }));
+    setFormData(prev => ({ ...prev, customer_id: customerId, service_category, duration_mins, original_appointment_id: "" }));
     // Auto-select same-guardian customers (merge with any manual selections)
     const guardianIds = customer.guardian_id
       ? customers.filter(s => s.id !== customerId && s.guardian_id === customer.guardian_id).map(s => s.id)
@@ -113,9 +113,19 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     e.preventDefault();
     const [hours, minutes] = formData.start_time.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes + Number(formData.duration_mins);
-    const endHours = Math.floor(totalMinutes / 60);
+    const endHours = Math.floor(totalMinutes / 60) % 24;
     const endMins = totalMinutes % 60;
     const newEndTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+
+    // Credit validation for plan appointments
+    if (appointmentType === "plan") {
+      for (const s of allSelectedCustomers) {
+        if ((s.current_credits || 0) <= 0) {
+          toast.error(`${s.name} não tem créditos disponíveis para agendamento do plano!`);
+          return;
+        }
+      }
+    }
 
     // Check for time conflicts for ALL selected customers
     for (const s of allSelectedCustomers) {
@@ -158,7 +168,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
   const handleClose = () => {
     setAppointmentType("plan");
     setExtraCustomerIds([]);
-    setFormData({ customer_id: "", date: "", start_time: selectedTime || "08:00", duration_mins: 60, modality: "corte", original_appointment_id: "" });
+    setFormData({ customer_id: "", date: "", start_time: selectedTime || "08:00", duration_mins: 60, service_category: "corte", original_appointment_id: "" });
     onClose();
   };
 
@@ -349,7 +359,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                   <SelectContent>
                     {absentAppointments.map(l => (
                       <SelectItem key={l.id} value={l.id}>
-                        {l.date} {l.start_time} — {l.modality === "corte" ? "Corte" : "Barba"}
+                        {l.date} {l.start_time} — {(l.service_category || l.modality) === "corte" ? "Corte" : "Barba"}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -414,7 +424,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-gray-700">Tipo de Serviço</Label>
-              <Select value={formData.modality} onValueChange={(v) => handleChange("modality", v)}>
+              <Select value={formData.service_category} onValueChange={(v) => handleChange("service_category", v)}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>

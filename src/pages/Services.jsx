@@ -210,6 +210,7 @@ export default function Services() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["service_combos"]);
+      queryClient.invalidateQueries(["service_combo_items"]);
       toast.success("Combo criado!");
       setShowComboForm(false);
       setComboForm(EMPTY_COMBO);
@@ -217,8 +218,51 @@ export default function Services() {
     onError: (err) => toast.error("Erro ao criar combo: " + err.message),
   });
 
+  const updateCombo = useMutation({
+    mutationFn: async ({ id, data }) => {
+      const { selected_services, ...comboData } = data;
+      await db.entities.ServiceCombo.update(id, comboData);
+      // Replace combo items
+      const existingItems = allComboItems.filter(ci => ci.combo_id === id);
+      for (const item of existingItems) {
+        await db.entities.ServiceComboItem.delete(item.id);
+      }
+      if (selected_services?.length) {
+        for (const svcId of selected_services) {
+          await db.entities.ServiceComboItem.create({
+            combo_id: id,
+            service_id: svcId,
+            quantity: 1,
+          });
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["service_combos"]);
+      queryClient.invalidateQueries(["service_combo_items"]);
+      toast.success("Combo atualizado!");
+      setShowComboForm(false);
+      setEditingCombo(null);
+      setComboForm(EMPTY_COMBO);
+    },
+    onError: (err) => toast.error("Erro ao atualizar combo: " + err.message),
+  });
+
+  const { data: allComboItems = [] } = useQuery({
+    queryKey: ["service_combo_items"],
+    queryFn: () => db.entities.ServiceComboItem.list(),
+    enabled: ready,
+  });
+
   const deleteCombo = useMutation({
-    mutationFn: (id) => db.entities.ServiceCombo.delete(id),
+    mutationFn: async (id) => {
+      // Delete combo items first
+      const items = allComboItems.filter(ci => ci.combo_id === id);
+      for (const item of items) {
+        await db.entities.ServiceComboItem.delete(item.id);
+      }
+      return db.entities.ServiceCombo.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["service_combos"]);
       toast.success("Combo removido!");
@@ -248,7 +292,23 @@ export default function Services() {
     if (!comboForm.name) return toast.error("Nome do combo é obrigatório");
     if (comboForm.selected_services.length < 2) return toast.error("Selecione pelo menos 2 serviços");
     if (comboForm.combo_price <= 0) return toast.error("Preço do combo deve ser maior que 0");
-    createCombo.mutate(comboForm);
+    if (editingCombo) {
+      updateCombo.mutate({ id: editingCombo.id, data: comboForm });
+    } else {
+      createCombo.mutate(comboForm);
+    }
+  };
+
+  const openEditCombo = (combo) => {
+    setEditingCombo(combo);
+    const items = allComboItems.filter(ci => ci.combo_id === combo.id).map(ci => ci.service_id);
+    setComboForm({
+      name: combo.name || "",
+      combo_price: combo.combo_price || 0,
+      description: combo.description || "",
+      selected_services: items,
+    });
+    setShowComboForm(true);
   };
 
   const openEditService = (svc) => {
@@ -565,6 +625,9 @@ Novo Item
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openEditCombo(combo)}>
+                            <Edit className="w-4 h-4 mr-2" /> Editar
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setDeletingCombo(combo)} className="text-red-600">
                             <Trash2 className="w-4 h-4 mr-2" /> Excluir
                           </DropdownMenuItem>
@@ -735,7 +798,7 @@ Novo Item
       <Dialog open={showComboForm} onOpenChange={setShowComboForm}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Novo Combo</DialogTitle>
+            <DialogTitle>{editingCombo ? "Editar Combo" : "Novo Combo"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -797,7 +860,7 @@ Novo Item
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setShowComboForm(false)}>Cancelar</Button>
               <Button onClick={handleSaveCombo} className="bg-purple-600 text-white hover:bg-purple-700">
-                Criar Combo
+                {editingCombo ? "Salvar" : "Criar Combo"}
               </Button>
             </div>
           </div>

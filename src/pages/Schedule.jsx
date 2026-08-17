@@ -77,6 +77,26 @@ export default function Schedule() {
     queryFn: () => db.entities.Plan.list(),
   });
 
+  const { data: allServices = [] } = useQuery({
+    queryKey: ["services"],
+    queryFn: () => db.entities.Service.list(),
+  });
+
+  const { data: allStylistLevels = [] } = useQuery({
+    queryKey: ["stylist_levels"],
+    queryFn: () => db.entities.StylistLevel.list(),
+  });
+
+  const { data: allProServ = [] } = useQuery({
+    queryKey: ["professional_services"],
+    queryFn: () => db.entities.ProfessionalService.list(),
+  });
+
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => db.entities.User.list(),
+  });
+
   const { data: punchCards = [] } = useQuery({
     queryKey: ["punch_cards"],
     queryFn: () => db.entities.PunchCard.list(),
@@ -200,12 +220,14 @@ export default function Schedule() {
 
     if (newStatus === "present" && !appointment.service_performed) {
       const customer = customers.find(s => s.id === appointment.customer_id);
+      const svcCategory = appointment.service_category || appointment.modality;
       
-      // Check for active punch card first
+      // Check for active punch card first (matching service type)
       const activePunchCard = punchCards.find(pc =>
         pc.customer_id === appointment.customer_id &&
         pc.active !== false &&
         pc.used_services < pc.total_services &&
+        (!pc.service_id || !svcCategory || pc.service_category === svcCategory || pc.service_type === svcCategory) &&
         (!pc.expires_at || new Date(pc.expires_at) > new Date())
       );
 
@@ -228,6 +250,70 @@ export default function Schedule() {
       } else {
         toast.warning("Cliente sem créditos ou punch card disponível!");
       }
+
+      // Calculate pricing: stylist level multiplier + commission
+      const professional = appointment.professional_id
+        ? allUsers.find(u => u.id === appointment.professional_id)
+        : null;
+      const stylistLevel = professional?.stylist_level_id
+        ? allStylistLevels.find(l => l.id === professional.stylist_level_id)
+        : null;
+      const multiplier = Number(stylistLevel?.multiplier) || 1;
+
+      const service = svcCategory
+        ? allServices.find(s => s.category?.toLowerCase() === svcCategory.toLowerCase() || s.name?.toLowerCase()?.includes(svcCategory.toLowerCase()))
+        : null;
+      const basePrice = Number(service?.price) || 0;
+      const finalPrice = basePrice * multiplier;
+
+      // Get commission
+      const proServ = professional
+        ? allProServ.find(ps => ps.professional_id === professional.id && ps.service_id === service?.id)
+        : null;
+      const commissionPct = Number(proServ?.commission_pct) || Number(service?.comissao) || 0;
+      const commissionValue = finalPrice * (commissionPct / 100);
+
+      updateData.final_price = finalPrice;
+      updateData.commission_value = commissionValue;
+      updateData.stylist_level_id = professional?.stylist_level_id || null;
+    } else if (newStatus === "absent" && appointment.service_performed) {
+      // Restore credits/punch card if reversing from present
+      const customer = customers.find(s => s.id === appointment.customer_id);
+      if (appointment.punch_card_id) {
+        const pc = punchCards.find(p => p.id === appointment.punch_card_id);
+        if (pc && pc.used_services > 0) {
+          await updatePunchCardMutation.mutateAsync({
+            id: pc.id,
+            used_services: pc.used_services - 1,
+          });
+        }
+      } else if (customer) {
+        await updateCustomerCreditsMutation.mutateAsync({
+          id: customer.id,
+          credits: (customer.current_credits || 0) + 1,
+        });
+      }
+      updateData.service_performed = false;
+      toast.info("Falta registrada — crédito restaurado");
+    } else if (newStatus === "cancelled" && appointment.service_performed) {
+      // Restore credits on cancellation too
+      const customer = customers.find(s => s.id === appointment.customer_id);
+      if (appointment.punch_card_id) {
+        const pc = punchCards.find(p => p.id === appointment.punch_card_id);
+        if (pc && pc.used_services > 0) {
+          await updatePunchCardMutation.mutateAsync({
+            id: pc.id,
+            used_services: pc.used_services - 1,
+          });
+        }
+      } else if (customer) {
+        await updateCustomerCreditsMutation.mutateAsync({
+          id: customer.id,
+          credits: (customer.current_credits || 0) + 1,
+        });
+      }
+      updateData.service_performed = false;
+      toast.info("Cancelamento registrado — crédito restaurado");
     } else if (newStatus === "absent") {
       toast.info("Falta registrada");
     }
@@ -282,7 +368,7 @@ export default function Schedule() {
         start_time: appointment.start_time,
         end_time: appointment.end_time,
         duration_mins: appointment.duration_mins,
-        modality: appointment.modality,
+        service_category: appointment.service_category || appointment.modality,
         status: "scheduled",
         service_performed: false,
         appointment_type: "plan",
@@ -318,7 +404,7 @@ export default function Schedule() {
       start_time: newTime,
       end_time: `${endH}:${endM}`,
       duration_mins: appointment.duration_mins,
-      modality: appointment.modality,
+      service_category: appointment.service_category || appointment.modality,
       status: "scheduled",
       notes: `Reagendamento do serviço de ${appointment.date}`,
       company_id: appointment.company_id || companyId || undefined,

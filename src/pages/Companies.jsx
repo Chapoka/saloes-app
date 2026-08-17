@@ -33,6 +33,15 @@ import {
 import { toast } from "sonner";
 import CompanyFormModal from "@/components/companies/CompanyFormModal";
 
+const ESTABELECIMENTO_LABELS = {
+  barbearia: "Barbearia",
+  clinica_estetica: "Clínica / Estética",
+  salao_beleza: "Salão de Beleza",
+  studio_manicure: "Studio / Manicure",
+};
+
+const getEstabelecimentoLabel = (tipo) => ESTABELECIMENTO_LABELS[tipo] || tipo || "";
+
 export default function Companies() {
   const queryClient = useQueryClient();
   const [currentUser, setCurrentUser] = useState(null);
@@ -72,13 +81,23 @@ export default function Companies() {
 
   const createMutation = useMutation({
     mutationFn: (data) => db.entities.Company.create(data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["companies"] }); toast.success("Salão criado!"); closeModal(); },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      if (result?.id) queryClient.invalidateQueries({ queryKey: ["userCompany", result.id] });
+      toast.success("Salão criado!");
+      closeModal();
+    },
     onError: (err) => toast.error("Erro ao criar salão: " + (err?.message || "verifique os dados")),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => db.entities.Company.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["companies"] }); toast.success("Salão atualizado!"); closeModal(); },
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      queryClient.invalidateQueries({ queryKey: ["userCompany", variables.id] });
+      toast.success("Salão atualizado!");
+      closeModal();
+    },
     onError: (err) => toast.error("Erro ao atualizar salão: " + (err?.message || "verifique os dados")),
   });
 
@@ -131,6 +150,7 @@ export default function Companies() {
     // Required fields validation
     const requiredFields = [
       { key: "name", label: "Nome Fantasia" },
+      { key: "estabelecimento_tipo", label: "Tipo de Estabelecimento" },
     ];
     for (const field of requiredFields) {
       if (!form[field.key] || String(form[field.key]).trim() === "") {
@@ -138,11 +158,23 @@ export default function Companies() {
       }
     }
     // Sanitize data: convert formatted strings to proper types
+    const COMPANY_COLUMNS = [
+      "name", "cnpj", "tipo", "estabelecimento_tipo", "razao_social", "situacao_cadastral",
+      "data_abertura", "capital_social", "porte", "cnae_principal", "natureza_juridica",
+      "cep", "uf", "cidade", "bairro", "logradouro", "numero", "complemento",
+      "phone", "email", "owner_email", "owner_name", "owner_phone", "owner_cpf",
+      "active", "has_branch",
+      "branding_app_name", "branding_logo_url", "branding_primary_color", "branding_secondary_color",
+      "branding_accent_color", "branding_background_color", "branding_palette",
+    ];
     const sanitize = (raw) => {
-      const out = { ...raw };
+      const out = {};
+      // Only include known columns
+      for (const key of COMPANY_COLUMNS) {
+        if (raw[key] !== undefined && raw[key] !== null) out[key] = raw[key];
+      }
       // Clean formatted documents to digits only
       if (out.cnpj) out.cnpj = String(out.cnpj).replace(/\D/g, "");
-      if (out.owner_cpf) out.owner_cpf = String(out.owner_cpf).replace(/\D/g, "");
       if (out.cep) out.cep = String(out.cep).replace(/\D/g, "");
       if (out.phone) out.phone = String(out.phone).replace(/\D/g, "");
       if (out.owner_phone) out.owner_phone = String(out.owner_phone).replace(/\D/g, "");
@@ -154,20 +186,12 @@ export default function Companies() {
         out.capital_social = null;
       }
       // Empty strings -> undefined (avoid constraint errors)
-      if (out.data_abertura === "") out.data_abertura = undefined;
-      if (out.email === "") out.email = undefined;
-      if (out.owner_email === "") out.owner_email = undefined;
-      if (out.owner_cpf === "") out.owner_cpf = undefined;
-      if (out.tipo === "") out.tipo = undefined;
-      if (out.estabelecimento_tipo === "") out.estabelecimento_tipo = undefined;
-      if (out.branding_primary_color === "") out.branding_primary_color = undefined;
-      if (out.branding_secondary_color === "") out.branding_secondary_color = undefined;
-      if (out.branding_accent_color === "") out.branding_accent_color = undefined;
-      if (out.branding_background_color === "") out.branding_background_color = undefined;
-      if (out.branding_palette === "") out.branding_palette = undefined;
-      // Remove undefined keys so Supabase doesn't try to set them
-      Object.keys(out).forEach(key => {
-        if (out[key] === undefined) delete out[key];
+      ["data_abertura", "email", "owner_email", "tipo", "estabelecimento_tipo",
+       "branding_primary_color", "branding_secondary_color", "branding_accent_color",
+       "branding_background_color", "branding_palette",
+       "branding_app_name", "branding_logo_url",
+      ].forEach(key => {
+        if (out[key] === "") out[key] = null;
       });
       return out;
     };
@@ -287,16 +311,16 @@ export default function Companies() {
                       <Badge
                         className="flex items-center gap-1"
                         style={{
-                          background: `${company.branding_primary_color || (company.estabelecimento_tipo === "barbearia" ? "#f5c518" : "#ec4899")}20`,
-                          color: company.branding_primary_color || (company.estabelecimento_tipo === "barbearia" ? "#1a1a1a" : "#9d174d"),
-                          borderColor: company.branding_primary_color || (company.estabelecimento_tipo === "barbearia" ? "#f5c518" : "#ec4899"),
+                          background: `${company.branding_primary_color || "#6366f1"}20`,
+                          color: company.branding_primary_color || "#4f46e5",
+                          borderColor: company.branding_primary_color || "#6366f1",
                         }}
                       >
                         <span
                           className="w-2 h-2 rounded-full"
-                          style={{ background: company.branding_primary_color || (company.estabelecimento_tipo === "barbearia" ? "#f5c518" : "#ec4899") }}
+                          style={{ background: company.branding_primary_color || "#6366f1" }}
                         />
-                        {company.estabelecimento_tipo === "barbearia" ? "Barbearia" : "Salão"}
+                        {getEstabelecimentoLabel(company.estabelecimento_tipo)}
                       </Badge>
                     )}
                     {company.has_branch && (
@@ -398,16 +422,16 @@ export default function Companies() {
                           <Badge
                             className="flex items-center gap-1"
                             style={{
-                              background: `${company.branding_primary_color || (company.estabelecimento_tipo === "barbearia" ? "#f5c518" : "#ec4899")}20`,
-                              color: company.branding_primary_color || (company.estabelecimento_tipo === "barbearia" ? "#1a1a1a" : "#9d174d"),
-                              borderColor: company.branding_primary_color || (company.estabelecimento_tipo === "barbearia" ? "#f5c518" : "#ec4899"),
+                              background: `${company.branding_primary_color || "#6366f1"}20`,
+                              color: company.branding_primary_color || "#4f46e5",
+                              borderColor: company.branding_primary_color || "#6366f1",
                             }}
                           >
                             <span
                               className="w-2 h-2 rounded-full"
-                              style={{ background: company.branding_primary_color || (company.estabelecimento_tipo === "barbearia" ? "#f5c518" : "#ec4899") }}
+                              style={{ background: company.branding_primary_color || "#6366f1" }}
                             />
-                            {company.estabelecimento_tipo === "barbearia" ? "Barbearia" : "Salão"}
+                            {getEstabelecimentoLabel(company.estabelecimento_tipo)}
                           </Badge>
                         ) : "—"}
                       </td>

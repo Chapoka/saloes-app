@@ -9,7 +9,7 @@ import { useMemo } from "react";
  *   c) Caso contrário → preço integral do serviço
  *
  * @param {Object} params
- * @param {Object} params.service - O serviço agendado { id, nome, preco, ... }
+ * @param {Object} params.service - O serviço agendado { id, name, price, ... }
  * @param {Array}  params.customerPlans - CustomerPlan[] do cliente
  * @param {Array}  params.customerCombos - CustomerCombo[] do cliente
  * @param {Array}  params.plans - Plan[] (catálogo de planos)
@@ -28,7 +28,7 @@ export function calculateAppointmentPrice({
     return { finalPrice: 0, discountMethod: null, tag: null };
   }
 
-  const servicePrice = Number(service.preco) || 0;
+  const servicePrice = Number(service.price) || 0;
 
   // a) Verificar plano ativo com cota restante
   const activePlan = customerPlans.find(
@@ -40,7 +40,7 @@ export function calculateAppointmentPrice({
       finalPrice: 0,
       discountMethod: "plan",
       tag: "Cobrado do Plano",
-      planName: plan?.nome || "Plano",
+      planName: plan?.name || "Plano",
       cotaRestante: activePlan.cota_restante,
     };
   }
@@ -55,7 +55,7 @@ export function calculateAppointmentPrice({
       finalPrice: 0,
       discountMethod: "combo",
       tag: "Cobrado do Combo",
-      comboName: combo?.nome || "Combo",
+      comboName: combo?.name || "Combo",
       servicosRestantes: activeCombo.servicos_restantes,
     };
   }

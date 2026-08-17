@@ -104,13 +104,17 @@ export default function Profissionais() {
 
   const createProf = useMutation({
     mutationFn: async (data) => {
-      const result = await db.auth.inviteUser(data.email, "profissional", data.name);
+      const result = await db.users.inviteUser(data.email, "profissional", data.name);
       if (result?.user_id) {
-        await supabase.from("users").update({
+        const updatePayload = {
           phone: data.phone,
-          company_id: effectiveCompanyId,
           must_change_password: true,
-        }).eq("id", result.user_id);
+        };
+        if (effectiveCompanyId) {
+          updatePayload.company_id = effectiveCompanyId;
+          updatePayload.company_ids = [effectiveCompanyId];
+        }
+        await supabase.from("users").update(updatePayload).eq("id", result.user_id);
       }
       return result;
     },
@@ -135,8 +139,13 @@ export default function Profissionais() {
   const deleteProf = useMutation({
     mutationFn: async (id) => {
       await supabase.from("professional_services").delete().eq("professional_id", id);
-      const { error } = await supabase.from("users").delete().eq("id", id);
-      if (error) throw error;
+      // Delete from auth.users via RPC
+      try {
+        await supabase.rpc("delete_user_direct", { p_user_id: id });
+      } catch {
+        // Fallback: delete from public users only
+        await supabase.from("users").delete().eq("id", id);
+      }
     },
     onSuccess: () => { queryClient.invalidateQueries(["users"]); queryClient.invalidateQueries(["professional_services"]); toast.success("Removido!"); setDeletingProf(null); setSelectedProf(null); },
     onError: (err) => toast.error("Erro: " + err.message),

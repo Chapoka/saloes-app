@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, Loader2, Building2, MapPin, Phone, User, MessageCircle, PaintBucket, Image, Palette } from "lucide-react";
 import { toast } from "sonner";
-import { PALETTE_LIST } from "@/lib/colorPalettes";
+import { PALETTE_LIST, COLOR_PALETTES } from "@/lib/colorPalettes";
 
 const emptyForm = {
   name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
@@ -17,8 +17,10 @@ const emptyForm = {
 };
 
 const ESTABLISHMENT_THEMES = {
-  barbearia: { primary: "#f5c518", secondary: "#1a1a1a", label: "Barbearia" },
-  salao_beleza: { primary: "#ec4899", secondary: "#f9a8d4", label: "Salão" },
+  barbearia: { primary: COLOR_PALETTES.barbearia.colors.primary, secondary: COLOR_PALETTES.barbearia.colors.secondary, label: "Barbearia" },
+  clinica_estetica: { primary: COLOR_PALETTES.clinica.colors.primary, secondary: COLOR_PALETTES.clinica.colors.secondary, label: "Clínica / Estética" },
+  salao_beleza: { primary: COLOR_PALETTES.salao.colors.primary, secondary: COLOR_PALETTES.salao.colors.secondary, label: "Salão de Beleza" },
+  studio_manicure: { primary: COLOR_PALETTES.studio.colors.primary, secondary: COLOR_PALETTES.studio.colors.secondary, label: "Studio / Manicure" },
 };
 
 function formatPhone(value) {
@@ -225,39 +227,29 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
               </select>
             </div>
             <div className="space-y-1 col-span-2">
-              <Label>Tipo de Estabelecimento</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <Label>Tipo de Estabelecimento *</Label>
+              <select
+                value={form.estabelecimento_tipo}
+                onChange={(e) => {
+                  const key = e.target.value;
+                  const theme = ESTABLISHMENT_THEMES[key];
+                  setForm((prev) => ({
+                    ...prev,
+                    estabelecimento_tipo: key,
+                    branding_primary_color: theme?.primary || prev.branding_primary_color,
+                    branding_secondary_color: theme?.secondary || prev.branding_secondary_color,
+                  }));
+                }}
+                className="rounded-xl border border-input bg-transparent px-3 h-9 text-sm w-full"
+              >
+                <option value="">Selecione o tipo</option>
                 {Object.entries(ESTABLISHMENT_THEMES).map(([key, theme]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setForm((prev) => ({
-                      ...prev,
-                      estabelecimento_tipo: key,
-                      branding_primary_color: theme.primary,
-                      branding_secondary_color: theme.secondary,
-                    }))}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
-                      form.estabelecimento_tipo === key
-                        ? "text-gray-900"
-                        : "border-gray-200 text-gray-500 hover:border-gray-300"
-                    }`}
-                    style={form.estabelecimento_tipo === key ? {
-                      borderColor: theme.primary,
-                      background: `${theme.primary}15`,
-                    } : {}}
-                  >
-                    <span className="flex gap-0.5">
-                      <span className="w-4 h-4 rounded-full border border-gray-200" style={{ background: theme.primary }} />
-                      <span className="w-4 h-4 rounded-full border border-gray-200 -ml-1.5" style={{ background: theme.secondary }} />
-                    </span>
-                    {theme.label}
-                  </button>
+                  <option key={key} value={key}>{theme.label}</option>
                 ))}
-              </div>
+              </select>
               {form.estabelecimento_tipo && (
                 <p className="text-xs text-gray-500">
-                  Cores aplicadas automaticamente: primária <strong style={{ color: form.branding_primary_color }}>{form.branding_primary_color}</strong> e secundária <strong style={{ color: form.branding_secondary_color }}>{form.branding_secondary_color}</strong>
+                  Cores aplicadas: primária <strong style={{ color: form.branding_primary_color }}>{form.branding_primary_color}</strong> e secundária <strong style={{ color: form.branding_secondary_color }}>{form.branding_secondary_color}</strong>
                 </p>
               )}
             </div>

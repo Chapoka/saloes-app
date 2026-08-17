@@ -259,6 +259,21 @@
 
 import { supabase } from "@/lib/supabaseClient";
 
+const _tableColumnsCache = {};
+function cacheColumnsFromRow(table, row) {
+  if (row && typeof row === "object" && !Array.isArray(row)) {
+    _tableColumnsCache[table] = Object.keys(row);
+  }
+}
+function filterKnownColumns(obj, knownColumns) {
+  if (!knownColumns || !obj || typeof obj !== "object") return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (knownColumns.includes(k)) out[k] = v;
+  }
+  return out;
+}
+
 const ENTITY_TABLE_MAP = {
   Company: "companies",
   Customer: "customers",
@@ -365,6 +380,7 @@ const createEntityHandler = (entityName) => {
       if (limit) query = query.limit(limit);
       const { data, error } = await query;
       if (error) throw error;
+      if (data?.[0]) cacheColumnsFromRow(table, data[0]);
       return (data || []).map(fromDb);
     },
 
@@ -382,24 +398,44 @@ const createEntityHandler = (entityName) => {
     },
 
     create: async (data) => {
+      const knownCols = _tableColumnsCache[table];
+      const payload = knownCols ? filterKnownColumns(toDb(data), knownCols) : toDb(data);
       const { data: created, error } = await supabase
         .from(table)
-        .insert(toDb(data))
+        .insert(payload)
         .select()
         .single();
-      if (error) throw error;
-      return fromDb(created);
+      if (!error) {
+        if (created) cacheColumnsFromRow(table, created);
+        return fromDb(created);
+      }
+      if (error.code === "PGRST204") {
+        const { error: err2 } = await supabase.from(table).insert(payload);
+        if (err2) throw err2;
+        return fromDb({ ...payload, id: crypto.randomUUID() });
+      }
+      throw error;
     },
 
     update: async (id, data) => {
+      const knownCols = _tableColumnsCache[table];
+      const payload = knownCols ? filterKnownColumns(toDb(data), knownCols) : toDb(data);
       const { data: updated, error } = await supabase
         .from(table)
-        .update(toDb(data))
+        .update(payload)
         .eq("id", id)
         .select()
         .single();
-      if (error) throw error;
-      return fromDb(updated);
+      if (!error) {
+        if (updated) cacheColumnsFromRow(table, updated);
+        return fromDb(updated);
+      }
+      if (error.code === "PGRST204") {
+        const { error: err2 } = await supabase.from(table).update(payload).eq("id", id);
+        if (err2) throw err2;
+        return fromDb({ id, ...payload });
+      }
+      throw error;
     },
 
     delete: async (id) => {
@@ -452,7 +488,7 @@ const createMockHandler = (entityName) => {
       const items = getStorage();
       const index = items.findIndex((i) => i.id === id);
       if (index === -1) throw new Error("Not found");
-      items[index] = { ...items[index], ...data, updated_date: new Date().toISOString() };
+      items[index] = { ...items[index], ...data, updated_at: new Date().toISOString() };
       setStorage(items);
       return items[index];
     },

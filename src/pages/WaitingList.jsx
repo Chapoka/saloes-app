@@ -48,7 +48,7 @@ export default function WaitingList() {
     preferred_days: [],
     priority: "normal",
     notes: "",
-    company_id: companyId || "",
+    company_id: companyId || null,
   });
 
   const { data: waitingList = [], isLoading } = useQuery({
@@ -69,7 +69,7 @@ export default function WaitingList() {
 
   /** @type {import("@tanstack/react-query").UseMutationOptions<unknown, unknown, typeof formData>} */
   const createMutation = useMutation({
-    mutationFn: async (data) => db.entities.WaitingList.create({ ...data, company_id: companyId || data?.company_id }),
+    mutationFn: async (data) => db.entities.WaitingList.create({ ...data, company_id: companyId || data?.company_id || null }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["waiting_list"] });
       setShowAddModal(false);
@@ -81,7 +81,7 @@ export default function WaitingList() {
         preferred_days: [],
         priority: "normal",
         notes: "",
-        company_id: companyId || "",
+        company_id: companyId || null,
       });
       toast.success("Cliente adicionado à fila!");
     },

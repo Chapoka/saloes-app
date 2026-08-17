@@ -274,9 +274,25 @@ export default function Plans() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const effectiveCompanyId = isAdmin ? (formData.company_id || null) : (companyId || null);
-    const { selected_service_ids, ...planData } = formData;
+    const { selected_service_ids, total_value, ...planData } = formData;
+    
+    // Auto-calculate price from plan items if items exist
+    let finalPrice = parseFloat(planData.price) || 0;
+    if (planItems.length > 0) {
+      const totalPlan = planItems.reduce((sum, item) => {
+        const itemTotal = (item.price || 0) * (item.quantity || 1);
+        const disc = item.discount_type === "percent"
+          ? itemTotal * ((item.discount || 0) / 100)
+          : (item.discount || 0);
+        return sum + itemTotal - disc;
+      }, 0);
+      const visits = parseInt(planData.session_count) || 1;
+      finalPrice = totalPlan / visits;
+    }
+    
     const data = {
       ...planData,
+      price: finalPrice,
       company_id: effectiveCompanyId,
       product_type: planData.product_type || null,
       combo_type: planData.combo_type || null,
@@ -291,7 +307,9 @@ export default function Plans() {
       if (planItems.length > 0) {
         tasks.push(savePlanItems.mutateAsync({ planId, items: planItems }));
       }
-      Promise.all(tasks).then(() => { resetForm(); toast.success(editingPlan ? "Plano atualizado!" : "Plano criado!"); });
+      Promise.all(tasks)
+        .then(() => { resetForm(); toast.success(editingPlan ? "Plano atualizado!" : "Plano criado!"); })
+        .catch((err) => { toast.error("Erro ao salvar itens do plano: " + err.message); });
     };
     if (editingPlan) {
       updateMutation.mutate({ id: editingPlan.id, data }, { onSuccess: () => saveAll(editingPlan.id) });
@@ -642,7 +660,13 @@ export default function Plans() {
                                       {item.manufacturer && <span className="text-[10px] text-gray-400 truncate max-w-[80px]">· {item.manufacturer}</span>}
                                       {item.quantity > 1 && <span className="text-gray-400">x{item.quantity}</span>}
                                     </div>
-                                    <span className="font-medium text-gray-900">R$ {((item.price || 0) * (item.quantity || 1) - (item.discount || 0)).toFixed(2)}</span>
+                                    <span className="font-medium text-gray-900">R$ {(() => {
+                                      const itemTotal = (item.price || 0) * (item.quantity || 1);
+                                      const disc = item.discount_type === "percent"
+                                        ? itemTotal * ((item.discount || 0) / 100)
+                                        : (item.discount || 0);
+                                      return (itemTotal - disc).toFixed(2);
+                                    })()}</span>
                                   </div>
                                 ))}
                               </div>

@@ -265,7 +265,7 @@ export default function CustomerDetail() {
                           </p>
                           <p className="text-xs text-gray-500">
                             {appointment.start_time} • {appointment.duration_mins}min • {" "}
-                             {appointment.modality === "corte" ? "Corte" : appointment.modality === "barba" ? "Barba" : "Serviço"}
+                             {(appointment.service_category || appointment.modality) === "corte" ? "Corte" : (appointment.service_category || appointment.modality) === "barba" ? "Barba" : "Serviço"}
                           </p>
                         </div>
                       </div>
@@ -320,7 +320,7 @@ export default function CustomerDetail() {
                           </p>
                           <p className="text-xs text-gray-500">
                             {appointment.start_time} • {appointment.duration_mins}min • {" "}
-                             {appointment.modality === "corte" ? "Corte" : appointment.modality === "barba" ? "Barba" : "Serviço"}
+                             {(appointment.service_category || appointment.modality) === "corte" ? "Corte" : (appointment.service_category || appointment.modality) === "barba" ? "Barba" : "Serviço"}
                           </p>
                         </div>
                       </div>
@@ -467,7 +467,7 @@ export default function CustomerDetail() {
                     <span className="font-medium">{nextAppointment.start_time}</span>
                   </div>
                   <Badge className="bg-branding-primary/10 text-branding-primary">
-                    {nextAppointment.modality === "corte" ? "✂️ Corte" : "🪒 Barba"}
+                    {(nextAppointment.service_category || nextAppointment.modality) === "corte" ? "✂️ Corte" : "🪒 Barba"}
                   </Badge>
                 </div>
               </div>
