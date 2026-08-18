@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const timeOptions = [];
-for (let h = 6; h <= 21; h++) {
+for (let h = 0; h <= 23; h++) {
   timeOptions.push(`${h.toString().padStart(2, '0')}:00`);
   timeOptions.push(`${h.toString().padStart(2, '0')}:30`);
 }

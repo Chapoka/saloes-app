@@ -19,6 +19,7 @@ import {
   Layers,
   PaintBucket,
   Award,
+  Crown,
 } from "lucide-react";
 import CompanyIntegrationCard from "@/components/settings/CompanyIntegrationCard";
 import ModalitiesSection from "@/components/settings/ModalitiesSection";
@@ -61,7 +62,7 @@ export default function Settings() {
     birth_date: "",
     role: "cliente",
     company_ids: [],
-    stylist_level_id: "",
+    is_master: false,
   });
 
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
@@ -143,13 +144,15 @@ export default function Settings() {
     ? allStylistLevels.filter(l => currentUserCompanyIds.includes(l.company_id))
     : allStylistLevels;
   const visibleUsers = isSuperAdmin
-    ? users
-    : (isAdmin || isProfissional)
+    ? users.filter(u => {
+        const uRole = u.role === "teacher" ? "profissional" : u.role === "user" ? "cliente" : u.role;
+        return uRole === "super_admin" || uRole === "admin";
+      })
+    : isAdmin
       ? users.filter(u => {
-          const uIds = u.company_ids?.length ? u.company_ids : (u.company_id ? [u.company_id] : []);
           const uRole = u.role === "teacher" ? "profissional" : u.role === "user" ? "cliente" : u.role;
-          // Must share at least one company AND be profissional or cliente (admins don't see other admins or super_admins)
-          return currentUserCompanyIds.some(cid => uIds.includes(cid)) && (uRole === "profissional" || uRole === "cliente");
+          const uIds = u.company_ids?.length ? u.company_ids : (u.company_id ? [u.company_id] : []);
+          return (uRole === "super_admin" || uRole === "admin") && currentUserCompanyIds.some(cid => uIds.includes(cid));
         })
       : [];
 
@@ -198,13 +201,20 @@ export default function Settings() {
   const saveUserMutation = useMutation({
     mutationFn: async (userData) => {
       if (editingUser) {
-        await db.entities.User.update(editingUser.id, {
+        const cleanData = {
+          full_name: userData.full_name || null,
+          email: userData.email || null,
           role: userData.role,
-          cpf: userData.cpf,
-          rg: userData.rg,
-          birth_date: userData.birth_date,
-          stylist_level_id: userData.role === "profissional" ? (userData.stylist_level_id || null) : null,
-        });
+          cpf: userData.cpf || null,
+          rg: userData.rg || null,
+          birth_date: userData.birth_date || null,
+          is_master: userData.is_master || false,
+        };
+        const { error: updateError } = await supabase
+          .from("users")
+          .update(cleanData)
+          .eq("id", editingUser.id);
+        if (updateError) throw updateError;
         // Update company associations via user_companies
         await supabase.from("user_companies").delete().eq("user_id", editingUser.id);
         if (userData.company_ids?.length) {
@@ -247,7 +257,7 @@ export default function Settings() {
       }
       setShowUserModal(false);
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], stylist_level_id: "" });
+      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false });
     },
     onError: (error) => {
       console.error("saveUserMutation error:", error);
@@ -308,11 +318,11 @@ export default function Settings() {
         birth_date: user.birth_date || "",
         role: user.role || "cliente",
         company_ids: user.company_ids || [],
-        stylist_level_id: user.stylist_level_id || "",
+        is_master: user.is_master || false,
       });
     } else {
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: isProfissional && currentUserCompanyIds.length ? [currentUserCompanyIds[0]] : [], stylist_level_id: "" });
+      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: isProfissional && currentUserCompanyIds.length ? [currentUserCompanyIds[0]] : [], is_master: false });
     }
     setShowUserModal(true);
   };
@@ -320,11 +330,13 @@ export default function Settings() {
   const isEditingUserDirty = () => {
     if (!editingUser) return true;
     return (
+      userFormData.full_name !== (editingUser.full_name || "") ||
+      userFormData.email !== (editingUser.email || "") ||
       userFormData.cpf !== (editingUser.cpf || "") ||
       userFormData.rg !== (editingUser.rg || "") ||
       userFormData.birth_date !== (editingUser.birth_date || "") ||
       userFormData.role !== (editingUser.role || "cliente") ||
-      userFormData.stylist_level_id !== (editingUser.stylist_level_id || "") ||
+      (userFormData.is_master || false) !== (editingUser.is_master || false) ||
       JSON.stringify(userFormData.company_ids) !== JSON.stringify(editingUser.company_ids || [])
     );
   };
@@ -335,7 +347,10 @@ export default function Settings() {
       return;
     }
     if (editingUser && !isEditingUserDirty()) {
-      toast.info("Nenhuma alteração detectada");
+      toast.info("Nenhuma alteração efetuada");
+      setShowUserModal(false);
+      setEditingUser(null);
+      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false });
       return;
     }
     saveUserMutation.mutate(userFormData);
@@ -599,6 +614,7 @@ export default function Settings() {
           )}
 
           {/* Users Management */}
+          {(isSuperAdmin || isAdmin) && (
           <Card className="rounded-2xl shadow-sm border border-gray-100">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -632,7 +648,15 @@ export default function Settings() {
                         {user.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{user.full_name || "Sem nome"}</p>
+                        <p className="font-medium text-gray-900 flex items-center gap-1.5">
+                          {user.full_name || "Sem nome"}
+                          {user.is_master && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                              <Crown className="w-3 h-3" />
+                              Master
+                            </span>
+                          )}
+                        </p>
                         <p className="text-sm text-gray-500">{user.email}</p>
                         {(() => {
                           const cIds = user.company_ids?.length ? user.company_ids : (user.company_id ? [user.company_id] : []);
@@ -673,7 +697,9 @@ export default function Settings() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteUser(user.id)}
-                        className="text-gray-600 hover:text-red-600"
+                        disabled={user.is_master && !isSuperAdmin}
+                        className={user.is_master && !isSuperAdmin ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-red-600"}
+                        title={user.is_master && !isSuperAdmin ? "Somente Super Admin pode excluir o Master" : "Excluir"}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -686,6 +712,7 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+          )}
 
           {/* Modalities Management */}
           <ModalitiesSection />
@@ -769,7 +796,6 @@ export default function Settings() {
                     onChange={(e) => setUserFormData({ ...userFormData, full_name: e.target.value })}
                     placeholder="João da Silva"
                     className="rounded-xl"
-                    disabled={editingUser}
                   />
                 </div>
 
@@ -781,7 +807,6 @@ export default function Settings() {
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
                     placeholder="joao@exemplo.com"
                     className="rounded-xl"
-                    disabled={editingUser}
                   />
                 </div>
 
@@ -835,7 +860,7 @@ export default function Settings() {
                       <button
                         key={value}
                         type="button"
-                        onClick={() => setUserFormData({ ...userFormData, role: value, stylist_level_id: value === "profissional" ? userFormData.stylist_level_id : "" })}
+                        onClick={() => setUserFormData({ ...userFormData, role: value })}
                         className={`py-2 px-3 rounded-xl border-2 text-sm font-medium transition-all ${
                           userFormData.role === value
                             ? color === "purple" ? "border-purple-500 bg-purple-50 text-purple-700"
@@ -851,46 +876,6 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {/* Stylist Level selector */}
-                {userFormData.role === "profissional" && (
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Award className="w-4 h-4" /> Nível do Profissional</Label>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setUserFormData({ ...userFormData, stylist_level_id: "" })}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg border text-xs font-medium transition-all",
-                          !userFormData.stylist_level_id
-                            ? "border-branding-primary bg-branding-primary/10 text-branding-primary"
-                            : "border-gray-200 text-gray-500 hover:border-gray-300"
-                        )}
-                      >
-                        Sem nível
-                      </button>
-                      {companyLevels.map(level => (
-                        <button
-                          key={level.id}
-                          type="button"
-                          onClick={() => setUserFormData({ ...userFormData, stylist_level_id: level.id })}
-                          className={cn(
-                            "px-3 py-1.5 rounded-lg border text-xs font-medium transition-all",
-                            userFormData.stylist_level_id === level.id
-                              ? "text-white"
-                              : "border-gray-200 text-gray-600 hover:border-gray-300"
-                          )}
-                          style={userFormData.stylist_level_id === level.id
-                            ? { backgroundColor: level.color || "#6366f1", borderColor: level.color || "#6366f1" }
-                            : {}
-                          }
-                        >
-                          {level.name} ({Number(level.multiplier || 1).toFixed(1)}x)
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Company multi-select dropdown */}
                 {(isSuperAdmin || isAdmin) && (
                   <div className="space-y-2">
@@ -901,6 +886,25 @@ export default function Settings() {
                       onChange={(ids) => setUserFormData({ ...userFormData, company_ids: ids })}
                     />
                   </div>
+                )}
+
+                {/* Master toggle - only super_admin */}
+                {isSuperAdmin && editingUser && (
+                  <label className="flex items-center gap-3 cursor-pointer p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                    <input
+                      type="checkbox"
+                      checked={userFormData.is_master || false}
+                      onChange={(e) => setUserFormData({ ...userFormData, is_master: e.target.checked })}
+                      className="w-4 h-4 text-amber-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-amber-900 flex items-center gap-1.5">
+                        <Crown className="w-4 h-4" />
+                        Master da Conta
+                      </p>
+                      <p className="text-xs text-amber-600">Responsável pelo recebimento de cobranças. Não pode ser excluído.</p>
+                    </div>
+                  </label>
                 )}
 
                 {editingUser && (

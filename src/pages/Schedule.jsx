@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { db } from "@/api/dbClient";
+import { supabase } from "@/lib/supabaseClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Calendar, CalendarDays, CalendarRange, Building2, Users } from "lucide-react";
+import { Plus, Calendar, CalendarDays, CalendarRange, Building2, Users, Clock, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import WeeklyCalendar from "@/components/schedule/WeeklyCalendar";
@@ -10,6 +11,8 @@ import MonthCalendar from "@/components/schedule/MonthCalendar";
 import AppointmentModal from "@/components/schedule/AppointmentModal";
 import NewAppointmentModal from "@/components/schedule/NewAppointmentModal";
 import RepeatAppointmentDialog from "@/components/schedule/RepeatAppointmentDialog";
+import BusinessHoursModal from "@/components/schedule/BusinessHoursModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { addWeeks, format as fnsFormat } from "date-fns";
 import { syncToGoogleCalendar, syncToOutlookCalendar } from "@/lib/calendarService";
@@ -42,14 +45,28 @@ export default function Schedule() {
   const [currentUser, setCurrentUser] = useState(null);
   const [repeatAppointment, setRepeatAppointment] = useState(null);
   const [isCreatingRepeat, setIsCreatingRepeat] = useState(false);
+  const [showBusinessHours, setShowBusinessHours] = useState(false);
+  const [outOfHoursSlot, setOutOfHoursSlot] = useState(null);
 
   useEffect(() => {
-    db.auth.me().then(setCurrentUser).catch(() => {});
+    db.auth.me().then(async (user) => {
+      if (user) {
+        const { data: userCompanies } = await supabase
+          .from("user_companies")
+          .select("company_id")
+          .eq("user_id", user.id);
+        setCurrentUser({
+          ...user,
+          company_ids: userCompanies?.map(uc => uc.company_id) || user.company_ids || (user.company_id ? [user.company_id] : []),
+        });
+      }
+    }).catch(() => {});
   }, []);
 
   const rawRole = currentUser?.role;
   const normalizedRole = rawRole === "teacher" ? "profissional" : rawRole === "user" ? "cliente" : rawRole;
   const isSuperAdmin = normalizedRole === "super_admin";
+  const isAdmin = normalizedRole === "admin";
   const isProfissional = normalizedRole === "profissional";
   const companyId = currentUser?.company_id;
   const [selectedCompanyId, setSelectedCompanyId] = useState("all");
@@ -58,11 +75,36 @@ export default function Schedule() {
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
     queryFn: () => db.entities.Company.list(),
-    enabled: isSuperAdmin,
+    enabled: !!currentUser,
   });
 
   // Effective company filter
   const effectiveCompanyId = (isProfissional && !isSuperAdmin) ? companyId : (selectedCompanyId !== "all" ? selectedCompanyId : null);
+
+  // Company data for business hours
+  const activeCompanyId = isSuperAdmin ? (selectedCompanyId !== "all" ? selectedCompanyId : null) : companyId;
+  const resolvedCompanyId = activeCompanyId || (companies.length === 1 ? companies[0].id : null);
+
+  const { data: currentCompany } = useQuery({
+    queryKey: ["company", resolvedCompanyId],
+    queryFn: () => db.entities.Company.get(resolvedCompanyId),
+    enabled: !!resolvedCompanyId,
+  });
+
+  const updateCompanyMutation = useMutation({
+    mutationFn: async ({ data, targetCompanyId }) => {
+      if (!targetCompanyId) throw new Error("Nenhuma empresa selecionada");
+      const { error } = await supabase
+        .from("companies")
+        .update(data)
+        .eq("id", targetCompanyId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["company"] });
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+    },
+  });
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers", effectiveCompanyId, isProfissional, isSuperAdmin],
@@ -322,10 +364,28 @@ export default function Schedule() {
     setSelectedAppointment(null);
   };
 
+  const isSlotOutOfHours = (time) => {
+    if (!currentCompany?.opening_time || !currentCompany?.closing_time) return false;
+    return time < currentCompany.opening_time || time >= currentCompany.closing_time;
+  };
+
   const handleSlotClick = (date, time) => {
+    if (isSlotOutOfHours(time)) {
+      setOutOfHoursSlot({ date, time });
+      return;
+    }
     setSelectedDate(date);
     setSelectedTime(time || null);
     setShowNewAppointment(true);
+  };
+
+  const handleConfirmOutOfHours = () => {
+    if (outOfHoursSlot) {
+      setSelectedDate(outOfHoursSlot.date);
+      setSelectedTime(outOfHoursSlot.time);
+      setShowNewAppointment(true);
+      setOutOfHoursSlot(null);
+    }
   };
 
   const deleteAppointmentMutation = useMutation({
@@ -456,6 +516,16 @@ export default function Schedule() {
                 ))}
               </SelectContent>
             </Select>
+            {(isAdmin || isSuperAdmin) && (
+              <Button
+                variant="outline"
+                onClick={() => setShowBusinessHours(true)}
+                className="rounded-xl border-gray-200"
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Horário
+              </Button>
+            )}
             <Button
               onClick={() => {
                 setSelectedDate(new Date());
@@ -514,6 +584,8 @@ export default function Schedule() {
             customers={customers}
             onAppointmentClick={setSelectedAppointment}
             onSlotClick={handleSlotClick}
+            openingTime={currentCompany?.opening_time}
+            closingTime={currentCompany?.closing_time}
           />
         )}
         {viewMode === "week" && (
@@ -522,6 +594,8 @@ export default function Schedule() {
             customers={customers}
             onAppointmentClick={setSelectedAppointment}
             onSlotClick={handleSlotClick}
+            openingTime={currentCompany?.opening_time}
+            closingTime={currentCompany?.closing_time}
           />
         )}
         {viewMode === "month" && (
@@ -573,6 +647,44 @@ export default function Schedule() {
           onConfirm={handleRepeatAppointment}
           isLoading={isCreatingRepeat}
         />
+
+        {/* Business Hours Modal */}
+        <BusinessHoursModal
+          open={showBusinessHours}
+          onClose={() => setShowBusinessHours(false)}
+          company={currentCompany}
+          companies={isSuperAdmin ? companies : companies.filter(c => {
+            const ids = currentUser?.company_ids?.length ? currentUser.company_ids : (currentUser?.company_id ? [currentUser.company_id] : []);
+            return ids.includes(c.id);
+          })}
+          companyId={companyId}
+          isSuperAdmin={isSuperAdmin}
+          onSave={(data, targetId) => updateCompanyMutation.mutateAsync({ data, targetCompanyId: targetId })}
+        />
+
+        {/* Out of Hours Confirmation */}
+        <Dialog open={!!outOfHoursSlot} onOpenChange={() => setOutOfHoursSlot(null)}>
+          <DialogContent className="sm:max-w-sm rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertTriangle className="w-5 h-5" />
+                Fora do Horário de Funcionamento
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-gray-600">
+              O horário <strong>{outOfHoursSlot?.time}</strong> está fora do horário de funcionamento do salão ({currentCompany?.opening_time || "08:00"} - {currentCompany?.closing_time || "18:00"}).
+            </p>
+            <p className="text-sm text-gray-600">Deseja agendar mesmo assim?</p>
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" onClick={() => setOutOfHoursSlot(null)} className="flex-1 rounded-xl">
+                Cancelar
+              </Button>
+              <Button onClick={handleConfirmOutOfHours} className="flex-1 rounded-xl btn-branding">
+                Agendar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

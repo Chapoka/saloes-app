@@ -7,7 +7,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { cn } from "@/lib/utils";
 
 const timeSlots = [];
-for (let h = 6; h <= 21; h++) {
+for (let h = 0; h <= 23; h++) {
   timeSlots.push(`${h.toString().padStart(2, '0')}:00`);
   timeSlots.push(`${h.toString().padStart(2, '0')}:30`);
 }
@@ -103,11 +103,16 @@ const groupAppointments = (appointments, customers) => {
   return grouped;
 };
 
-export default function WeeklyCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick }) {
+export default function WeeklyCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  const isSlotOutOfHours = (time) => {
+    if (!openingTime || !closingTime) return false;
+    return time < openingTime || time >= closingTime;
+  };
 
   const getAppointmentsForDay = (date) => {
     const filtered = appointments.filter(appointment => 
@@ -162,6 +167,21 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
         </div>
       </div>
 
+      {/* Business Hours Legend */}
+      {openingTime && closingTime && (
+        <div className="px-4 py-2 border-b border-gray-100 flex items-center gap-4 text-xs text-gray-500">
+          <span className="font-medium text-gray-700">Horário: {openingTime} - {closingTime}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-red-100 border border-red-200"></span>
+            <span>Fora do expediente</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-white border border-gray-200"></span>
+            <span>Dentro do expediente</span>
+          </div>
+        </div>
+      )}
+
       {/* Calendar Grid */}
       <div className="overflow-x-auto">
         <div className="min-w-[800px]">
@@ -198,7 +218,10 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
               {timeSlots.map((time, i) => (
                 <div 
                   key={time} 
-                  className="h-12 px-3 flex items-start justify-end pt-1 text-xs text-gray-500 border-b border-gray-50"
+                  className={cn(
+                    "h-12 px-3 flex items-start justify-end pt-1 text-xs border-b border-gray-50",
+                    isSlotOutOfHours(time) ? "bg-red-50 text-red-400" : "text-gray-500"
+                  )}
                 >
                   {i % 2 === 0 && time}
                 </div>
@@ -221,7 +244,12 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                   {timeSlots.map((time, i) => (
                     <div
                       key={i}
-                      className="h-12 border-b border-gray-50 cursor-pointer hover:bg-branding-primary/5 transition-colors"
+                      className={cn(
+                        "h-12 border-b border-gray-50 cursor-pointer transition-colors",
+                        isSlotOutOfHours(time)
+                          ? "bg-red-50 hover:bg-red-100"
+                          : "hover:bg-branding-primary/5"
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
                         onSlotClick && onSlotClick(day, time);
