@@ -28,7 +28,7 @@ export default function RepeatAppointmentDialog({ open, onClose, appointment, on
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
       <DialogContent className="sm:max-w-sm rounded-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

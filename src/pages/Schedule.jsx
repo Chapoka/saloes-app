@@ -253,7 +253,10 @@ export default function Schedule() {
         });
       }
 
-      // Popup de repetição removido — disponível via detalhes do agendamento
+      const first = Array.isArray(results) ? results[0] : results;
+      if (first) {
+        setRepeatAppointment(first);
+      }
     },
   });
 
