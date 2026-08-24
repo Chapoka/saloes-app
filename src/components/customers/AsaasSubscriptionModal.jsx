@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { db } from "@/api/dbClient";
-import { CheckCircle, X, Loader2, Calendar, AlertCircle, FileText, Repeat, Mail, MessageSquare } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
+import { CheckCircle, X, Loader2, Calendar, AlertCircle, FileText, Repeat, Mail, MessageSquare, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export default function AsaasSubscriptionModal({ customer, plans, companyId, onClose }) {
@@ -11,6 +14,8 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
   const [error, setError] = useState(null);
   const [paymentTemplate, setPaymentTemplate] = useState(null);
   const [notifications, setNotifications] = useState({ whatsapp: false, email: false });
+  const [cpf, setCpf] = useState(customer?.cpf || "");
+  const [cpfRequired, setCpfRequired] = useState(false);
 
   useEffect(() => {
     db.entities.Template.filter({ trigger: "payment_link" })
@@ -21,6 +26,12 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!customer?.cpf) {
+      setCpfRequired(true);
+    }
+  }, [customer]);
 
   const getPlanInfo = () => {
     if (customer?.custom_plan) {
@@ -87,6 +98,21 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
     }
 
     return sent;
+  };
+
+  const handleSaveCpf = async () => {
+    if (!cpf || cpf.replace(/\D/g, "").length !== 11) {
+      toast.error("CPF inválido. Informe 11 dígitos.");
+      return;
+    }
+    try {
+      await supabase.from("users").update({ cpf }).eq("id", customer.id).then(() => {});
+      await db.entities.Customer.update(customer.id, { cpf });
+      setCpfRequired(false);
+      toast.success("CPF salvo!");
+    } catch (e) {
+      toast.error("Erro ao salvar CPF: " + e.message);
+    }
   };
 
   const handleCreateInvoice = async () => {
@@ -185,7 +211,6 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
               </a>
             )}
 
-            {/* Notification status */}
             <div className="space-y-1.5">
               {customer.whatsapp && (
                 <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.whatsapp ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-500"}`}>
@@ -218,6 +243,33 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
               </button>
             </div>
 
+            {/* CPF Section */}
+            {cpfRequired && (
+              <div className="space-y-2 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <Label className="text-sm font-medium text-amber-800 flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4" />
+                  CPF do cliente
+                </Label>
+                <p className="text-xs text-amber-600">Necessário para gerar cobranças</p>
+                <div className="flex gap-2">
+                  <Input
+                    value={cpf}
+                    onChange={(e) => setCpf(e.target.value)}
+                    placeholder="000.000.000-00"
+                    className="rounded-xl flex-1"
+                    maxLength={14}
+                  />
+                  <Button
+                    onClick={handleSaveCpf}
+                    variant="outline"
+                    className="rounded-xl border-amber-300 text-amber-700 hover:bg-amber-100"
+                  >
+                    Salvar
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {planInfo ? (
               <div className="p-4 bg-branding-primary/5 border border-branding-primary/20 rounded-xl space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-gray-500">Plano:</span><span className="font-medium">{planInfo.name}</span></div>
@@ -231,7 +283,6 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
               </div>
             )}
 
-            {/* Channels preview */}
             <div className="flex gap-2">
               {customer.whatsapp && (
                 <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg">
@@ -257,29 +308,29 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => { setMode("invoice"); handleCreateInvoice(); }}
-                disabled={loading || !planInfo}
+                disabled={loading || !planInfo || cpfRequired}
                 className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 hover:border-branding-primary hover:bg-branding-primary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                   {loading && mode === "invoice" ? <Loader2 className="w-5 h-5 animate-spin text-branding-primary" /> : <FileText className="w-5 h-5 text-gray-600" />}
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-sm text-gray-900">Cobrança Simples</p>
+                  <p className="font-semibold text-sm text-gray-900">Cobrança Registrada</p>
                   <p className="text-xs text-gray-500 mt-0.5">Registro interno, sem Asaas</p>
                 </div>
               </button>
 
               <button
                 onClick={() => { setMode("subscription"); handleCreateSubscription(); }}
-                disabled={loading || !planInfo}
+                disabled={loading || !planInfo || cpfRequired}
                 className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 hover:border-branding-secondary hover:bg-branding-secondary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                   {loading && mode === "subscription" ? <Loader2 className="w-5 h-5 animate-spin text-branding-secondary" /> : <Repeat className="w-5 h-5 text-gray-600" />}
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-sm text-gray-900">Assinatura Asaas</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Recorrente via Asaas</p>
+                  <p className="font-semibold text-sm text-gray-900">Cobrança Avulsa</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Via Asaas (PIX)</p>
                 </div>
               </button>
             </div>
