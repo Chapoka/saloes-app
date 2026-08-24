@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { format } from "date-fns";
+import { format, isToday, parseISO } from "date-fns";
 import { Calendar, Clock, User, Star, RotateCcw, Users, Check, Scissors, Package } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-const timeOptions = [];
+const allTimeOptions = [];
 for (let h = 0; h <= 23; h++) {
-  timeOptions.push(`${h.toString().padStart(2, '0')}:00`);
-  timeOptions.push(`${h.toString().padStart(2, '0')}:30`);
+  allTimeOptions.push(`${h.toString().padStart(2, '0')}:00`);
+  allTimeOptions.push(`${h.toString().padStart(2, '0')}:30`);
 }
 
 const APPOINTMENT_TYPES = [
@@ -48,6 +48,12 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
   }, [selectedTime]);
 
   useEffect(() => {
+    if (formData.date && timeOptions.length > 0 && !timeOptions.includes(formData.start_time)) {
+      setFormData(prev => ({ ...prev, start_time: timeOptions[0] }));
+    }
+  }, [formData.date, timeOptions]);
+
+  useEffect(() => {
     if (appointmentType !== "makeup") {
       setFormData(prev => ({ ...prev, original_appointment_id: "" }));
     }
@@ -60,6 +66,22 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     const role = rawRole === "teacher" ? "profissional" : rawRole;
     return p.active !== false && (role === "profissional" || p.is_professional === true);
   }), [professionals]);
+
+  const timeOptions = useMemo(() => {
+    if (!formData.date) return allTimeOptions;
+    try {
+      const selected = parseISO(formData.date);
+      if (isToday(selected)) {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        return allTimeOptions.filter(t => {
+          const [h, m] = t.split(":").map(Number);
+          return h * 60 + m >= currentMinutes;
+        });
+      }
+    } catch {}
+    return allTimeOptions;
+  }, [formData.date]);
 
   const handleCustomerChange = (customerId) => {
     const customer = customers.find(s => s.id === customerId);
