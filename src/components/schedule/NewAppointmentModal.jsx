@@ -171,15 +171,6 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     const endMins = totalMinutes % 60;
     const newEndTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 
-    if (appointmentType === "normal") {
-      for (const s of allSelectedCustomers) {
-        if ((s.current_credits || 0) <= 0) {
-          toast.error(`${s.name} não tem créditos disponíveis para agendamento!`);
-          return;
-        }
-      }
-    }
-
     for (const s of allSelectedCustomers) {
       const conflict = appointments.find(l =>
         l.customer_id === s.id &&
@@ -313,11 +304,6 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-gray-500" />
                       {cust.name}
-                      {appointmentType === "normal" && (
-                        <span className="text-gray-500 text-xs">
-                          ({cust.current_credits || 0} créd.)
-                        </span>
-                      )}
                     </div>
                   </SelectItem>
                 ))}
@@ -374,7 +360,6 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                       </div>
                       <span>{s.name}</span>
                     </div>
-                    <span className="text-xs text-gray-500">({s.current_credits || 0} créd.)</span>
                   </button>
                 ))}
               </div>
@@ -422,7 +407,6 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                       </div>
                       <span>{s.name}</span>
                     </div>
-                    <span className="text-xs text-gray-500">({s.current_credits || 0} créd.)</span>
                   </button>
                 ))}
               </div>
@@ -566,15 +550,6 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
               </SelectContent>
             </Select>
           </div>
-
-          {appointmentType !== "normal" && (
-            <div className={cn("p-3 rounded-xl text-sm flex items-center gap-2",
-              appointmentType === "trial" ? "bg-amber-50 border border-amber-200 text-amber-700" : "bg-purple-50 border border-purple-200 text-purple-700"
-            )}>
-              {appointmentType === "trial" ? "⭐" : "🔄"}
-              {appointmentType === "trial" ? "Agendamentos experimentais não consomem créditos" : "Reposições não consomem créditos"}
-            </div>
-          )}
 
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="outline" onClick={handleClose} className="flex-1 rounded-xl">
