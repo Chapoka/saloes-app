@@ -299,8 +299,11 @@ logger.info("Guardian created via mini-form", guardian);
       if (!cpfValue) {
         return toast.error("CPF é obrigatório para clientes com plano ou cobrança.");
       }
-      if (!rgValue) {
-        return toast.error("RG é obrigatório para clientes com plano ou cobrança.");
+      if (!phoneValue) {
+        return toast.error("WhatsApp é obrigatório para clientes com plano ou cobrança.");
+      }
+      if (!formData.email?.trim()) {
+        return toast.error("E-mail é obrigatório para clientes com plano ou cobrança.");
       }
     }
 
@@ -588,11 +591,12 @@ logger.info("Guardian created via mini-form", guardian);
 
           <InputWithIcon
             icon={Mail}
-            label="E-mail"
+            label={`E-mail${isDependent ? "" : " *"}`}
             type="email"
             value={formData.email}
             onChange={(e) => handleChange("email", e.target.value)}
             placeholder="email@exemplo.com"
+            required={!isDependent}
           />
 
           <InputWithIcon
