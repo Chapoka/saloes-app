@@ -58,6 +58,7 @@ export default function Settings() {
   const [userFormData, setUserFormData] = useState({
     full_name: "",
     email: "",
+    password: "",
     cpf: "",
     rg: "",
     birth_date: "",
@@ -218,7 +219,6 @@ export default function Settings() {
           .update(cleanData)
           .eq("id", editingUser.id);
         if (updateError) throw updateError;
-        // Update company associations via user_companies
         await supabase.from("user_companies").delete().eq("user_id", editingUser.id);
         if (userData.company_ids?.length) {
           const rows = userData.company_ids.map(company_id => ({
@@ -230,25 +230,49 @@ export default function Settings() {
         }
         return editingUser;
       } else {
-        const invited = await db.users.inviteUser(userData.email, userData.role, userData.full_name);
-        const newUserId = invited.user_id;
-        if (newUserId && userData.company_ids?.length) {
+        if (!userData.password || userData.password.length < 6) {
+          throw new Error("A senha deve ter pelo menos 6 caracteres");
+        }
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${window.location.origin}/api/auth/admin-create-user`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token || ""}`,
+          },
+          body: JSON.stringify({
+            email: userData.email,
+            password: userData.password,
+            full_name: userData.full_name || "",
+            role: userData.role || "cliente",
+            company_ids: userData.company_ids || [],
+          }),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Erro ao criar usuário");
+
+        if (result.user_id && userData.company_ids?.length) {
           const rows = userData.company_ids.map(company_id => ({
-            user_id: newUserId,
+            user_id: result.user_id,
             company_id,
           }));
           await supabase.from("user_companies").insert(rows);
         }
+
+        if (result.user_id && userData.is_professional) {
+          await supabase.from("users").update({ is_professional: true }).eq("id", result.user_id);
+        }
+
         const roleLabel = userData.role === "super_admin" ? "Super Admin" : userData.role === "admin" ? "Administrador" : userData.role === "profissional" ? "Profissional" : "Cliente";
         await db.entities.AuditLog.create({
           action: "create",
           entity_type: "User",
           category: "system",
-          description: `Usuário ${userData.email} convidado como ${roleLabel}`,
+          description: `Usuário ${userData.email} criado como ${roleLabel}`,
           user_name: currentUser?.full_name || currentUser?.email,
           user_email: currentUser?.email,
         });
-        return invited;
+        return result;
       }
     },
     onSuccess: (data) => {
@@ -256,11 +280,11 @@ export default function Settings() {
       if (editingUser) {
         toast.success("Usuário atualizado!");
       } else {
-        toast.success("Convite enviado! O usuário receberá um email para definir a senha.");
+        toast.success("Usuário criado com sucesso!");
       }
       setShowUserModal(false);
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
+      setUserFormData({ full_name: "", email: "", password: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
     },
     onError: (error) => {
       console.error("saveUserMutation error:", error);
@@ -316,6 +340,7 @@ export default function Settings() {
       setUserFormData({
         full_name: user.full_name || "",
         email: user.email || "",
+        password: "",
         cpf: user.cpf || "",
         rg: user.rg || "",
         birth_date: user.birth_date || "",
@@ -326,7 +351,13 @@ export default function Settings() {
       });
     } else {
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: isProfissional && currentUserCompanyIds.length ? [currentUserCompanyIds[0]] : [], is_master: false, is_professional: false });
+      setUserFormData({
+        full_name: "", email: "", password: "", cpf: "", rg: "", birth_date: "",
+        role: "cliente",
+        company_ids: isSuperAdmin ? [] : currentUserCompanyIds.length ? [currentUserCompanyIds[0]] : [],
+        is_master: false,
+        is_professional: false,
+      });
     }
     setShowUserModal(true);
   };
@@ -355,7 +386,7 @@ export default function Settings() {
       toast.info("Nenhuma alteração efetuada");
       setShowUserModal(false);
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
+      setUserFormData({ full_name: "", email: "", password: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
       return;
     }
     saveUserMutation.mutate(userFormData);
@@ -815,6 +846,20 @@ export default function Settings() {
                   />
                 </div>
 
+                {!editingUser && (
+                  <div className="space-y-2">
+                    <Label>Senha *</Label>
+                    <Input
+                      type="password"
+                      value={userFormData.password}
+                      onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
+                      placeholder="Mínimo 6 caracteres"
+                      className="rounded-xl"
+                      required
+                    />
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>CPF</Label>
@@ -857,10 +902,16 @@ export default function Settings() {
                           { value: "profissional", label: "Profissional", color: "blue" },
                           { value: "cliente", label: "Cliente", color: "gray" },
                         ]
-                      : [
-                          { value: "profissional", label: "Profissional", color: "blue" },
-                          { value: "cliente", label: "Cliente", color: "gray" },
-                        ]
+                      : isAdmin
+                        ? [
+                            { value: "admin", label: "Admin", color: "amber" },
+                            { value: "profissional", label: "Profissional", color: "blue" },
+                            { value: "cliente", label: "Cliente", color: "gray" },
+                          ]
+                        : [
+                            { value: "profissional", label: "Profissional", color: "blue" },
+                            { value: "cliente", label: "Cliente", color: "gray" },
+                          ]
                     ).map(({ value, label, color }) => (
                       <button
                         key={value}
@@ -886,7 +937,7 @@ export default function Settings() {
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Building2 className="w-4 h-4" /> Empresa</Label>
                     <CompanyMultiSelect
-                      companies={companies}
+                      companies={isSuperAdmin ? companies : companies.filter(c => currentUserCompanyIds.includes(c.id))}
                       selectedIds={userFormData.company_ids}
                       onChange={(ids) => setUserFormData({ ...userFormData, company_ids: ids })}
                     />
@@ -956,7 +1007,7 @@ export default function Settings() {
                 </Button>
                 <Button
                   onClick={handleSaveUser}
-                  disabled={saveUserMutation.isPending}
+                  disabled={saveUserMutation.isPending || (!editingUser && (!userFormData.email || !userFormData.password || userFormData.password.length < 6))}
                   className="flex-1 bg-branding-secondary hover:bg-branding-secondary/90 rounded-xl"
                 >
                   {saveUserMutation.isPending ? "Salvando..." : "Salvar"}
