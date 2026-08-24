@@ -211,7 +211,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
         status: statusMap[appointmentType],
         service_performed: false,
         appointment_type: typeMap[appointmentType],
-        service_category: selectedService?.category || "outro",
+        service_category: (selectedService?.category || "outro").toLowerCase(),
       };
       if (formData.original_appointment_id) submitData.original_appointment_id = formData.original_appointment_id;
       if (formData.service_id) submitData.service_id = formData.service_id;
