@@ -196,6 +196,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     }
 
     const statusMap = { normal: "scheduled", trial: "trial", makeup: "makeup" };
+    const typeMap = { normal: "plan", trial: "trial", makeup: "makeup" };
 
     const selectedService = activeServices.find(s => s.id === formData.service_id);
 
@@ -209,7 +210,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
         end_time: newEndTime,
         status: statusMap[appointmentType],
         service_performed: false,
-        appointment_type: appointmentType,
+        appointment_type: typeMap[appointmentType],
         service_category: selectedService?.category || "outro",
       };
       if (formData.original_appointment_id) submitData.original_appointment_id = formData.original_appointment_id;
