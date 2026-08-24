@@ -128,7 +128,7 @@ export default function Profissionais() {
   const professionals = allUsers.filter(u => {
     const rawRole = u.role || "";
     const role = rawRole === "teacher" ? "profissional" : rawRole;
-    const isProf = role === "profissional";
+    const isProf = role === "profissional" || u.is_professional === true;
     const matchCompany = !effectiveCompanyId || u.company_id === effectiveCompanyId || (u.company_ids || []).includes(effectiveCompanyId);
     const matchSearch = !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase());
     return isProf && matchCompany && matchSearch;

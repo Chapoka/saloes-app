@@ -87,7 +87,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <span>Detalhes do Serviço</span>
+              <span>Detalhes do Agendamento</span>
               {!isGrouped && (
                 <span className={cn("text-xs px-2 py-1 rounded-full", status.bg, status.color)}>
                   {status.label}
@@ -169,7 +169,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                   <Users className="w-4 h-4 text-purple-500" />
                   Dependentes vinculados: {dependentsOfGuardian.map(d => d.name).join(", ")}
                 </p>
-                <p className="text-xs text-purple-500">Os serviços destes dependentes aparecerão separadamente na agenda.</p>
+                <p className="text-xs text-purple-500">Os agendamentos destes dependentes aparecerão separadamente na agenda.</p>
               </div>
             )}
 
@@ -365,11 +365,11 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                             className="w-full border border-red-200 text-red-500 hover:bg-red-50 rounded-lg text-xs h-7 mt-1"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
-                            Cancelar serviço de {gl.customer_name?.split(" ")[0]}
+                            Cancelar agendamento de {gl.customer_name?.split(" ")[0]}
                           </Button>
                         )}
                         {gl.status === "cancelled" && (
-                          <p className="text-xs text-gray-500 italic w-full text-center">Serviço cancelado</p>
+                          <p className="text-xs text-gray-500 italic w-full text-center">Agendamento cancelado</p>
                         )}
                       </div>
                     </div>
@@ -412,11 +412,11 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                     onClick={() => setShowRescheduleForm(true)}
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
-                    Reagendar este serviço
+                     Reagendar este agendamento
                   </Button>
                 ) : (
                   <div className="space-y-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                    <p className="text-sm font-medium text-amber-800">Reagendar serviço para:</p>
+                    <p className="text-sm font-medium text-amber-800">Reagendar agendamento para:</p>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="text-xs text-gray-500 mb-1 block">Data</label>
@@ -467,7 +467,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                 onClick={() => setShowDeleteDialog(true)}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                Excluir Serviço
+                 Excluir Agendamento
               </Button>
             </div>
           </div>
@@ -480,7 +480,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir {isGrouped ? "estes serviços" : <>este serviço de <strong>{appointment?.customer_name}</strong></>}?
+              Tem certeza que deseja excluir {isGrouped ? "estes agendamentos" : <>este agendamento de <strong>{appointment?.customer_name}</strong></>}?
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>

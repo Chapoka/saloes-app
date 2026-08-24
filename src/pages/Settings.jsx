@@ -20,6 +20,7 @@ import {
   PaintBucket,
   Award,
   Crown,
+  UserCog,
 } from "lucide-react";
 import CompanyIntegrationCard from "@/components/settings/CompanyIntegrationCard";
 import ModalitiesSection from "@/components/settings/ModalitiesSection";
@@ -63,6 +64,7 @@ export default function Settings() {
     role: "cliente",
     company_ids: [],
     is_master: false,
+    is_professional: false,
   });
 
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
@@ -209,6 +211,7 @@ export default function Settings() {
           rg: userData.rg || null,
           birth_date: userData.birth_date || null,
           is_master: userData.is_master || false,
+          is_professional: userData.is_professional || false,
         };
         const { error: updateError } = await supabase
           .from("users")
@@ -257,7 +260,7 @@ export default function Settings() {
       }
       setShowUserModal(false);
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false });
+      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
     },
     onError: (error) => {
       console.error("saveUserMutation error:", error);
@@ -319,10 +322,11 @@ export default function Settings() {
         role: user.role || "cliente",
         company_ids: user.company_ids || [],
         is_master: user.is_master || false,
+        is_professional: user.is_professional || user.role === "profissional" || false,
       });
     } else {
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: isProfissional && currentUserCompanyIds.length ? [currentUserCompanyIds[0]] : [], is_master: false });
+      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: isProfissional && currentUserCompanyIds.length ? [currentUserCompanyIds[0]] : [], is_master: false, is_professional: false });
     }
     setShowUserModal(true);
   };
@@ -337,6 +341,7 @@ export default function Settings() {
       userFormData.birth_date !== (editingUser.birth_date || "") ||
       userFormData.role !== (editingUser.role || "cliente") ||
       (userFormData.is_master || false) !== (editingUser.is_master || false) ||
+      (userFormData.is_professional || false) !== (editingUser.is_professional || false) ||
       JSON.stringify(userFormData.company_ids) !== JSON.stringify(editingUser.company_ids || [])
     );
   };
@@ -350,7 +355,7 @@ export default function Settings() {
       toast.info("Nenhuma alteração efetuada");
       setShowUserModal(false);
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false });
+      setUserFormData({ full_name: "", email: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
       return;
     }
     saveUserMutation.mutate(userFormData);
@@ -887,6 +892,23 @@ export default function Settings() {
                     />
                   </div>
                 )}
+
+                {/* Professional toggle */}
+                <label className="flex items-center gap-3 cursor-pointer p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                  <input
+                    type="checkbox"
+                    checked={userFormData.is_professional || false}
+                    onChange={(e) => setUserFormData({ ...userFormData, is_professional: e.target.checked })}
+                    className="w-4 h-4 text-blue-500"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-blue-900 flex items-center gap-1.5">
+                      <UserCog className="w-4 h-4" />
+                      É profissional
+                    </p>
+                    <p className="text-xs text-blue-600">Permitirá agendar este usuário como profissional nos atendimentos</p>
+                  </div>
+                </label>
 
                 {/* Master toggle - only super_admin */}
                 {isSuperAdmin && editingUser && (

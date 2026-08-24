@@ -337,7 +337,7 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                             <div className="flex items-center justify-between text-sm">
                               <div className="flex items-center gap-2 text-gray-600">
                                 <Droplets className="w-4 h-4 text-branding-primary" />
-                                <span>Tipo de Serviço:</span>
+                                <span>Tipo de Agendamento:</span>
                               </div>
                               <span className="font-medium text-gray-900">
                                 {serviceCategoryLabels[appointment.service_category] || appointment.service_category}

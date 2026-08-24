@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
-import { Calendar, Clock, User, Star, RotateCcw, BookOpen, Users, Check } from "lucide-react";
+import { Calendar, Clock, User, Star, RotateCcw, Users, Check, Scissors, Package } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,20 +16,22 @@ for (let h = 0; h <= 23; h++) {
 }
 
 const APPOINTMENT_TYPES = [
-  { value: "plan", label: "Serviço do Plano", icon: BookOpen, color: "border-branding-primary bg-branding-primary/5 text-branding-primary" },
+  { value: "normal", label: "Normal", icon: Scissors, color: "border-branding-primary bg-branding-primary/5 text-branding-primary" },
   { value: "trial", label: "Experimental", icon: Star, color: "border-amber-400 bg-amber-50 text-amber-600" },
   { value: "makeup", label: "Reposição", icon: RotateCcw, color: "border-purple-400 bg-purple-50 text-purple-600" },
 ];
 
-export default function NewAppointmentModal({ open, onClose, customers, plans = [], appointments = [], selectedDate, selectedTime, onSubmit, isLoading }) {
-  const [appointmentType, setAppointmentType] = useState("plan");
+export default function NewAppointmentModal({ open, onClose, customers, plans = [], services = [], professionals = [], products = [], appointments = [], blockedTimes = [], selectedDate, selectedTime, onSubmit, isLoading }) {
+  const [appointmentType, setAppointmentType] = useState("normal");
   const [extraCustomerIds, setExtraCustomerIds] = useState([]);
   const [formData, setFormData] = useState({
     customer_id: "",
+    service_id: "",
+    professional_id: "",
+    product_id: "",
     date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
     start_time: "08:00",
     duration_mins: 60,
-    service_category: "corte",
     original_appointment_id: "",
   });
 
@@ -45,38 +47,64 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     }
   }, [selectedTime]);
 
-  // Auto-fill service_category/duration from customer's plan
+  useEffect(() => {
+    if (appointmentType !== "makeup") {
+      setFormData(prev => ({ ...prev, original_appointment_id: "" }));
+    }
+  }, [appointmentType]);
+
+  const activeServices = useMemo(() => services.filter(s => s.active !== false && s.type !== "product"), [services]);
+  const activeProducts = useMemo(() => products.filter(p => p.active !== false && p.type === "product"), [products]);
+  const activeProfessionals = useMemo(() => professionals.filter(p => {
+    const rawRole = p.role || "";
+    const role = rawRole === "teacher" ? "profissional" : rawRole;
+    return p.active !== false && (role === "profissional" || p.is_professional === true);
+  }), [professionals]);
+
   const handleCustomerChange = (customerId) => {
     const customer = customers.find(s => s.id === customerId);
     if (!customer) return setFormData(prev => ({ ...prev, customer_id: customerId, original_appointment_id: "" }));
-    
-    let service_category = formData.service_category;
+
+    let service_id = formData.service_id;
     let duration_mins = formData.duration_mins;
-    
-    if (customer.custom_plan) {
-      service_category = customer.custom_plan.modality || service_category;
-      duration_mins = customer.custom_plan.duration_mins || duration_mins;
-    } else if (customer.plan_id) {
+
+    if (customer.plan_id) {
       const plan = plans.find(p => p.id === customer.plan_id);
       if (plan) {
-        service_category = plan.modality || service_category;
-        duration_mins = plan.duration_mins || duration_mins;
+        const matchingService = activeServices.find(s => s.category?.toLowerCase() === plan.modality?.toLowerCase());
+        if (matchingService) {
+          service_id = matchingService.id;
+          duration_mins = matchingService.duration_mins || duration_mins;
+        }
+      }
+    } else if (customer.custom_plan) {
+      const matchingService = activeServices.find(s => s.category?.toLowerCase() === customer.custom_plan.modality?.toLowerCase());
+      if (matchingService) {
+        service_id = matchingService.id;
+        duration_mins = matchingService.duration_mins || duration_mins;
       }
     }
-    
-    setFormData(prev => ({ ...prev, customer_id: customerId, service_category, duration_mins, original_appointment_id: "" }));
-    // Auto-select same-guardian customers (merge with any manual selections)
+
+    setFormData(prev => ({ ...prev, customer_id: customerId, service_id, duration_mins, original_appointment_id: "" }));
+
     const guardianIds = customer.guardian_id
       ? customers.filter(s => s.id !== customerId && s.guardian_id === customer.guardian_id).map(s => s.id)
       : customers.filter(s => s.id !== customerId && s.guardian_id === customerId).map(s => s.id);
     setExtraCustomerIds(prev => {
-      // Keep manually-added non-guardian customers, replace guardian ones
       const nonGuardian = prev.filter(id => !guardianIds.includes(id));
       return [...new Set([...guardianIds, ...nonGuardian])];
     });
   };
 
-  // Find customers who share the same guardian (responsável)
+  const handleServiceChange = (serviceId) => {
+    const service = activeServices.find(s => s.id === serviceId);
+    if (service) {
+      setFormData(prev => ({ ...prev, service_id: serviceId, duration_mins: service.duration_mins || prev.duration_mins }));
+    } else {
+      setFormData(prev => ({ ...prev, service_id: serviceId }));
+    }
+  };
+
   const selectedCustomer = customers.find(s => s.id === formData.customer_id);
   const sameGuardianCustomers = (() => {
     if (!selectedCustomer) return [];
@@ -100,10 +128,14 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     );
   };
 
-  // Absent appointments for the selected customer (for makeup linking)
-  const absentAppointments = appointmentType === "makeup" && formData.customer_id
-    ? appointments.filter(l => l.customer_id === formData.customer_id && l.status === "absent" && !l.rescheduled)
-    : [];
+  const absentAppointments = useMemo(() => {
+    if (appointmentType !== "makeup" || !formData.customer_id) return [];
+    return appointments.filter(l =>
+      l.customer_id === formData.customer_id &&
+      (l.status === "absent" || l.status === "cancelled") &&
+      !l.rescheduled
+    );
+  }, [appointmentType, formData.customer_id, appointments]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -117,17 +149,15 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     const endMins = totalMinutes % 60;
     const newEndTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
 
-    // Credit validation for plan appointments
-    if (appointmentType === "plan") {
+    if (appointmentType === "normal") {
       for (const s of allSelectedCustomers) {
         if ((s.current_credits || 0) <= 0) {
-          toast.error(`${s.name} não tem créditos disponíveis para agendamento do plano!`);
+          toast.error(`${s.name} não tem créditos disponíveis para agendamento!`);
           return;
         }
       }
     }
 
-    // Check for time conflicts for ALL selected customers
     for (const s of allSelectedCustomers) {
       const conflict = appointments.find(l =>
         l.customer_id === s.id &&
@@ -137,15 +167,25 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
         newEndTime > l.start_time
       );
       if (conflict) {
-        toast.error(`${s.name} já tem serviço nesse horário (${conflict.start_time} - ${conflict.end_time})`);
+        toast.error(`${s.name} já tem agendamento nesse horário (${conflict.start_time} - ${conflict.end_time})`);
         return;
       }
     }
 
-    // Map appointment type to status
-    const statusMap = { plan: "scheduled", trial: "trial", makeup: "makeup" };
+    const blockedConflict = blockedTimes.find(bt =>
+      bt.date === formData.date &&
+      formData.start_time < bt.end_time &&
+      newEndTime > bt.start_time
+    );
+    if (blockedConflict) {
+      toast.error(`Horário bloqueado (${blockedConflict.start_time} - ${blockedConflict.end_time})${blockedConflict.description ? `: ${blockedConflict.description}` : ''}`);
+      return;
+    }
 
-    // Build appointment data for all selected customers
+    const statusMap = { normal: "scheduled", trial: "trial", makeup: "makeup" };
+
+    const selectedService = activeServices.find(s => s.id === formData.service_id);
+
     const allData = allSelectedCustomers.map(s => {
       const submitData = {
         ...formData,
@@ -156,33 +196,36 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
         status: statusMap[appointmentType],
         service_performed: false,
         appointment_type: appointmentType,
+        service_category: selectedService?.category || "outro",
       };
       if (!submitData.original_appointment_id) delete submitData.original_appointment_id;
+      if (!submitData.service_id) delete submitData.service_id;
+      if (!submitData.professional_id) delete submitData.professional_id;
+      if (!submitData.product_id) delete submitData.product_id;
       return submitData;
     });
 
-    // Always submit as array for consistency
     onSubmit(allData);
   };
 
   const handleClose = () => {
-    setAppointmentType("plan");
+    setAppointmentType("normal");
     setExtraCustomerIds([]);
-    setFormData({ customer_id: "", date: "", start_time: selectedTime || "08:00", duration_mins: 60, service_category: "corte", original_appointment_id: "" });
+    setFormData({ customer_id: "", service_id: "", professional_id: "", product_id: "", date: "", start_time: selectedTime || "08:00", duration_mins: 60, original_appointment_id: "" });
     onClose();
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md rounded-2xl">
+      <DialogContent className="sm:max-w-md rounded-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Serviço</DialogTitle>
+          <DialogTitle>Novo Agendamento</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          {/* Appointment Type Selection */}
+          {/* Tipo de Agendamento */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Tipo de Serviço</Label>
+            <Label className="text-sm font-medium text-gray-700">Tipo de Agendamento</Label>
             <div className="grid grid-cols-3 gap-2">
               {APPOINTMENT_TYPES.map(type => {
                 const Icon = type.icon;
@@ -204,7 +247,38 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             </div>
           </div>
 
-          {/* Customer */}
+          {/* Reposição - Agendamentos perdidos/cancelados */}
+          {appointmentType === "makeup" && !formData.customer_id && (
+            <div className="p-3 rounded-xl bg-purple-50 border border-purple-200 text-sm text-purple-700 flex items-center gap-2">
+              <RotateCcw className="w-4 h-4 flex-shrink-0" />
+              Selecione o cliente para ver agendamentos de origem (faltas ou cancelamentos)
+            </div>
+          )}
+          {appointmentType === "makeup" && formData.customer_id && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">
+                Agendamento de origem <span className="text-gray-500 font-normal">— opcional</span>
+              </Label>
+              {absentAppointments.length === 0 ? (
+                <p className="text-sm text-gray-500 italic">Nenhum agendamento perdido ou cancelado para este cliente</p>
+              ) : (
+                <Select value={formData.original_appointment_id} onValueChange={(v) => setFormData(prev => ({ ...prev, original_appointment_id: v }))}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder="Selecione o agendamento de origem" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {absentAppointments.map(l => (
+                      <SelectItem key={l.id} value={l.id}>
+                        {l.date} {l.start_time} — {l.status === "absent" ? "Falta" : "Cancelado"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          )}
+
+          {/* Cliente */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">Cliente</Label>
             <Select value={formData.customer_id} onValueChange={handleCustomerChange}>
@@ -217,7 +291,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-gray-500" />
                       {cust.name}
-                      {appointmentType === "plan" && (
+                      {appointmentType === "normal" && (
                         <span className="text-gray-500 text-xs">
                           ({cust.current_credits || 0} créd.)
                         </span>
@@ -229,7 +303,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             </Select>
           </div>
 
-          {/* Additional Customers from same guardian */}
+          {/* Mesmo responsável */}
           {sameGuardianCustomers.length > 0 && (() => {
             const guardianIds = sameGuardianCustomers.map(s => s.id);
             const allSelected = guardianIds.every(id => extraCustomerIds.includes(id));
@@ -286,7 +360,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             );
           })()}
 
-          {/* Add any other customer */}
+          {/* Outros clientes */}
           {formData.customer_id && (() => {
             const guardianIds = new Set(sameGuardianCustomers.map(s => s.id));
             const otherCustomers = customers.filter(s =>
@@ -334,8 +408,6 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             );
           })()}
 
-
-
           {allSelectedCustomers.length > 1 && (
             <div className="flex items-center gap-2 p-2 bg-branding-primary/5 rounded-xl text-sm text-branding-primary">
               <Users className="w-4 h-4" />
@@ -343,32 +415,82 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             </div>
           )}
 
-          {/* Absent appointment link for makeup */}
-          {appointmentType === "makeup" && formData.customer_id && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Serviço de origem (ausência) <span className="text-gray-500 font-normal">— opcional</span>
-              </Label>
-              {absentAppointments.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">Nenhuma falta registrada para este cliente</p>
-              ) : (
-                <Select value={formData.original_appointment_id} onValueChange={(v) => setFormData(prev => ({ ...prev, original_appointment_id: v }))}>
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="Selecione o serviço com ausência" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {absentAppointments.map(l => (
-                      <SelectItem key={l.id} value={l.id}>
-                        {l.date} {l.start_time} — {(l.service_category || l.modality) === "corte" ? "Corte" : "Barba"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-          )}
+          {/* Serviço */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700">Serviço</Label>
+            <Select value={formData.service_id} onValueChange={handleServiceChange}>
+              <SelectTrigger className="rounded-xl">
+                <SelectValue placeholder="Selecione o serviço" />
+              </SelectTrigger>
+              <SelectContent>
+                {activeServices.length === 0 ? (
+                  <SelectItem value="none" disabled>Nenhum serviço disponível</SelectItem>
+                ) : (
+                  activeServices.map(svc => (
+                    <SelectItem key={svc.id} value={svc.id}>
+                      <div className="flex items-center gap-2">
+                        <Scissors className="w-4 h-4 text-gray-500" />
+                        {svc.name}
+                        <span className="text-gray-400 text-xs">R$ {Number(svc.price || 0).toFixed(2)}</span>
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
 
-          {/* Date & Time */}
+          {/* Profissional */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700">Profissional</Label>
+            <Select value={formData.professional_id} onValueChange={(v) => handleChange("professional_id", v)}>
+              <SelectTrigger className="rounded-xl">
+                <SelectValue placeholder="Selecione o profissional" />
+              </SelectTrigger>
+              <SelectContent>
+                {activeProfessionals.length === 0 ? (
+                  <SelectItem value="none" disabled>Nenhum profissional disponível</SelectItem>
+                ) : (
+                  activeProfessionals.map(pro => (
+                    <SelectItem key={pro.id} value={pro.id}>
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-gray-500" />
+                        {pro.full_name || pro.email}
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Produto */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+              <Package className="w-4 h-4 text-gray-500" />
+              Produto
+              <span className="text-gray-500 font-normal">— opcional</span>
+            </Label>
+            <Select value={formData.product_id} onValueChange={(v) => handleChange("product_id", v)}>
+              <SelectTrigger className="rounded-xl">
+                <SelectValue placeholder="Selecione o produto" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhum produto</SelectItem>
+                {activeProducts.map(prod => (
+                  <SelectItem key={prod.id} value={prod.id}>
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4 text-gray-500" />
+                      {prod.name}
+                      <span className="text-gray-400 text-xs">R$ {Number(prod.price || 0).toFixed(2)}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Data & Hora */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-gray-700">Data</Label>
@@ -402,46 +524,33 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             </div>
           </div>
 
-          {/* Duration & Modality */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Duração</Label>
-              <Select
-                value={formData.duration_mins.toString()}
-                onValueChange={(v) => handleChange("duration_mins", parseInt(v))}
-              >
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">30 minutos</SelectItem>
-                  <SelectItem value="60">60 minutos</SelectItem>
-                  <SelectItem value="90">90 minutos</SelectItem>
-                  <SelectItem value="120">120 minutos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Tipo de Serviço</Label>
-              <Select value={formData.service_category} onValueChange={(v) => handleChange("service_category", v)}>
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="corte">Corte</SelectItem>
-                  <SelectItem value="barba">Barba</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Duração */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700">Duração</Label>
+            <Select
+              value={formData.duration_mins.toString()}
+              onValueChange={(v) => handleChange("duration_mins", parseInt(v))}
+            >
+              <SelectTrigger className="rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="15">15 minutos</SelectItem>
+                <SelectItem value="30">30 minutos</SelectItem>
+                <SelectItem value="45">45 minutos</SelectItem>
+                <SelectItem value="60">60 minutos</SelectItem>
+                <SelectItem value="90">90 minutos</SelectItem>
+                <SelectItem value="120">120 minutos</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          {appointmentType !== "plan" && (
+          {appointmentType !== "normal" && (
             <div className={cn("p-3 rounded-xl text-sm flex items-center gap-2",
               appointmentType === "trial" ? "bg-amber-50 border border-amber-200 text-amber-700" : "bg-purple-50 border border-purple-200 text-purple-700"
             )}>
               {appointmentType === "trial" ? "⭐" : "🔄"}
-              {appointmentType === "trial" ? "Serviços experimentais não consomem créditos" : "Reposições não consomem créditos"}
+              {appointmentType === "trial" ? "Agendamentos experimentais não consomem créditos" : "Reposições não consomem créditos"}
             </div>
           )}
 
@@ -452,13 +561,13 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             <Button
               type="submit"
               disabled={!formData.customer_id || isLoading}
-              className={cn("flex-1 rounded-xl", 
+              className={cn("flex-1 rounded-xl",
                 appointmentType === "trial" ? "bg-gradient-to-r from-amber-500 to-amber-600" :
                 appointmentType === "makeup" ? "bg-gradient-to-r from-purple-500 to-purple-600" :
                 "btn-branding"
               )}
             >
-              {isLoading ? "Agendando..." : allSelectedCustomers.length > 1 ? `Agendar ${allSelectedCustomers.length} Serviços` : "Agendar Serviço"}
+              {isLoading ? "Agendando..." : allSelectedCustomers.length > 1 ? `Agendar ${allSelectedCustomers.length} Agendamentos` : "Agendar"}
             </Button>
           </div>
         </form>

@@ -67,7 +67,7 @@ export default function RepeatAppointmentDialog({ open, onClose, appointment, on
 
           {previewDates.length > 0 && (
             <div className="text-xs text-gray-500">
-              <p className="mb-1 font-medium">Próximos serviços:</p>
+              <p className="mb-1 font-medium">Próximos agendamentos:</p>
               {previewDates.map((d, i) => (
                 <span key={i} className="inline-block mr-2 bg-gray-100 px-2 py-0.5 rounded">{d}</span>
               ))}

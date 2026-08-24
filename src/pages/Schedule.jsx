@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { db } from "@/api/dbClient";
 import { supabase } from "@/lib/supabaseClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Calendar, CalendarDays, CalendarRange, Building2, Users, Clock, AlertTriangle } from "lucide-react";
+import { Plus, Calendar, CalendarDays, CalendarRange, Building2, Users, Clock, AlertTriangle, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import WeeklyCalendar from "@/components/schedule/WeeklyCalendar";
@@ -12,6 +12,7 @@ import AppointmentModal from "@/components/schedule/AppointmentModal";
 import NewAppointmentModal from "@/components/schedule/NewAppointmentModal";
 import RepeatAppointmentDialog from "@/components/schedule/RepeatAppointmentDialog";
 import BusinessHoursModal from "@/components/schedule/BusinessHoursModal";
+import BlockedTimesModal from "@/components/schedule/BlockedTimesModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { addWeeks, format as fnsFormat } from "date-fns";
@@ -46,6 +47,7 @@ export default function Schedule() {
   const [repeatAppointment, setRepeatAppointment] = useState(null);
   const [isCreatingRepeat, setIsCreatingRepeat] = useState(false);
   const [showBusinessHours, setShowBusinessHours] = useState(false);
+  const [showBlockedTimes, setShowBlockedTimes] = useState(false);
   const [outOfHoursSlot, setOutOfHoursSlot] = useState(null);
 
   useEffect(() => {
@@ -106,6 +108,18 @@ export default function Schedule() {
     },
   });
 
+  const createBlockedTimeMutation = useMutation({
+    mutationFn: async (data) => {
+      const { error } = await supabase
+        .from("blocked_times")
+        .insert(data);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blocked_times"] });
+    },
+  });
+
   const { data: customers = [] } = useQuery({
     queryKey: ["customers", effectiveCompanyId, isProfissional, isSuperAdmin],
     queryFn: () => effectiveCompanyId
@@ -159,6 +173,19 @@ export default function Schedule() {
     enabled: !!currentUser && (!effectiveCompanyId || customerIds.length > 0),
   });
 
+  const { data: blockedTimes = [] } = useQuery({
+    queryKey: ["blocked_times", effectiveCompanyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("blocked_times")
+        .select("*")
+        .eq("company_id", effectiveCompanyId);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!effectiveCompanyId,
+  });
+
   const createAppointmentMutation = useMutation({
     mutationFn: async (data) => {
       // Support batch creation (array of appointments)
@@ -186,7 +213,7 @@ export default function Schedule() {
       queryClient.invalidateQueries({ queryKey: ["makeup_appointments"] });
       setShowNewAppointment(false);
       const count = Array.isArray(results) ? results.length : 1;
-      toast.success(count > 1 ? `${count} serviços agendados com sucesso!` : "Serviço agendado com sucesso!");
+      toast.success(count > 1 ? `${count} agendamentos criados com sucesso!` : "Agendamento criado com sucesso!");
 
       // Sync to connected calendars
       const stored = getStoredCalendarTokens();
@@ -392,7 +419,7 @@ export default function Schedule() {
     mutationFn: (appointmentId) => db.entities.Appointment.delete(appointmentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
-      toast.success("Serviço excluído com sucesso!");
+      toast.success("Agendamento excluído com sucesso!");
     },
   });
 
@@ -406,7 +433,7 @@ export default function Schedule() {
       await db.entities.Appointment.delete(id);
     }
     queryClient.invalidateQueries({ queryKey: ["appointments"] });
-    toast.success(`${count} ${count === 1 ? "serviço excluído" : "serviços excluídos"} com sucesso!`);
+    toast.success(`${count} ${count === 1 ? "agendamento excluído" : "agendamentos excluídos"} com sucesso!`);
   };
 
   // Apply customer filter on the client side
@@ -439,7 +466,7 @@ export default function Schedule() {
     queryClient.invalidateQueries({ queryKey: ["appointments"] });
     setRepeatAppointment(null);
     setIsCreatingRepeat(false);
-    toast.success(`${weeks} serviços agendados com sucesso!`);
+    toast.success(`${weeks} agendamentos criados com sucesso!`);
   };
 
   const handleReschedule = async (appointment, newDate, newTime) => {
@@ -466,11 +493,11 @@ export default function Schedule() {
       duration_mins: appointment.duration_mins,
       service_category: appointment.service_category || appointment.modality,
       status: "scheduled",
-      notes: `Reagendamento do serviço de ${appointment.date}`,
+        notes: `Reagendamento do agendamento de ${appointment.date}`,
       company_id: appointment.company_id || companyId || undefined,
     });
 
-    toast.success("Serviço reagendado com sucesso!");
+    toast.success("Agendamento reagendado com sucesso!");
     setSelectedAppointment(null);
   };
 
@@ -486,7 +513,7 @@ export default function Schedule() {
               </div>
               Agenda
             </h1>
-            <p className="text-gray-500 mt-1">Gerencie os serviços e atendimentos</p>
+            <p className="text-gray-500 mt-1">Gerencie os agendamentos e atendimentos</p>
           </div>
           
           <div className="flex items-center gap-2 flex-wrap">
@@ -526,6 +553,16 @@ export default function Schedule() {
                 Horário
               </Button>
             )}
+            {(isAdmin || isSuperAdmin) && (
+              <Button
+                variant="outline"
+                onClick={() => setShowBlockedTimes(true)}
+                className="rounded-xl border-gray-200"
+              >
+                <Ban className="w-4 h-4 mr-2" />
+                Bloquear Horário
+              </Button>
+            )}
             <Button
               onClick={() => {
                 setSelectedDate(new Date());
@@ -535,7 +572,7 @@ export default function Schedule() {
               className="btn-branding rounded-xl shadow-lg shadow-branding-primary/20"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Novo Serviço
+              Novo Agendamento
             </Button>
           </div>
         </div>
@@ -629,7 +666,11 @@ export default function Schedule() {
           }}
           customers={customers}
           plans={plans}
+          services={allServices}
+          professionals={allUsers}
+          products={allServices}
           appointments={appointments}
+          blockedTimes={blockedTimes}
           selectedDate={selectedDate}
           selectedTime={selectedTime}
           onSubmit={(data) => {
@@ -660,6 +701,20 @@ export default function Schedule() {
           companyId={companyId}
           isSuperAdmin={isSuperAdmin}
           onSave={(data, targetId) => updateCompanyMutation.mutateAsync({ data, targetCompanyId: targetId })}
+        />
+
+        {/* Blocked Times Modal */}
+        <BlockedTimesModal
+          open={showBlockedTimes}
+          onClose={() => setShowBlockedTimes(false)}
+          company={currentCompany}
+          companies={isSuperAdmin ? companies : companies.filter(c => {
+            const ids = currentUser?.company_ids?.length ? currentUser.company_ids : (currentUser?.company_id ? [currentUser.company_id] : []);
+            return ids.includes(c.id);
+          })}
+          companyId={companyId}
+          isSuperAdmin={isSuperAdmin}
+          onSave={(data) => createBlockedTimeMutation.mutateAsync(data)}
         />
 
         {/* Out of Hours Confirmation */}

@@ -458,7 +458,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2 text-gray-600">
                           <Droplets className="w-4 h-4 text-branding-primary" />
-                          <span>Tipo de Serviço:</span>
+                          <span>Tipo de Agendamento:</span>
                         </div>
                         <span className="font-medium text-gray-900">
                           {appointment.service_category === "corte" ? "Corte" : "Barba"}
@@ -506,7 +506,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
               className="w-full rounded-xl"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Excluir {selectedIds.size} {selectedIds.size === 1 ? "serviço selecionado" : "serviços selecionados"}
+              Excluir {selectedIds.size} {selectedIds.size === 1 ? "agendamento selecionado" : "agendamentos selecionados"}
             </Button>
           )}
           <Button
@@ -516,7 +516,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
             }}
             className="w-full btn-branding rounded-xl"
           >
-            Agendar Novo Serviço
+            Agendar Novo Agendamento
           </Button>
         </div>
       </DialogContent>
@@ -528,7 +528,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir {selectedIds.size} {selectedIds.size === 1 ? "serviço" : "serviços"}?
+            Tem certeza que deseja excluir {selectedIds.size} {selectedIds.size === 1 ? "agendamento" : "agendamentos"}?
             Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>

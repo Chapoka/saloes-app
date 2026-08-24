@@ -222,6 +222,13 @@ export interface User {
   company_id?: string;
   company_ids?: string[];
   stylist_level_id?: string;
+  is_professional?: boolean;
+  phone?: string;
+  photo_url?: string;
+  specialty?: string;
+  commission_pct?: number;
+  work_days?: string[];
+  is_master?: boolean;
   created_at?: string;
   updated_at?: string;
 }

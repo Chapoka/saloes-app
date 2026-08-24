@@ -259,6 +259,23 @@
  * @property {string} [updated_at]
  */
 
+/**
+ * @typedef {Object} BlockedTime
+ * @property {string} id
+ * @property {string} company_id
+ * @property {string} date
+ * @property {string} start_time
+ * @property {string} end_time
+ * @property {string} [description]
+ * @property {boolean} [block_all_barbers]
+ * @property {"none"|"weekly"|"daily"|"period"} [recurrence_type]
+ * @property {number} [recurrence_day_of_week]
+ * @property {string} [period_start_date]
+ * @property {string} [period_end_date]
+ * @property {string} [created_at]
+ * @property {string} [updated_at]
+ */
+
 import { supabase } from "@/lib/supabaseClient";
 
 const _tableColumnsCache = {};
@@ -297,6 +314,7 @@ const ENTITY_TABLE_MAP = {
   StylistLevel: "stylist_levels",
   PunchCard: "punch_cards",
   ProfessionalService: "professional_services",
+  BlockedTime: "blocked_times",
 };
 
 const CUSTOMER_COLUMN_MAP = {
