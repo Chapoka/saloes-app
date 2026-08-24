@@ -253,10 +253,7 @@ export default function Schedule() {
         });
       }
 
-      const first = Array.isArray(results) ? results[0] : results;
-      if (first && first.appointment_type === "plan") {
-        setRepeatAppointment(first);
-      }
+      // Popup de repetição removido — disponível via detalhes do agendamento
     },
   });
 
