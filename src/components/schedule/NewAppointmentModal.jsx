@@ -49,9 +49,9 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
   useEffect(() => {
     if (formData.date && timeOptions.length > 0 && !timeOptions.includes(formData.start_time)) {
-      setFormData(prev => ({ ...prev, start_time: timeOptions[0] }));
+      setFormData(prev => ({ ...prev, start_time: timeOptions[0] || "08:00" }));
     }
-  }, [formData.date, timeOptions]);
+  }, [formData.date]);
 
   useEffect(() => {
     if (appointmentType !== "makeup") {
@@ -201,8 +201,9 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
     const allData = allSelectedCustomers.map(s => {
       const submitData = {
-        ...formData,
         customer_id: s.id,
+        date: formData.date,
+        start_time: formData.start_time,
         duration_mins: Number(formData.duration_mins),
         customer_name: s.name || "",
         end_time: newEndTime,
@@ -211,10 +212,10 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
         appointment_type: appointmentType,
         service_category: selectedService?.category || "outro",
       };
-      if (!submitData.original_appointment_id) delete submitData.original_appointment_id;
-      if (!submitData.service_id) delete submitData.service_id;
-      if (!submitData.professional_id) delete submitData.professional_id;
-      if (!submitData.product_id) delete submitData.product_id;
+      if (formData.original_appointment_id) submitData.original_appointment_id = formData.original_appointment_id;
+      if (formData.service_id) submitData.service_id = formData.service_id;
+      if (formData.professional_id) submitData.professional_id = formData.professional_id;
+      if (formData.product_id) submitData.product_id = formData.product_id;
       return submitData;
     });
 
