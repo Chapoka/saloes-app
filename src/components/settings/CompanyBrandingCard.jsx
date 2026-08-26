@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { db } from "@/api/dbClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, PaintBucket, Image, Type, ChevronDown, ChevronUp, Building2, Palette } from "lucide-react";
+import { Save, PaintBucket, Image, Type, ChevronDown, ChevronUp, Building2, Palette, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +53,8 @@ export default function CompanyBrandingCard({ company }) {
   const accent = form.branding_accent_color || "#1e293b";
   const background = form.branding_background_color || "#f8fafc";
 
+  const [uploading, setUploading] = useState(false);
+
   return (
     <div className="border border-gray-200 rounded-2xl overflow-hidden">
       <button
@@ -60,9 +62,12 @@ export default function CompanyBrandingCard({ company }) {
         className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-3">
+          {form.branding_logo_url ? (
+            <img src={form.branding_logo_url} alt="" className="w-9 h-9 rounded-xl object-cover bg-white border" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+          ) : null}
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})` }}
+            style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, display: form.branding_logo_url ? 'none' : 'flex' }}
           >
             <Building2 className="w-4 h-4 text-white" />
           </div>
@@ -99,15 +104,45 @@ export default function CompanyBrandingCard({ company }) {
               <Image className="w-4 h-4 text-gray-500" />
               <p className="font-semibold text-gray-800">Logo</p>
             </div>
-            <Input
-              value={form.branding_logo_url}
-              onChange={e => setField("branding_logo_url", e.target.value)}
-              placeholder="https://... (URL da imagem)"
-              className="rounded-xl bg-white text-sm"
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                value={form.branding_logo_url}
+                onChange={e => setField("branding_logo_url", e.target.value)}
+                placeholder="URL da imagem"
+                className="rounded-xl bg-white text-sm flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="shrink-0 rounded-xl"
+                disabled={uploading}
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/*";
+                  input.onchange = async () => {
+                    const file = input.files?.[0];
+                    if (!file) return;
+                    setUploading(true);
+                    try {
+                      const result = await db.integrations.Core.UploadFile({ file });
+                      setField("branding_logo_url", result.file_url);
+                    } catch (err) {
+                      toast.error("Erro ao fazer upload: " + (err.message || err));
+                    } finally {
+                      setUploading(false);
+                    }
+                  };
+                  input.click();
+                }}
+              >
+                {uploading ? "Enviando..." : <><Upload className="w-4 h-4 mr-1" />Upload</>}
+              </Button>
+            </div>
             {form.branding_logo_url && (
-              <div className="mt-2 p-2 bg-white rounded-xl border inline-block">
+              <div className="mt-2 p-2 bg-white rounded-xl border inline-flex items-center gap-2">
                 <img src={form.branding_logo_url} alt="Preview" className="h-10 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
+                <button type="button" onClick={() => setField("branding_logo_url", "")} className="text-xs text-red-500 hover:underline">Remover</button>
               </div>
             )}
           </div>

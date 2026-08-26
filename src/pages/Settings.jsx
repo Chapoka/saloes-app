@@ -21,6 +21,8 @@ import {
   Award,
   Crown,
   UserCog,
+  Phone,
+  User,
 } from "lucide-react";
 import CompanyIntegrationCard from "@/components/settings/CompanyIntegrationCard";
 import ModalitiesSection from "@/components/settings/ModalitiesSection";
@@ -59,6 +61,7 @@ export default function Settings() {
     full_name: "",
     email: "",
     password: "",
+    whatsapp: "",
     cpf: "",
     rg: "",
     birth_date: "",
@@ -73,6 +76,12 @@ export default function Settings() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [mustChangeOnLogin, setMustChangeOnLogin] = useState(false);
   const [resetTargetUser, setResetTargetUser] = useState(null);
+  const [foundCustomer, setFoundCustomer] = useState(null);
+  const [foundCustomerHasUser, setFoundCustomerHasUser] = useState(false);
+  const [showImportCustomerModal, setShowImportCustomerModal] = useState(false);
+  const [importEmailChecked, setImportEmailChecked] = useState("");
+  const [existingUserFound, setExistingUserFound] = useState(null);
+  const [showExistingUserModal, setShowExistingUserModal] = useState(false);
 
   const [currentUser, setCurrentUser] = useState(null);
   const [subaccountsCompany, setSubaccountsCompany] = useState(null);
@@ -131,6 +140,13 @@ export default function Settings() {
     queryKey: ["stylist_levels"],
     queryFn: () => db.entities.StylistLevel.list(),
   });
+
+  const { data: allCustomers = [] } = useQuery({
+    queryKey: ["customers"],
+    queryFn: () => db.entities.Customer.list(),
+  });
+
+  const customerEmailSet = new Set(allCustomers.map(c => c.email).filter(Boolean));
 
   const getCompanyName = (companyId) => {
     const c = companies.find(c => c.id === companyId);
@@ -207,6 +223,7 @@ export default function Settings() {
         const cleanData = {
           full_name: userData.full_name || null,
           email: userData.email || null,
+          whatsapp: userData.whatsapp || null,
           role: userData.role,
           cpf: userData.cpf || null,
           rg: userData.rg || null,
@@ -246,12 +263,17 @@ export default function Settings() {
             full_name: userData.full_name || "",
             role: userData.role || "cliente",
             company_ids: userData.company_ids || [],
+            whatsapp: userData.whatsapp || "",
+            cpf: userData.cpf || "",
+            rg: userData.rg || "",
+            birth_date: userData.birth_date || "",
           }),
         });
         const result = await res.json();
         if (!res.ok) throw new Error(result.error || "Erro ao criar usuário");
 
         if (result.user_id && userData.company_ids?.length) {
+          await supabase.from("user_companies").delete().eq("user_id", result.user_id);
           const rows = userData.company_ids.map(company_id => ({
             user_id: result.user_id,
             company_id,
@@ -277,18 +299,24 @@ export default function Settings() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      const isAlsoClient = customerEmailSet.has(userFormData.email);
       if (editingUser) {
         toast.success("Usuário atualizado!");
+      } else if (isAlsoClient) {
+        toast.success("Usuário criado! Este usuário também possui cadastro como cliente — dois perfis ativos.");
       } else {
         toast.success("Usuário criado com sucesso!");
       }
       setShowUserModal(false);
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", password: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
+      setUserFormData({ full_name: "", email: "", password: "", whatsapp: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
     },
     onError: (error) => {
       console.error("saveUserMutation error:", error);
-      const msg = error?.message || error?.error?.message || "Erro ao salvar usuário";
+      let msg = error?.message || error?.error?.message || "Erro ao salvar usuário";
+      if (msg.includes("already been registered") || msg.includes("already registered")) {
+        msg = "Este e-mail já está registrado como usuário do sistema. Tente editar o usuário existente.";
+      }
       toast.error(msg);
     },
   });
@@ -335,12 +363,18 @@ export default function Settings() {
   });
 
   const handleOpenUserModal = (user = null) => {
+    setImportEmailChecked("");
+    setFoundCustomer(null);
+    setFoundCustomerHasUser(false);
+    setExistingUserFound(null);
+    setShowExistingUserModal(false);
     if (user) {
       setEditingUser(user);
       setUserFormData({
         full_name: user.full_name || "",
         email: user.email || "",
         password: "",
+        whatsapp: user.whatsapp || "",
         cpf: user.cpf || "",
         rg: user.rg || "",
         birth_date: user.birth_date || "",
@@ -352,7 +386,7 @@ export default function Settings() {
     } else {
       setEditingUser(null);
       setUserFormData({
-        full_name: "", email: "", password: "", cpf: "", rg: "", birth_date: "",
+        full_name: "", email: "", password: "", whatsapp: "", cpf: "", rg: "", birth_date: "",
         role: "cliente",
         company_ids: isSuperAdmin ? [] : currentUserCompanyIds.length ? [currentUserCompanyIds[0]] : [],
         is_master: false,
@@ -367,6 +401,7 @@ export default function Settings() {
     return (
       userFormData.full_name !== (editingUser.full_name || "") ||
       userFormData.email !== (editingUser.email || "") ||
+      userFormData.whatsapp !== (editingUser.whatsapp || "") ||
       userFormData.cpf !== (editingUser.cpf || "") ||
       userFormData.rg !== (editingUser.rg || "") ||
       userFormData.birth_date !== (editingUser.birth_date || "") ||
@@ -386,10 +421,93 @@ export default function Settings() {
       toast.info("Nenhuma alteração efetuada");
       setShowUserModal(false);
       setEditingUser(null);
-      setUserFormData({ full_name: "", email: "", password: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
+      setUserFormData({ full_name: "", email: "", password: "", whatsapp: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
       return;
     }
     saveUserMutation.mutate(userFormData);
+  };
+
+  const handleCheckCustomerEmail = async (email) => {
+    if (!email || !email.includes("@") || editingUser) return;
+    if (email === importEmailChecked) return;
+    setImportEmailChecked(email);
+    setShowUserModal(false);
+    try {
+      const { data: customer, error: custErr } = await supabase
+        .from("customers")
+        .select("id, name, email, whatsapp, cpf, rg, birth_date")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (custErr) {
+        console.error("Error checking customer:", custErr);
+      }
+
+      if (customer) {
+        const { data: existingUser } = await supabase
+          .from("users")
+          .select("id, full_name, email, role")
+          .eq("email", email)
+          .maybeSingle();
+        setFoundCustomer(customer);
+        setFoundCustomerHasUser(!!existingUser);
+        setShowImportCustomerModal(true);
+        return;
+      }
+
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("id, full_name, email, role")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (existingUser) {
+        if (existingUser.full_name) {
+          const { data: customerByName } = await supabase
+            .from("customers")
+            .select("id, name, email, whatsapp, cpf, rg, birth_date")
+            .ilike("name", existingUser.full_name)
+            .maybeSingle();
+
+          if (customerByName) {
+            setFoundCustomer(customerByName);
+            setFoundCustomerHasUser(true);
+            setShowImportCustomerModal(true);
+            return;
+          }
+        }
+
+        setExistingUserFound(existingUser);
+        setShowExistingUserModal(true);
+        return;
+      }
+
+      setShowUserModal(true);
+    } catch (e) {
+      console.error("handleCheckCustomerEmail error:", e);
+      setShowUserModal(true);
+    }
+  };
+
+  const handleImportCustomer = () => {
+    if (!foundCustomer) return;
+    setUserFormData(prev => ({
+      ...prev,
+      full_name: foundCustomer.name || prev.full_name,
+      whatsapp: foundCustomer.whatsapp || prev.whatsapp,
+      cpf: foundCustomer.cpf || prev.cpf,
+      rg: foundCustomer.rg || prev.rg,
+      birth_date: foundCustomer.birth_date || prev.birth_date,
+      role: "admin",
+    }));
+    setShowImportCustomerModal(false);
+    setFoundCustomer(null);
+    setFoundCustomerHasUser(false);
+    if (foundCustomerHasUser) {
+      toast.success("Dados do cliente importados! Salve para atualizar o usuário existente.");
+    } else {
+      toast.success("Dados do cliente importados! O usuário terá dois perfis: administrador e cliente.");
+    }
   };
 
   const handleDeleteUser = (userId) => {
@@ -642,7 +760,7 @@ export default function Settings() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                {companies.map(company => (
+                {(isSuperAdmin ? companies : companies.filter(c => currentUserCompanyIds.includes(c.id))).map(company => (
                   <CompanyBrandingCard key={company.id} company={company} />
                 ))}
               </CardContent>
@@ -714,6 +832,12 @@ export default function Settings() {
                        }`}>
                         {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Administrador" : user.role === "profissional" ? "Profissional" : "Cliente"}
                        </span>
+                      {customerEmailSet.has(user.email) && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700 font-semibold">
+                          <User className="w-3 h-3" />
+                          Também cliente
+                        </span>
+                      )}
                       <Switch
                         checked={user.active !== false}
                         onCheckedChange={(checked) =>
@@ -816,10 +940,123 @@ export default function Settings() {
           </div>
         )}
 
+        {/* Import Customer Modal */}
+        {showImportCustomerModal && foundCustomer && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+              <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <Users className="w-5 h-5 text-branding-primary" />
+                {foundCustomerHasUser ? "Cliente e Usuário Encontrado" : "Cliente Encontrado"}
+              </h3>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-800">
+                {foundCustomerHasUser ? (
+                  <>
+                    <p>Este e-mail já está cadastrado como <strong>cliente</strong> e também como <strong>usuário do sistema</strong>.</p>
+                    <p className="mt-1">Deseja importar os dados do cliente para atualizar o usuário?</p>
+                  </>
+                ) : (
+                  <>
+                    <p>Este e-mail já está cadastrado como <strong>cliente</strong>.</p>
+                    <p className="mt-1">Deseja importar os dados e salvar como <strong>cliente e administrador</strong>?</p>
+                  </>
+                )}
+                {foundCustomer && foundCustomer.email !== importEmailChecked && (
+                  <p className="mt-2 text-xs text-amber-600 font-medium">
+                    ⚠️ Cliente encontrado pelo nome "{foundCustomer.name}". E-mail do cliente: {foundCustomer.email || "não informado"}
+                  </p>
+                )}
+                <ul className="mt-2 space-y-1 text-xs">
+                  <li className="flex items-center gap-1.5"><span className="font-semibold text-blue-600">●</span> <strong>Administrador</strong> — acesso ao painel do sistema</li>
+                  <li className="flex items-center gap-1.5"><span className="font-semibold text-emerald-600">●</span> <strong>Cliente</strong> — acesso ao portal do cliente com cobranças</li>
+                </ul>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+                <p className="text-xs text-gray-500 font-medium mb-2">Dados que serão importados:</p>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Nome:</span>
+                  <span className="font-medium text-gray-900">{foundCustomer.name || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">WhatsApp:</span>
+                  <span className="font-medium text-gray-900">{foundCustomer.whatsapp || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">CPF:</span>
+                  <span className="font-medium text-gray-900">{foundCustomer.cpf || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">RG:</span>
+                  <span className="font-medium text-gray-900">{foundCustomer.rg || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Data de Nasc.:</span>
+                  <span className="font-medium text-gray-900">{foundCustomer.birth_date || "-"}</span>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => { setShowImportCustomerModal(false); setFoundCustomer(null); setFoundCustomerHasUser(false); setShowUserModal(true); }} className="flex-1 rounded-xl">
+                  {foundCustomerHasUser ? "Não, deixar como está" : "Não, cadastrar novo"}
+                </Button>
+                <Button onClick={() => { handleImportCustomer(); setShowUserModal(true); }} className="flex-1 bg-branding-primary hover:bg-branding-primary/90 rounded-xl">
+                  {foundCustomerHasUser ? "Sim, importar dados" : "Sim, importar"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Existing User Modal */}
+        {showExistingUserModal && existingUserFound && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+              <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <Users className="w-5 h-5 text-amber-600" />
+                Usuário Já Cadastrado
+              </h3>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+                <p>Este e-mail já está registrado como <strong>usuário do sistema</strong>.</p>
+                <p className="mt-1">Deseja editar o usuário existente ou cadastrar um novo?</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+                <p className="text-xs text-gray-500 font-medium mb-2">Dados do usuário encontrado:</p>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Nome:</span>
+                  <span className="font-medium text-gray-900">{existingUserFound.full_name || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">E-mail:</span>
+                  <span className="font-medium text-gray-900">{existingUserFound.email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Perfil:</span>
+                  <span className="font-medium text-gray-900">
+                    {existingUserFound.role === "super_admin" ? "Super Admin" :
+                     existingUserFound.role === "admin" ? "Administrador" :
+                     existingUserFound.role === "profissional" ? "Profissional" : "Cliente"}
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => { setShowExistingUserModal(false); setExistingUserFound(null); setShowUserModal(true); }} className="flex-1 rounded-xl">
+                  Cadastrar Novo
+                </Button>
+                <Button onClick={() => {
+                  const user = users.find(u => u.id === existingUserFound.id);
+                  setShowExistingUserModal(false);
+                  setExistingUserFound(null);
+                  if (user) handleOpenUserModal(user);
+                }} className="flex-1 bg-branding-primary hover:bg-branding-primary/90 rounded-xl">
+                  Editar Usuário
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* User Modal */}
         {showUserModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
               <h3 className="text-xl font-semibold text-gray-900">
                 {editingUser ? "Editar Usuário" : "Novo Usuário"}
               </h3>
@@ -841,7 +1078,18 @@ export default function Settings() {
                     type="email"
                     value={userFormData.email}
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                    onBlur={(e) => handleCheckCustomerEmail(e.target.value)}
                     placeholder="joao@exemplo.com"
+                    className="rounded-xl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2"><Phone className="w-4 h-4" /> WhatsApp</Label>
+                  <Input
+                    value={userFormData.whatsapp}
+                    onChange={(e) => setUserFormData({ ...userFormData, whatsapp: e.target.value })}
+                    placeholder="(00) 00000-0000"
                     className="rounded-xl"
                   />
                 </div>
