@@ -240,7 +240,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
           {/* Tipo de Agendamento */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Tipo de Agendamento</Label>
+            <Label className="text-sm font-medium text-on-surface">Tipo de Agendamento</Label>
             <div className="grid grid-cols-3 gap-2">
               {APPOINTMENT_TYPES.map(type => {
                 const Icon = type.icon;
@@ -251,7 +251,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                     onClick={() => setAppointmentType(type.value)}
                     className={cn(
                       "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-xs font-medium",
-                      appointmentType === type.value ? type.color : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                      appointmentType === type.value ? type.color : "border-outline-variant bg-card text-muted-foreground hover:border-outline"
                     )}
                   >
                     <Icon className="w-4 h-4" />
@@ -271,11 +271,11 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
           )}
           {appointmentType === "makeup" && formData.customer_id && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Agendamento de origem <span className="text-gray-500 font-normal">— opcional</span>
+              <Label className="text-sm font-medium text-on-surface">
+                Agendamento de origem <span className="text-muted-foreground font-normal">— opcional</span>
               </Label>
               {absentAppointments.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">Nenhum agendamento perdido ou cancelado para este cliente</p>
+                <p className="text-sm text-muted-foreground italic">Nenhum agendamento perdido ou cancelado para este cliente</p>
               ) : (
                 <Select value={formData.original_appointment_id} onValueChange={(v) => setFormData(prev => ({ ...prev, original_appointment_id: v }))}>
                   <SelectTrigger className="rounded-xl">
@@ -295,7 +295,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           {/* Cliente */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Cliente</Label>
+            <Label className="text-sm font-medium text-on-surface">Cliente</Label>
             <Select value={formData.customer_id} onValueChange={handleCustomerChange}>
               <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Selecione o cliente" />
@@ -304,7 +304,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                 {customers?.map(cust => (
                   <SelectItem key={cust.id} value={cust.id}>
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-500" />
+                      <User className="w-4 h-4 text-muted-foreground" />
                       {cust.name}
                     </div>
                   </SelectItem>
@@ -320,7 +320,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             return (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                <Label className="text-sm font-medium text-on-surface flex items-center gap-1.5">
                   <User className="w-4 h-4 text-purple-500" />
                   Mesmo responsável
                 </Label>
@@ -348,7 +348,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                       "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
                       extraCustomerIds.includes(s.id)
                         ? "bg-purple-100 text-purple-700 font-medium"
-                        : "text-gray-600 hover:bg-gray-50"
+                        : "text-on-surface-variant hover:bg-surface-container-low"
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -356,7 +356,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                         "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                         extraCustomerIds.includes(s.id)
                           ? "bg-purple-500 border-purple-500"
-                          : "border-gray-300"
+                          : "border-outline"
                       )}>
                         {extraCustomerIds.includes(s.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
@@ -380,12 +380,12 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             if (otherCustomers.length === 0) return null;
             return (
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+              <Label className="text-sm font-medium text-on-surface flex items-center gap-1.5">
                 <Users className="w-4 h-4 text-branding-primary" />
                 Outros clientes
-                <span className="text-gray-500 font-normal">— opcional</span>
+                <span className="text-muted-foreground font-normal">— opcional</span>
               </Label>
-              <div className="space-y-1.5 max-h-32 overflow-y-auto border border-gray-200 rounded-xl p-2">
+              <div className="space-y-1.5 max-h-32 overflow-y-auto border border-outline-variant rounded-xl p-2">
                 {otherCustomers.map(s => (
                   <button
                     key={s.id}
@@ -395,7 +395,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                       "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
                       extraCustomerIds.includes(s.id)
                         ? "bg-branding-primary/10 text-branding-primary font-medium"
-                        : "text-gray-600 hover:bg-gray-50"
+                        : "text-on-surface-variant hover:bg-surface-container-low"
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -403,7 +403,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                         "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                         extraCustomerIds.includes(s.id)
                           ? "bg-branding-primary border-branding-primary"
-                          : "border-gray-300"
+                          : "border-outline"
                       )}>
                         {extraCustomerIds.includes(s.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
@@ -425,7 +425,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           {/* Serviço */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Serviço</Label>
+            <Label className="text-sm font-medium text-on-surface">Serviço</Label>
             <Select value={formData.service_id} onValueChange={handleServiceChange}>
               <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Selecione o serviço" />
@@ -437,9 +437,9 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                   activeServices.map(svc => (
                     <SelectItem key={svc.id} value={svc.id}>
                       <div className="flex items-center gap-2">
-                        <Scissors className="w-4 h-4 text-gray-500" />
+                        <Scissors className="w-4 h-4 text-muted-foreground" />
                         {svc.name}
-                        <span className="text-gray-400 text-xs">R$ {Number(svc.price || 0).toFixed(2)}</span>
+                        <span className="text-outline text-xs">R$ {Number(svc.price || 0).toFixed(2)}</span>
                       </div>
                     </SelectItem>
                   ))
@@ -450,7 +450,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           {/* Profissional */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Profissional</Label>
+            <Label className="text-sm font-medium text-on-surface">Profissional</Label>
             <Select value={formData.professional_id} onValueChange={(v) => handleChange("professional_id", v)}>
               <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Selecione o profissional" />
@@ -462,7 +462,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                   activeProfessionals.map(pro => (
                     <SelectItem key={pro.id} value={pro.id}>
                       <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-gray-500" />
+                        <User className="w-4 h-4 text-muted-foreground" />
                         {pro.full_name || pro.email}
                       </div>
                     </SelectItem>
@@ -474,10 +474,10 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           {/* Produto */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-              <Package className="w-4 h-4 text-gray-500" />
+            <Label className="text-sm font-medium text-on-surface flex items-center gap-1.5">
+              <Package className="w-4 h-4 text-muted-foreground" />
               Produto
-              <span className="text-gray-500 font-normal">— opcional</span>
+              <span className="text-muted-foreground font-normal">— opcional</span>
             </Label>
             <Select value={formData.product_id} onValueChange={(v) => handleChange("product_id", v)}>
               <SelectTrigger className="rounded-xl">
@@ -488,9 +488,9 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                 {activeProducts.map(prod => (
                   <SelectItem key={prod.id} value={prod.id}>
                     <div className="flex items-center gap-2">
-                      <Package className="w-4 h-4 text-gray-500" />
+                      <Package className="w-4 h-4 text-muted-foreground" />
                       {prod.name}
-                      <span className="text-gray-400 text-xs">R$ {Number(prod.price || 0).toFixed(2)}</span>
+                      <span className="text-outline text-xs">R$ {Number(prod.price || 0).toFixed(2)}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -501,9 +501,9 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
           {/* Data & Hora */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Data</Label>
+              <Label className="text-sm font-medium text-on-surface">Data</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="date"
                   value={formData.date}
@@ -515,11 +515,11 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Horário</Label>
+              <Label className="text-sm font-medium text-on-surface">Horário</Label>
               <Select value={formData.start_time} onValueChange={(v) => handleChange("start_time", v)}>
                 <SelectTrigger className="rounded-xl">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-500" />
+                    <Clock className="w-4 h-4 text-muted-foreground" />
                     <SelectValue />
                   </div>
                 </SelectTrigger>
@@ -534,7 +534,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           {/* Duração */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Duração</Label>
+            <Label className="text-sm font-medium text-on-surface">Duração</Label>
             <Select
               value={formData.duration_mins.toString()}
               onValueChange={(v) => handleChange("duration_mins", parseInt(v))}

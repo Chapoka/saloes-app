@@ -62,12 +62,12 @@ const CATEGORIES = [
   { value: "tratamento", label: "Tratamento", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
   { value: "manicure", label: "Manicure/Pedicure", color: "bg-pink-100 text-pink-700 border-pink-200" },
   { value: "sobrancelha", label: "Sobrancelha", color: "bg-orange-100 text-orange-700 border-orange-200" },
-  { value: "outro", label: "Outro", color: "bg-gray-100 text-gray-700 border-gray-200" },
+  { value: "outro", label: "Outro", color: "bg-surface-container-low text-on-surface border-outline-variant" },
 ];
 
 const getCategoryInfo = (cat) => {
   const found = CATEGORIES.find(c => c.value === cat || c.label === cat);
-  return found || { value: cat, label: cat, color: "bg-gray-100 text-gray-700 border-gray-200" };
+  return found || { value: cat, label: cat, color: "bg-surface-container-low text-on-surface border-outline-variant" };
 };
 
   const EMPTY_SERVICE = {
@@ -390,7 +390,7 @@ Novo Item
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Serviços Ativos", value: services.filter(s => getEffectiveActive(s)).length, icon: Scissors, color: "text-blue-600" },
-          { label: "Inativos", value: services.filter(s => !getEffectiveActive(s)).length, icon: PowerOff, color: "text-gray-500" },
+          { label: "Inativos", value: services.filter(s => !getEffectiveActive(s)).length, icon: PowerOff, color: "text-muted-foreground" },
           { label: "Preço Médio", value: `R$ ${avgPrice}`, icon: DollarSign, color: "text-emerald-600" },
           { label: "Margem Média", value: avgMargin !== "-" ? `${avgMargin}%` : "-", icon: DollarSign, color: "text-blue-600" },
           { label: "Vinculados a Planos", value: [...new Set(planServices.map(ps => ps.service_id))].length, icon: Package, color: "text-purple-600" },
@@ -406,7 +406,7 @@ Novo Item
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit" style={{ background: theme.isDark ? "rgba(255,255,255,0.06)" : "#f3f4f6" }}>
+      <div className="flex gap-1 bg-surface-container-low rounded-lg p-1 w-fit" style={{ background: theme.isDark ? "rgba(255,255,255,0.06)" : "#f3f4f6" }}>
         {[
           { key: "services", label: "Serviços" },
           { key: "combos", label: "Combos" },
@@ -416,7 +416,7 @@ Novo Item
             onClick={() => setTab(t.key)}
             className={cn(
               "px-4 py-2 rounded-md text-sm font-medium transition-all",
-              tab === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              tab === t.key ? "bg-card text-on-surface shadow-sm" : "text-muted-foreground hover:text-on-surface"
             )}
           >
             {t.label}
@@ -430,7 +430,7 @@ Novo Item
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Buscar serviço..."
                 value={search}
@@ -466,11 +466,11 @@ Novo Item
 
           {/* Service Cards */}
           {loadingServices ? (
-            <div className="text-center py-12 text-gray-500">Carregando...</div>
+            <div className="text-center py-12 text-muted-foreground">Carregando...</div>
           ) : filteredServices.length === 0 ? (
             <div className="text-center py-12">
-              <Scissors className="w-12 h-12 mx-auto text-gray-500 mb-3" />
-              <p className="text-gray-500">Nenhum serviço encontrado</p>
+              <Scissors className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">Nenhum serviço encontrado</p>
               <Button
                 onClick={() => { setEditingService(null); setServiceForm(EMPTY_SERVICE); setShowServiceForm(true); }}
                 className="mt-4 bg-branding-primary text-white"
@@ -502,7 +502,7 @@ Novo Item
                           )}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900 text-sm">{svc.name} {!svc.company_id && <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 ml-1">Global</Badge>}</h3>
+                          <h3 className="font-semibold text-on-surface text-sm">{svc.name} {!svc.company_id && <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 ml-1">Global</Badge>}</h3>
                           <div className="flex items-center gap-1 mt-0.5">
                             <Badge variant="outline" className={cn("text-[10px]", cat.color)}>
                               {cat.label}
@@ -517,8 +517,8 @@ Novo Item
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-                            <MoreVertical className="w-4 h-4 text-gray-500" />
+                          <button className="p-1 rounded-lg hover:bg-surface-container transition-colors">
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -545,7 +545,7 @@ Novo Item
                     </div>
 
                     {svc.description && (
-                      <p className="text-xs text-gray-500 mb-3 line-clamp-2">{svc.description}</p>
+                      <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{svc.description}</p>
                     )}
 
                     {(() => {
@@ -555,8 +555,8 @@ Novo Item
                         .filter(Boolean);
                       if (linkedPlans.length === 0) return null;
                       return (
-                        <div className="mb-3 pt-2 border-t border-gray-50">
-                          <div className="flex items-center gap-1 text-xs text-gray-500 mb-1.5">
+                        <div className="mb-3 pt-2 border-t border-outline-variant/30">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5">
                             <Package className="w-3.5 h-3.5" />
                             Planos vinculados
                           </div>
@@ -569,20 +569,20 @@ Novo Item
                       );
                     })()}
 
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                    <div className="flex items-center justify-between pt-2 border-t border-outline-variant/30">
                       {svc.type === "product" ? (
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Package className="w-3.5 h-3.5" />
                           Estoque: {svc.quantidade_estoque || 0} {svc.unidade_medida || "un"}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Clock className="w-3.5 h-3.5" />
                           {Math.floor((svc.duration_mins || 0) / 60)}h{(svc.duration_mins || 0) % 60 > 0 ? ` ${(svc.duration_mins || 0) % 60}min` : ""}
                         </div>
                       )}
                       <div className="text-right">
-                        <span className="text-lg font-bold text-gray-900 block">
+                        <span className="text-lg font-bold text-on-surface block">
                           R$ {Number(svc.price || 0).toFixed(2).replace(".", ",")}
                         </span>
                         {svc.comissao > 0 && (
@@ -591,7 +591,7 @@ Novo Item
                           </span>
                         )}
                         {svc.preco_custo > 0 && (
-                          <span className="text-[10px] text-gray-500 block">
+                          <span className="text-[10px] text-muted-foreground block">
                             Custo: R$ {Number(svc.preco_custo).toFixed(2).replace(".", ",")}
                             {svc.price > 0 && (
                               <span className={cn("ml-1 font-medium", ((svc.price - svc.preco_custo) / svc.price * 100) >= 50 ? "text-emerald-600" : "text-amber-600")}>
@@ -624,12 +624,12 @@ Novo Item
           </div>
 
           {loadingCombos ? (
-            <div className="text-center py-12 text-gray-500">Carregando...</div>
+            <div className="text-center py-12 text-muted-foreground">Carregando...</div>
           ) : combos.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="w-12 h-12 mx-auto text-gray-500 mb-3" />
-              <p className="text-gray-500">Nenhum combo criado</p>
-              <p className="text-xs text-gray-500 mt-1">Combine serviços e ofereça um preço especial</p>
+              <Package className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">Nenhum combo criado</p>
+              <p className="text-xs text-muted-foreground mt-1">Combine serviços e ofereça um preço especial</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -641,8 +641,8 @@ Novo Item
                         <Package className="w-5 h-5 text-purple-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{combo.name}</h3>
-                        {combo.description && <p className="text-xs text-gray-500">{combo.description}</p>}
+                        <h3 className="font-semibold text-on-surface">{combo.name}</h3>
+                        {combo.description && <p className="text-xs text-muted-foreground">{combo.description}</p>}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -651,8 +651,8 @@ Novo Item
                       </span>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="p-1 rounded-lg hover:bg-gray-100">
-                            <MoreVertical className="w-4 h-4 text-gray-500" />
+                          <button className="p-1 rounded-lg hover:bg-surface-container">
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -854,7 +854,7 @@ Novo Item
               <Label>Serviços Incluídos (mín. 2)</Label>
               <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2">
                 {services.filter(s => getEffectiveActive(s)).map(svc => (
-                  <label key={svc.id} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer">
+                  <label key={svc.id} className="flex items-center gap-2 p-2 rounded hover:bg-surface-container-low cursor-pointer">
                     <input
                       type="checkbox"
                       checked={comboForm.selected_services.includes(svc.id)}
@@ -868,14 +868,14 @@ Novo Item
                       }}
                       className="rounded"
                     />
-                    <span className="text-sm text-gray-700">{svc.name}</span>
-                    <span className="text-xs text-gray-500 ml-auto">
+                    <span className="text-sm text-on-surface">{svc.name}</span>
+                    <span className="text-xs text-muted-foreground ml-auto">
                       R$ {Number(svc.price || 0).toFixed(2).replace(".", ",")}
                     </span>
                   </label>
                 ))}
                 {services.filter(s => getEffectiveActive(s)).length === 0 && (
-                  <p className="text-xs text-gray-500 text-center py-2">Crie serviços primeiro</p>
+                  <p className="text-xs text-muted-foreground text-center py-2">Crie serviços primeiro</p>
                 )}
               </div>
             </div>

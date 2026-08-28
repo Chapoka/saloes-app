@@ -2,41 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { db } from "@/api/dbClient";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Mail, Lock, Loader2, Scissors, Sparkles, ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
-import GoogleIcon from "@/components/GoogleIcon";
 
 const defaultSlides = [
   {
-    image: "https://images.unsplash.com/photo-1759134248487-e8baaf31e33e?w=800&fit=crop&auto=format",
-    title: "Salon Management",
-    subtitle: "Otimize agendamentos, controle financeiro e melhore a experiência dos seus clientes em uma única plataforma."
-  },
-  {
-    image: "https://images.unsplash.com/photo-1746723378067-83a345ff3160?w=800&fit=crop&auto=format",
-    subtitle: "Agende, confirme e acompanhe cada atendimento com facilidade. Tudo em um só lugar.",
-    title: "Controle total dos seus agendamentos."
-  },
-  {
-    image: "https://images.unsplash.com/photo-1759134198561-e2041049419c?w=800&fit=crop&auto=format",
-    subtitle: "Gerencie profissionais, serviços e horários para oferecer a melhor experiência aos seus clientes.",
-    title: "Um ambiente profissional, bem organizado."
-  },
-  {
-    image: "https://images.unsplash.com/photo-1706629503720-13cad35ce2e5?w=800&fit=crop&auto=format",
-    subtitle: "Cobranças automáticas e relatórios claros para você focar no que importa: seus clientes.",
-    title: "Barbearia ou salão? Nós cuidamos de tudo."
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCsk57F8qRlqQFzn_ZuMoRItbWcd2yjn6MtjV6ncA1H-UEEeXEIU1QJKZVo4MrYAQSY4D3ifZnSK4DKe_WMM0BMF7GCplFTXh2PbwNwld7uN8UJGQbz-891DWooD9EKI9vkxyxZM3L3ImSa0Vp2Esr8asHptAe9SIF6LfCxAvyfqBJANBFb1ZH4FJNTwiUvWQsdCiHRfyzJ0tqbUWIxnbSxKHtYV7Iv2sbnc_fOmyNhcZql1NH8Wktu6qKwidbIa3Jz6vS55k8jm8nA",
+    title: "Gestão Inteligente para o seu Salão",
+    subtitle: "Transforme a experiência dos seus clientes com agendamentos simplificados e controle total da sua rotina."
   }
 ];
-
-const PALETTE_LOGIN_THEMES = {
-  barbearia: { overlay: "rgba(10,10,10,0.8)", overlayGradient: "linear-gradient(160deg, rgba(10,10,10,0.95), rgba(23,23,23,0.8))", accent: "#C8A97E", formBg: "#FFFFFF", formText: "#0F172A", formMuted: "#64748B" },
-  salao: { overlay: "rgba(219,39,119,0.1)", overlayGradient: "linear-gradient(160deg, rgba(255,255,255,0.97), rgba(252,231,245,0.3))", accent: "#DB2777", formBg: "#FFFFFF", formText: "#0F172A", formMuted: "#64748B" },
-  clinica: { overlay: "rgba(5,150,105,0.1)", overlayGradient: "linear-gradient(160deg, rgba(255,255,255,0.97), rgba(209,250,229,0.3))", accent: "#059669", formBg: "#FFFFFF", formText: "#0F172A", formMuted: "#64748B" },
-  studio: { overlay: "rgba(124,58,237,0.1)", overlayGradient: "linear-gradient(160deg, rgba(255,255,255,0.97), rgba(245,243,255,0.3))", accent: "#7C3AED", formBg: "#FFFFFF", formText: "#0F172A", formMuted: "#64748B" },
-};
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -45,9 +18,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentIcon, setCurrentIcon] = useState(0);
   const [slides, setSlides] = useState(defaultSlides);
-  const [selectedPalette, setSelectedPalette] = useState("barbearia");
 
   useEffect(() => {
     db.entities.Settings.filter({ key: "login_carousel_images" })
@@ -69,41 +40,20 @@ export default function Login() {
   }, []);
 
   useEffect(() => {
-    db.entities.Settings.filter({ key: "default_branding_palette" })
-      .then((results) => {
-        if (results.length > 0 && results[0].value) {
-          setSelectedPalette(results[0].value);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIcon((prev) => (prev + 1) % 2);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const loginTheme = PALETTE_LOGIN_THEMES[selectedPalette] || PALETTE_LOGIN_THEMES.barbearia;
-  const accent = loginTheme.accent;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      if (authError) throw authError;
 
-      // Check if user must change password on first login
       if (data?.user?.id) {
         const { data: userProfile } = await supabase
           .from("users")
@@ -128,226 +78,229 @@ export default function Login() {
   const handleGoogle = async () => {
     try {
       setError("");
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: window.location.origin },
       });
-      if (error) throw error;
+      if (googleError) throw googleError;
     } catch (err) {
       setError(err.message || "Erro ao conectar com Google.");
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row login-light" style={{ background: loginTheme.formBg }}>
-      {/* Left Panel — Carousel */}
-      <div className="relative lg:w-1/2 h-72 lg:h-screen overflow-hidden">
+    <main className="flex min-h-screen w-full flex-col lg:flex-row bg-background text-on-background font-body-md overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+      {/* Left Side: Visual Carousel */}
+      <div className="relative hidden lg:flex lg:w-1/2 overflow-hidden bg-surface-container-lowest">
         {slides.map((slide, i) => (
           <div
             key={i}
-            className={`absolute inset-0 transition-opacity duration-1000 ${i === currentSlide ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 z-0 transition-opacity duration-1000 ${i === currentSlide ? "opacity-100" : "opacity-0"}`}
           >
-            <img src={slide.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{
-              background: selectedPalette === "barbearia"
-                ? "linear-gradient(135deg, rgba(12,12,12,0.85), rgba(212,165,116,0.2))"
-                : selectedPalette === "salao"
-                ? "linear-gradient(135deg, rgba(236,72,153,0.3), rgba(19,19,19,0.6))"
-                : selectedPalette === "clinica"
-                ? "linear-gradient(135deg, rgba(16,185,129,0.3), rgba(19,19,19,0.6))"
-                : "linear-gradient(135deg, rgba(139,92,246,0.3), rgba(19,19,19,0.6))",
-            }} />
+            <img
+              src={slide.image}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent"></div>
           </div>
         ))}
 
-        {/* Navigation arrows */}
-        <button
-          onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}
-          className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full backdrop-blur-sm flex items-center justify-center transition-colors"
-          style={{ background: "rgba(255,255,255,0.15)" }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.25)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}
-        >
-          <ChevronLeft className="w-5 h-5 text-white" />
-        </button>
-        <button
-          onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full backdrop-blur-sm flex items-center justify-center transition-colors"
-          style={{ background: "rgba(255,255,255,0.15)" }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.25)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}
-        >
-          <ChevronRight className="w-5 h-5 text-white" />
-        </button>
-
-        {/* Dots */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentSlide(i)}
-              className="h-2 rounded-full transition-all duration-300"
-              style={{
-                width: i === currentSlide ? "24px" : "8px",
-                background: i === currentSlide ? accent : "rgba(255,255,255,0.4)",
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Slide content overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-12 z-10">
-          <div className="backdrop-blur-sm rounded-2xl p-5 lg:p-8 max-w-md transition-all duration-500" style={{
-            background: selectedPalette === "barbearia" ? "rgba(12,12,12,0.7)" : "rgba(0,0,0,0.45)",
-            border: `1px solid ${selectedPalette === "barbearia" ? "rgba(212,165,116,0.2)" : "rgba(255,255,255,0.1)"}`,
-          }}>
-            <h2 className="text-white text-lg lg:text-2xl font-bold mb-2 leading-tight">
+        {/* Carousel Content Overlay */}
+        <div className="relative z-10 flex flex-col justify-end p-margin-desktop w-full h-full pb-20">
+          <div className="glass-card p-8 rounded-xl max-w-lg fade-in-up">
+            <h2 className="font-headline-xl text-headline-xl text-white mb-stack-md leading-tight">
               {slides[currentSlide].title}
             </h2>
-            <p className="text-white/80 text-sm lg:text-base leading-relaxed">
+            <p className="font-body-lg text-body-lg text-on-surface-variant">
               {slides[currentSlide].subtitle}
+            </p>
+          </div>
+
+          {/* Carousel Indicators */}
+          <div className="flex gap-2 mt-stack-lg ml-8 fade-in-up delay-100">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSlide(i)}
+                className="h-1.5 rounded-full transition-all duration-300"
+                style={{
+                  width: i === currentSlide ? "32px" : "8px",
+                  background: i === currentSlide ? "#c0c1ff" : "#2d3449"
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side: Login Form */}
+      <div className="flex-1 flex flex-col justify-center items-center p-margin-mobile lg:p-margin-desktop bg-gradient-to-br from-background to-surface-alt/30 relative">
+        {/* Subtle background glow */}
+        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-primary-container/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div className="w-full max-w-md space-y-stack-lg z-10">
+          {/* Brand & Header */}
+          <div className="text-center space-y-stack-sm fade-in-up">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-surface border border-outline-variant/30 shadow-lg mb-4">
+              <span
+                className="material-symbols-outlined text-4xl text-primary"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                cut
+              </span>
+            </div>
+            <h1 className="font-headline-lg-mobile lg:font-headline-lg text-headline-lg-mobile lg:text-headline-lg gradient-text">
+              Bem-vindo de volta
+            </h1>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Gerencie sua agenda com estilo e eficiência.
+            </p>
+          </div>
+
+          {/* Form Area */}
+          <div className="bg-surface p-6 sm:p-8 rounded-xl shadow-lg border border-outline-variant/20 fade-in-up delay-100">
+            {/* Social Login */}
+            <button
+              onClick={handleGoogle}
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-gray-50 text-gray-900 rounded-lg font-label-md text-label-md shadow-sm transition-colors border border-gray-200"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+              </svg>
+              Continuar com Google
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center my-6">
+              <div className="flex-grow border-t border-outline-variant/30"></div>
+              <span className="px-3 text-xs uppercase tracking-wider text-outline">ou entre com seu e-mail</span>
+              <div className="flex-grow border-t border-outline-variant/30"></div>
+            </div>
+
+            {error && (
+              <div className="mb-4 p-3 rounded-lg bg-error-container/20 text-error text-sm border border-error-container/30 flex items-center gap-2">
+                <span className="text-error text-xs font-bold">!</span>
+                {error}
+              </div>
+            )}
+
+            {/* Email/Password Form */}
+            <form onSubmit={handleSubmit} className="space-y-stack-md">
+              {/* Email Input */}
+              <div className="space-y-1">
+                <label className="block font-label-md text-label-md text-on-surface" htmlFor="email">E-mail</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+                    <span className="material-symbols-outlined text-lg">mail</span>
+                  </span>
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="voce@exemplo.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline focus:ring-2 focus:ring-primary focus:border-primary transition-all sm:text-sm"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className="block font-label-md text-label-md text-on-surface" htmlFor="password">Senha</label>
+                  <Link to="/forgot-password" className="font-body-sm text-body-sm text-primary hover:text-primary-container transition-colors">
+                    Esqueci minha senha
+                  </Link>
+                </div>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+                    <span className="material-symbols-outlined text-lg">lock</span>
+                  </span>
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full pl-10 pr-10 py-3 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline focus:ring-2 focus:ring-primary focus:border-primary transition-all sm:text-sm"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg font-label-md text-label-md text-white gradient-btn shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Entrando..." : "Entrar"}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Footer Link */}
+          <div className="text-center fade-in-up delay-200">
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              Não tem uma conta?{" "}
+              <Link to="/register" className="text-tertiary hover:text-tertiary-fixed-dim font-semibold transition-colors">
+                Cadastre-se
+              </Link>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Right Panel — Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 lg:py-0 relative dark:!bg-white" style={{
-        background: loginTheme.formBg,
-        color: loginTheme.formText,
-      }}>
-        {/* Subtle pattern */}
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: "radial-gradient(circle at 1px 1px, rgba(0,0,0,0.4) 1px, transparent 0)",
-          backgroundSize: "24px 24px",
-        }} />
-
-        <div className="w-full max-w-md relative animate-fade-in">
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-12">
-            <div className="relative">
-              <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(135deg, ${accent}, ${accent}cc)`,
-                  boxShadow: `0 8px 24px ${accent}35`,
-                }}
-              >
-                <Scissors className={`w-5 h-5 text-white absolute transition-opacity duration-700 ${currentIcon === 0 ? "opacity-100" : "opacity-0"}`} />
-                <Sparkles className={`w-5 h-5 text-white absolute transition-opacity duration-700 ${currentIcon === 1 ? "opacity-100" : "opacity-0"}`} />
-              </div>
-            </div>
-            <div>
-              <span className="text-lg font-bold tracking-tight block" style={{ color: loginTheme.formText }}>Salon Management</span>
-              <span className="text-xs" style={{ color: loginTheme.formMuted }}>Sistema de Gestão</span>
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-bold mb-2 tracking-tight" style={{ color: loginTheme.formText }}>Bem-vindo de volta</h1>
-          <p className="text-sm mb-8" style={{ color: loginTheme.formMuted }}>Acesse sua conta para gerenciar seu salão</p>
-
-          {/* Google */}
-          <Button
-            variant="outline"
-            className="w-full h-12 text-sm font-medium mb-6 rounded-xl border-surface-200 hover:bg-surface-50"
-            style={{ borderColor: "#E2E8F0", color: loginTheme.formText }}
-            onClick={handleGoogle}
-          >
-            <GoogleIcon className="w-5 h-5 mr-2" />
-            Continuar com Google
-          </Button>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t" style={{ borderColor: "#E2E8F0" }} />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase tracking-wider">
-              <span className="px-4 font-medium" style={{ background: loginTheme.formBg, color: loginTheme.formMuted }}>ou continue com e-mail</span>
-            </div>
-          </div>
-
-          {error && (
-            <div className="mb-4 p-3.5 rounded-xl bg-red-50 text-red-600 text-sm border border-red-100 flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-red-600 text-xs font-bold">!</span>
-              </div>
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium" style={{ color: loginTheme.formText }}>E-mail</Label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#94A3B8" }} />
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="seu@email.com.br"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-11 h-12 rounded-xl border-surface-200 focus:border-surface-300 focus:ring-surface-200 !text-surface-900 dark:!text-surface-900"
-                  style={{ borderColor: "#E2E8F0", color: "#0F172A" }}
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium" style={{ color: loginTheme.formText }}>Senha</Label>
-                <Link to="/forgot-password" className="text-xs font-medium hover:underline" style={{ color: accent }}>
-                  Esqueci minha senha
-                </Link>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "#94A3B8" }} />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-11 pr-12 h-12 rounded-xl border-surface-200 focus:border-surface-300 focus:ring-surface-200"
-                  style={{ borderColor: "#E2E8F0", color: "#0F172A" }}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors hover:opacity-70"
-                  style={{ color: "#94A3B8" }}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-            <Button
-              type="submit"
-              className="w-full h-12 font-semibold rounded-xl text-white mt-2"
-              style={{
-                background: `linear-gradient(135deg, ${accent}, ${accent}dd)`,
-                boxShadow: `0 4px 16px ${accent}30`,
-              }}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Entrando...
-                </>
-              ) : (
-                "Entrar"
-              )}
-            </Button>
-          </form>
-        </div>
-
-        <p className="mt-auto pt-8 text-xs" style={{ color: "#94A3B8" }}>
-          © 2024 Salon Management. Todos os direitos reservados.
-        </p>
-      </div>
-    </div>
+      <style>{`
+        .fade-in-up {
+          animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .glass-card {
+          background: rgba(30, 41, 59, 0.6);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-text {
+          background: linear-gradient(to right, #c0c1ff, #571bc1);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .gradient-btn {
+          background: linear-gradient(135deg, #494bd6 0%, #571bc1 100%);
+          transition: all 0.2s ease-in-out;
+        }
+        .gradient-btn:hover {
+          transform: scale(1.02);
+          box-shadow: 0 0 15px rgba(87, 27, 193, 0.5);
+        }
+      `}</style>
+    </main>
   );
 }

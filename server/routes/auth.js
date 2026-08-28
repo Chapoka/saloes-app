@@ -34,7 +34,7 @@ router.post("/confirm-email", async (req, res) => {
 // POST /api/auth/admin-create-user — criar um usuário (auth + public)
 router.post("/admin-create-user", async (req, res) => {
   try {
-    const { email, password, full_name, role, phone, commission_pct, specialty, photo_url, work_days, company_id, company_ids } = req.body;
+    const { email, password, full_name, role, phone, commission_pct, specialty, photo_url, work_days, company_id, company_ids, whatsapp, cpf, rg, birth_date } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "email e password são obrigatórios" });
     }
@@ -52,6 +52,8 @@ router.post("/admin-create-user", async (req, res) => {
       return res.status(403).json({ error: "Acesso negado" });
     }
 
+    let userId;
+
     const { data: userData, error: createError } = await req.supabase.auth.admin.createUser({
       email,
       password,
@@ -59,8 +61,21 @@ router.post("/admin-create-user", async (req, res) => {
       user_metadata: { full_name: full_name || "", role: role || "cliente" },
     });
 
-    if (createError) throw createError;
-    if (!userData?.user?.id) throw new Error("Falha ao criar usuário");
+    if (createError) {
+      // Se o e-mail já está registrado, busca o usuário existente
+      if (createError.message?.includes("already registered")) {
+        const { data: existingUsers, error: listErr } = await req.supabase.auth.admin.listUsers();
+        if (listErr) throw listErr;
+        const existing = (existingUsers?.users || []).find(u => u.email === email);
+        if (!existing) throw createError;
+        userId = existing.id;
+      } else {
+        throw createError;
+      }
+    } else {
+      userId = userData?.user?.id;
+      if (!userId) throw new Error("Falha ao criar usuário");
+    }
 
     // O trigger handle_new_user já deve ter criado o registro em public.users,
     // mas confirmamos e atualizamos o role se necessário
@@ -75,10 +90,14 @@ router.post("/admin-create-user", async (req, res) => {
     if (work_days) updateData.work_days = work_days;
     if (company_id) updateData.company_id = company_id;
     if (company_ids) updateData.company_ids = company_ids;
+    if (whatsapp) updateData.whatsapp = whatsapp;
+    if (cpf) updateData.cpf = cpf;
+    if (rg) updateData.rg = rg;
+    if (birth_date) updateData.birth_date = birth_date;
 
-    await req.supabase.from("users").update(updateData).eq("id", userData.user.id);
+    await req.supabase.from("users").update(updateData).eq("id", userId);
 
-    res.json({ user_id: userData.user.id, email });
+    res.json({ user_id: userId, email });
   } catch (err) {
     console.error("admin-create-user error:", err);
     res.status(500).json({ error: err.message });

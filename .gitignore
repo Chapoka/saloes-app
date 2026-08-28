@@ -2,6 +2,11 @@
 .env
 .env.*
 !.env.local
+# Sensitive files
+.env.stitch
+test-results/
+stitch-output/
+scripts/
 
 # Logs
 logs
@@ -21,6 +26,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/mcp.json
 .idea
 .DS_Store
 *.suo

@@ -15,7 +15,7 @@ function CopyIdButton({ id }) {
     <button
       onClick={handleCopy}
       title="Copiar ID"
-      className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-branding-primary transition-colors font-mono bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5"
+      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-branding-primary transition-colors font-mono bg-background border border-outline-variant rounded px-1.5 py-0.5"
     >
       {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
       {copied ? "Copiado!" : id.slice(0, 8) + "…"}
@@ -205,27 +205,27 @@ export default function Companies() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-branding-primary to-branding-secondary">
                 <Building2 className="w-6 h-6 text-white" />
               </div>
               Salões
             </h1>
-            <p className="text-gray-500 mt-1">{companies.length} salão(s) cadastrado(s)</p>
+            <p className="text-muted-foreground mt-1">{companies.length} salão(s) cadastrado(s)</p>
           </div>
           <div className="flex items-center gap-3">
             {companies.length > 0 && (
-              <div className="inline-flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
+              <div className="inline-flex rounded-xl border border-outline-variant bg-card p-1 shadow-sm">
                 <button
                   onClick={() => setViewMode("cards")}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === "cards" ? "bg-branding-primary text-white" : "text-gray-500 hover:text-gray-700"}`}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === "cards" ? "bg-branding-primary text-white" : "text-muted-foreground hover:text-on-surface"}`}
                   title="Visualização em cards"
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === "list" ? "bg-branding-primary text-white" : "text-gray-500 hover:text-gray-700"}`}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === "list" ? "bg-branding-primary text-white" : "text-muted-foreground hover:text-on-surface"}`}
                   title="Visualização em lista"
                 >
                   <List className="w-4 h-4" />
@@ -242,15 +242,15 @@ export default function Companies() {
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1,2,3].map(i => <div key={i} className="bg-white rounded-2xl p-6 animate-pulse h-40" />)}
+            {[1,2,3].map(i => <div key={i} className="bg-card rounded-2xl p-6 animate-pulse h-40" />)}
           </div>
         ) : companies.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-            <Building2 className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum salão cadastrado</h3>
+          <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-12 text-center">
+            <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-on-surface mb-2">Nenhum salão cadastrado</h3>
             {isSuperAdmin && (
               <>
-                <p className="text-gray-500 mb-6">Crie seu primeiro salão para começar</p>
+                <p className="text-muted-foreground mb-6">Crie seu primeiro salão para começar</p>
                 <Button onClick={() => openModal()} className="btn-branding rounded-xl">
                   <Plus className="w-5 h-5 mr-2" /> Novo Salão
                 </Button>
@@ -260,7 +260,7 @@ export default function Companies() {
         ) : viewMode === "cards" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {companies.map(company => (
-              <div key={company.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all">
+              <div key={company.id} className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-6 hover:shadow-md transition-all">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div
@@ -272,8 +272,8 @@ export default function Companies() {
                       {company.name?.charAt(0)?.toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{company.name}</h3>
-                      {company.cnpj && <p className="text-xs text-gray-500">{company.cnpj}</p>}
+                      <h3 className="font-semibold text-on-surface">{company.name}</h3>
+                      {company.cnpj && <p className="text-xs text-muted-foreground">{company.cnpj}</p>}
                     </div>
                   </div>
                   {(isSuperAdmin || isAdmin) && (
@@ -296,15 +296,15 @@ export default function Companies() {
                     </DropdownMenu>
                   )}
                 </div>
-                <div className="space-y-1 text-sm text-gray-500">
+                <div className="space-y-1 text-sm text-muted-foreground">
                   {company.email && <p>✉️ {company.email}</p>}
                   {company.phone && <p>📞 {company.phone}</p>}
                   {company.owner_name && <p>👤 {company.owner_name}</p>}
                   {company.cidade && <p>📍 {company.cidade}{company.uf ? ` - ${company.uf}` : ""}</p>}
                 </div>
-                <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                <div className="mt-3 pt-3 border-t border-outline-variant/30 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge className={company.active !== false ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}>
+                    <Badge className={company.active !== false ? "bg-emerald-100 text-emerald-700" : "bg-surface-container-low text-muted-foreground"}>
                       {company.active !== false ? "Ativa" : "Inativa"}
                     </Badge>
                     {company.estabelecimento_tipo && (
@@ -331,7 +331,7 @@ export default function Companies() {
                   </div>
                   <div className="flex items-center gap-3 pt-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-gray-500">Cores:</span>
+                      <span className="text-xs text-muted-foreground">Cores:</span>
                       <div className="flex items-center gap-0.5">
                         {["branding_primary_color", "branding_secondary_color", "branding_accent_color", "branding_background_color"].map((field) => (
                           <label key={field} className="relative cursor-pointer group">
@@ -347,16 +347,16 @@ export default function Companies() {
                               title={`Alterar cor ${field === "branding_primary_color" ? "primária" : field === "branding_secondary_color" ? "secundária" : field === "branding_accent_color" ? "destaque" : "fundo"}`}
                             />
                             <span
-                              className="w-5 h-5 rounded-full border-2 border-white shadow-sm block ring-1 ring-gray-200 group-hover:ring-2 group-hover:ring-branding-primary transition-all"
+                              className="w-5 h-5 rounded-full border-2 border-white shadow-sm block ring-1 ring-primary group-hover:ring-2 group-hover:ring-branding-primary transition-all"
                               style={{ background: company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc") }}
                             />
                           </label>
                         ))}
                       </div>
-                      <PaintBucket className="w-3 h-3 text-gray-500" />
+                      <PaintBucket className="w-3 h-3 text-muted-foreground" />
                     </div>
-                    <span className="text-xs text-gray-500">|</span>
-                    <span className="text-xs text-gray-500">ID:</span>
+                    <span className="text-xs text-muted-foreground">|</span>
+                    <span className="text-xs text-muted-foreground">ID:</span>
                     <CopyIdButton id={company.id} />
                   </div>
                 </div>
@@ -364,11 +364,11 @@ export default function Companies() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-100">
-                  <tr className="text-left text-gray-500">
+                <thead className="bg-background border-b border-outline-variant/30">
+                  <tr className="text-left text-muted-foreground">
                     <th className="px-4 py-3 font-medium">Salão</th>
                     <th className="px-4 py-3 font-medium hidden md:table-cell">Tipo</th>
                     <th className="px-4 py-3 font-medium hidden md:table-cell">CNPJ</th>
@@ -380,9 +380,9 @@ export default function Companies() {
                     <th className="px-4 py-3 font-medium text-right">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-outline-variant/30">
                   {companies.map(company => (
-                    <tr key={company.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={company.id} className="hover:bg-surface-container-low transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div
@@ -394,8 +394,8 @@ export default function Companies() {
                             {company.name?.charAt(0)?.toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{company.name}</p>
-                            <span className="text-xs text-gray-500 md:hidden">{company.cnpj || "—"}</span>
+                            <p className="font-medium text-on-surface truncate">{company.name}</p>
+                            <span className="text-xs text-muted-foreground md:hidden">{company.cnpj || "—"}</span>
                             <div className="flex items-center gap-0.5 mt-1 md:hidden">
                               {["branding_primary_color", "branding_secondary_color", "branding_accent_color", "branding_background_color"].map((field) => (
                                 <label key={field} className="relative cursor-pointer">
@@ -408,7 +408,7 @@ export default function Companies() {
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                   />
                                   <span
-                                    className="w-3.5 h-3.5 rounded-full border border-white shadow-sm block ring-1 ring-gray-200"
+                                    className="w-3.5 h-3.5 rounded-full border border-white shadow-sm block ring-1 ring-primary"
                                     style={{ background: company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc") }}
                                   />
                                 </label>
@@ -435,15 +435,15 @@ export default function Companies() {
                           </Badge>
                         ) : "—"}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{company.cnpj || "—"}</td>
+                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{company.cnpj || "—"}</td>
                       <td className="px-4 py-3 hidden lg:table-cell">
-                        <div className="space-y-0.5 text-gray-500">
+                        <div className="space-y-0.5 text-muted-foreground">
                           {company.phone && <p className="truncate">📞 {company.phone}</p>}
                           {company.email && <p className="truncate">✉️ {company.email}</p>}
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
-                        <div className="space-y-0.5 text-gray-500">
+                        <div className="space-y-0.5 text-muted-foreground">
                           {company.owner_name && <p className="truncate">👤 {company.owner_name}</p>}
                           {company.owner_phone && (
                             <a
@@ -457,12 +457,12 @@ export default function Companies() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell">
+                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                         {company.cidade ? `${company.cidade}${company.uf ? ` - ${company.uf}` : ""}` : "—"}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <Badge className={company.active !== false ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}>
+                          <Badge className={company.active !== false ? "bg-emerald-100 text-emerald-700" : "bg-surface-container-low text-muted-foreground"}>
                             {company.active !== false ? "Ativa" : "Inativa"}
                           </Badge>
                           {company.has_branch && (
@@ -486,7 +486,7 @@ export default function Companies() {
                                 title={`Alterar cor ${field === "branding_primary_color" ? "prim\u00e1ria" : field === "branding_secondary_color" ? "secund\u00e1ria" : field === "branding_accent_color" ? "destaque" : "fundo"}`}
                               />
                               <span
-                                className="w-5 h-5 rounded-full border-2 border-white shadow-sm block ring-1 ring-gray-200 group-hover:ring-2 group-hover:ring-branding-primary transition-all"
+                                className="w-5 h-5 rounded-full border-2 border-white shadow-sm block ring-1 ring-primary group-hover:ring-2 group-hover:ring-branding-primary transition-all"
                                 style={{ background: company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc") }}
                               />
                             </label>

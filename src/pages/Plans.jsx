@@ -348,7 +348,7 @@ export default function Plans() {
           <div className="flex gap-2 flex-wrap">
             {isAdmin && (
               <Select value={filterCompany} onValueChange={setFilterCompany}>
-                <SelectTrigger className="rounded-xl w-48 bg-white">
+                <SelectTrigger className="rounded-xl w-48 bg-card">
                   <SelectValue placeholder="Filtrar salão" />
                 </SelectTrigger>
                 <SelectContent>
@@ -361,11 +361,11 @@ export default function Plans() {
               </Select>
             )}
 
-            <div className="flex border border-gray-200 rounded-xl overflow-hidden">
-              <button onClick={() => setViewMode("grid")} className={cn("px-3 py-2 transition-colors", viewMode === "grid" ? "bg-branding-primary text-white" : "hover:bg-gray-50")}>
+            <div className="flex border border-outline-variant rounded-xl overflow-hidden">
+              <button onClick={() => setViewMode("grid")} className={cn("px-3 py-2 transition-colors", viewMode === "grid" ? "bg-branding-primary text-white" : "hover:bg-surface-container-low")}>
                 <Package className="w-4 h-4" />
               </button>
-              <button onClick={() => setViewMode("list")} className={cn("px-3 py-2 transition-colors", viewMode === "list" ? "bg-branding-primary text-white" : "hover:bg-gray-50")}>
+              <button onClick={() => setViewMode("list")} className={cn("px-3 py-2 transition-colors", viewMode === "list" ? "bg-branding-primary text-white" : "hover:bg-surface-container-low")}>
                 <DollarSign className="w-4 h-4" />
               </button>
             </div>
@@ -385,35 +385,35 @@ export default function Plans() {
         {/* Custom Plans */}
         {customers.filter(s => s.custom_plan).length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Planos Personalizados</h2>
+            <h2 className="text-xl font-bold text-on-surface mb-4">Planos Personalizados</h2>
             {viewMode === "list" ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+              <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-x-auto">
                 <table className="w-full text-sm min-w-[600px]">
-                  <thead className="bg-gray-50/50 border-b border-gray-100">
+                  <thead className="bg-background border-b border-outline-variant/30">
                     <tr>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600">Cliente</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Tipo de Serviço</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600">Serviços / Duração</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Frequência</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600">Preço/serviço</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600">Total Estimado</th>
+                      <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Cliente</th>
+                      <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden sm:table-cell">Tipo de Serviço</th>
+                      <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Serviços / Duração</th>
+                      <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden sm:table-cell">Frequência</th>
+                      <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Preço/serviço</th>
+                      <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Total Estimado</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-outline-variant/30">
                     {customers.filter(s => s.custom_plan).map(customer => {
                       const cp = customer.custom_plan;
                       const totalValue = (cp.price_per_service || 0) * (cp.total_services || 0);
                       const frequencyText = cp.frequency_type === "weekly" ? "p/ semana" : cp.frequency_type === "daily" ? "p/ dia" : "p/ mês";
                       return (
-<tr key={customer.id} className="hover:bg-gray-50/50">
-                            <td className="px-4 py-3 font-medium text-gray-900">{customer.name}</td>
+<tr key={customer.id} className="hover:bg-surface-container-low">
+                            <td className="px-4 py-3 font-medium text-on-surface">{customer.name}</td>
                           <td className="px-4 py-3 hidden sm:table-cell">
                             <Badge className={cn("border", getModalityColor(cp.modality))}>{getModalityLabel(cp.modality)}</Badge>
                           </td>
-                          <td className="px-4 py-3 text-gray-600">{cp.total_services} serviços / {cp.duration_mins}min</td>
-                          <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{cp.frequency_count}x {frequencyText}</td>
-                          <td className="px-4 py-3 font-semibold text-gray-900">R$ {cp.price_per_service?.toFixed(2)}</td>
-                          <td className="px-4 py-3 font-bold text-gray-900">R$ {totalValue.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-on-surface-variant">{cp.total_services} serviços / {cp.duration_mins}min</td>
+                          <td className="px-4 py-3 text-on-surface-variant hidden sm:table-cell">{cp.frequency_count}x {frequencyText}</td>
+                          <td className="px-4 py-3 font-semibold text-on-surface">R$ {cp.price_per_service?.toFixed(2)}</td>
+                          <td className="px-4 py-3 font-bold text-on-surface">R$ {totalValue.toFixed(2)}</td>
                         </tr>
                       );
                     })}
@@ -427,36 +427,36 @@ export default function Plans() {
                   const totalValue = (cp.price_per_service || 0) * (cp.total_services || 0);
                   const frequencyText = cp.frequency_type === "weekly" ? "por semana" : cp.frequency_type === "daily" ? "por dia" : "por mês";
                   return (
-                    <div key={customer.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
+                    <div key={customer.id} className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden hover:shadow-md transition-all">
                       <div className="p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div>
-                            <h3 className="text-xl font-bold text-gray-900">{customer.name}</h3>
+                            <h3 className="text-xl font-bold text-on-surface">{customer.name}</h3>
                             <Badge className={cn("mt-2 border", getModalityColor(cp.modality))}>{getModalityLabel(cp.modality)}</Badge>
                           </div>
                         </div>
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                            <div className="flex items-center gap-2 text-gray-600"><Clock className="w-4 h-4 text-branding-primary" />Duração</div>
-                            <span className="font-semibold text-gray-900">{cp.duration_mins} min</span>
+                          <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                            <div className="flex items-center gap-2 text-on-surface-variant"><Clock className="w-4 h-4 text-branding-primary" />Duração</div>
+                            <span className="font-semibold text-on-surface">{cp.duration_mins} min</span>
                           </div>
-                          <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                            <div className="flex items-center gap-2 text-gray-600"><Package className="w-4 h-4 text-branding-secondary" />Serviços</div>
-                            <span className="font-semibold text-gray-900">{cp.total_services} serviços</span>
+                          <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                            <div className="flex items-center gap-2 text-on-surface-variant"><Package className="w-4 h-4 text-branding-secondary" />Serviços</div>
+                            <span className="font-semibold text-on-surface">{cp.total_services} serviços</span>
                           </div>
-                          <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">Frequência</span>
-                            <span className="font-semibold text-gray-900 text-sm">{cp.frequency_count}x {frequencyText}</span>
+                          <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                            <span className="text-on-surface-variant text-sm">Frequência</span>
+                            <span className="font-semibold text-on-surface text-sm">{cp.frequency_count}x {frequencyText}</span>
                           </div>
                           <div className="flex items-center justify-between py-2">
-                            <span className="text-gray-600 text-sm">Valor por serviço</span>
-                            <span className="font-semibold text-gray-900">R$ {cp.price_per_service?.toFixed(2)}</span>
+                            <span className="text-on-surface-variant text-sm">Valor por serviço</span>
+                            <span className="font-semibold text-on-surface">R$ {cp.price_per_service?.toFixed(2)}</span>
                           </div>
                         </div>
                       </div>
                       <div className="bg-gradient-to-r from-branding-primary/5 to-branding-secondary/5 px-6 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-branding-primary" /><span className="text-gray-600">Total Estimado</span></div>
-                        <span className="text-2xl font-bold text-gray-900">R$ {totalValue.toFixed(2)}</span>
+                        <div className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-branding-primary" /><span className="text-on-surface-variant">Total Estimado</span></div>
+                        <span className="text-2xl font-bold text-on-surface">R$ {totalValue.toFixed(2)}</span>
                       </div>
                     </div>
                   );
@@ -468,16 +468,16 @@ export default function Plans() {
 
         {/* Standard Plans */}
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Planos Padrão</h2>
+          <h2 className="text-xl font-bold text-on-surface mb-4">Planos Padrão</h2>
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map(i => <div key={i} className="bg-white rounded-2xl p-6 animate-pulse h-48" />)}
+              {[1, 2, 3].map(i => <div key={i} className="bg-card rounded-2xl p-6 animate-pulse h-48" />)}
             </div>
           ) : visiblePlans.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-              <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum plano encontrado</h3>
-              <p className="text-gray-500 mb-6">
+            <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-12 text-center">
+              <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-on-surface mb-2">Nenhum plano encontrado</h3>
+              <p className="text-muted-foreground mb-6">
                 {isAdmin ? "Crie um plano e vincule a um salão ou deixe global." : "Nenhum plano disponível para seu salão."}
               </p>
               {canManage && (
@@ -487,22 +487,22 @@ export default function Plans() {
               )}
             </div>
           ) : viewMode === "list" ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+            <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-x-auto">
               <table className="w-full text-sm min-w-[750px]">
-                <thead className="bg-gray-50/50 border-b border-gray-100">
+                <thead className="bg-background border-b border-outline-variant/30">
                   <tr>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Nome</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Tipo</th>
-                    {isAdmin && <th className="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Salão</th>}
-                    <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Profissional</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Visitas</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Preço/visita</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Total</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600">Ativo</th>
-                    {canManage && <th className="text-right px-4 py-3 font-medium text-gray-600">Ações</th>}
+                    <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Nome</th>
+                    <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden sm:table-cell">Tipo</th>
+                    {isAdmin && <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden md:table-cell">Salão</th>}
+                    <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden lg:table-cell">Profissional</th>
+                    <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Visitas</th>
+                    <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Preço/visita</th>
+                    <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Total</th>
+                    <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Ativo</th>
+                    {canManage && <th className="text-right px-4 py-3 font-medium text-on-surface-variant">Ações</th>}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-outline-variant/30">
                   {visiblePlans.map(plan => {
                     const { label, color } = planCompanyLabel(plan);
                     const linkedServices = planServices
@@ -510,8 +510,8 @@ export default function Plans() {
                       .map(ps => services.find(s => s.id === ps.service_id))
                       .filter(Boolean);
                     return (
-                      <tr key={plan.id} className="hover:bg-gray-50/50">
-                        <td className="px-4 py-3 font-medium text-gray-900">{plan.name}</td>
+                      <tr key={plan.id} className="hover:bg-surface-container-low">
+                        <td className="px-4 py-3 font-medium text-on-surface">{plan.name}</td>
                         <td className="px-4 py-3 hidden sm:table-cell">
                           <Badge className={cn("border", getModalityColor(plan.modality))}>{getModalityLabel(plan.modality)}</Badge>
                         </td>
@@ -520,10 +520,10 @@ export default function Plans() {
                             <Badge className={cn("border text-xs", color)}>{label}</Badge>
                           </td>
                         )}
-                        <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{plan.professional || "—"}</td>
-                        <td className="px-4 py-3 text-gray-600">{plan.session_count} / {plan.duration_mins}min</td>
-                        <td className="px-4 py-3 font-semibold text-gray-900">R$ {plan.price?.toFixed(2)}</td>
-                        <td className="px-4 py-3 font-bold text-gray-900">R$ {((plan.price || 0) * (plan.session_count || 0) - (plan.discount || 0)).toFixed(2)}</td>
+                        <td className="px-4 py-3 text-on-surface-variant hidden lg:table-cell">{plan.professional || "—"}</td>
+                        <td className="px-4 py-3 text-on-surface-variant">{plan.session_count} / {plan.duration_mins}min</td>
+                        <td className="px-4 py-3 font-semibold text-on-surface">R$ {plan.price?.toFixed(2)}</td>
+                        <td className="px-4 py-3 font-bold text-on-surface">R$ {((plan.price || 0) * (plan.session_count || 0) - (plan.discount || 0)).toFixed(2)}</td>
                         <td className="px-4 py-3">
                           {canEditPlan(plan)
                             ? <Switch checked={plan.active !== false} onCheckedChange={(checked) => togglePlanMutation.mutate({ id: plan.id, active: checked })} />
@@ -557,11 +557,11 @@ export default function Plans() {
                 const customersWithPlan = customers.filter(s => s.plan_id === plan.id);
                 const { label, color } = planCompanyLabel(plan);
                 return (
-                  <div key={plan.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
+                  <div key={plan.id} className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden hover:shadow-md transition-all">
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                          <h3 className="text-xl font-bold text-on-surface">{plan.name}</h3>
                           <div className="flex flex-wrap gap-1.5 mt-2">
                             <Badge className={cn("border", getModalityColor(plan.modality))}>{getModalityLabel(plan.modality)}</Badge>
                             {isAdmin && (
@@ -589,42 +589,42 @@ export default function Plans() {
                       </div>
 
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                          <div className="flex items-center gap-2 text-gray-600"><Clock className="w-4 h-4 text-branding-primary" />Duração</div>
-                          <span className="font-semibold text-gray-900">{plan.duration_mins} min</span>
+                        <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                          <div className="flex items-center gap-2 text-on-surface-variant"><Clock className="w-4 h-4 text-branding-primary" />Duração</div>
+                          <span className="font-semibold text-on-surface">{plan.duration_mins} min</span>
                         </div>
-                        <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                          <div className="flex items-center gap-2 text-gray-600"><Package className="w-4 h-4 text-branding-secondary" />Visitas</div>
-                          <span className="font-semibold text-gray-900">{plan.session_count} visitas</span>
+                        <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                          <div className="flex items-center gap-2 text-on-surface-variant"><Package className="w-4 h-4 text-branding-secondary" />Visitas</div>
+                          <span className="font-semibold text-on-surface">{plan.session_count} visitas</span>
                         </div>
                         {plan.product_type && (
-                          <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">Produto</span>
-                            <span className="font-medium text-gray-900 text-sm">{plan.product_type}</span>
+                          <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                            <span className="text-on-surface-variant text-sm">Produto</span>
+                            <span className="font-medium text-on-surface text-sm">{plan.product_type}</span>
                           </div>
                         )}
                         {plan.combo_type && (
-                          <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">Combo</span>
-                            <span className="font-medium text-gray-900 text-sm">{plan.combo_type}</span>
+                          <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                            <span className="text-on-surface-variant text-sm">Combo</span>
+                            <span className="font-medium text-on-surface text-sm">{plan.combo_type}</span>
                           </div>
                         )}
                         {plan.professional && (
-                          <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">Profissional</span>
-                            <span className="font-medium text-gray-900 text-sm">{plan.professional}</span>
+                          <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                            <span className="text-on-surface-variant text-sm">Profissional</span>
+                            <span className="font-medium text-on-surface text-sm">{plan.professional}</span>
                           </div>
                         )}
                         {plan.commission > 0 && (
-                          <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm">Comissão</span>
-                            <span className="font-medium text-gray-900 text-sm">{plan.commission}%</span>
+                          <div className="flex items-center justify-between py-2 border-b border-outline-variant/30">
+                            <span className="text-on-surface-variant text-sm">Comissão</span>
+                            <span className="font-medium text-on-surface text-sm">{plan.commission}%</span>
                           </div>
                         )}
                         {plan.description && (
-                          <div className="py-2 border-b border-gray-100">
-                            <span className="text-gray-600 text-sm block mb-1">Descrição</span>
-                            <p className="text-xs text-gray-500 line-clamp-2">{plan.description}</p>
+                          <div className="py-2 border-b border-outline-variant/30">
+                            <span className="text-on-surface-variant text-sm block mb-1">Descrição</span>
+                            <p className="text-xs text-muted-foreground line-clamp-2">{plan.description}</p>
                           </div>
                         )}
                         {(() => {
@@ -634,8 +634,8 @@ export default function Plans() {
                             .filter(Boolean);
                           if (linkedServices.length === 0) return null;
                           return (
-                            <div className="py-2 border-b border-gray-100">
-                              <div className="flex items-center gap-2 text-gray-600 mb-2"><Scissors className="w-4 h-4 text-branding-primary" />Serviços inclusos</div>
+                            <div className="py-2 border-b border-outline-variant/30">
+                              <div className="flex items-center gap-2 text-on-surface-variant mb-2"><Scissors className="w-4 h-4 text-branding-primary" />Serviços inclusos</div>
                               <div className="flex flex-wrap gap-1">
                                 {linkedServices.map(svc => (
                                   <span key={svc.id} className="text-xs bg-branding-primary/10 text-branding-primary px-2 py-1 rounded-full border border-branding-primary/20">{svc.name}</span>
@@ -650,17 +650,17 @@ export default function Plans() {
                           const typeLabels = { service: "Serviço", product: "Produto", combo: "Combo" };
                           return (
                             <div className="py-2">
-                              <div className="flex items-center gap-2 text-gray-600 mb-2"><FileText className="w-4 h-4 text-branding-primary" />Itens do plano</div>
+                              <div className="flex items-center gap-2 text-on-surface-variant mb-2"><FileText className="w-4 h-4 text-branding-primary" />Itens do plano</div>
                               <div className="space-y-1">
                                 {items.map(item => (
-                                  <div key={item.id} className="flex items-center justify-between text-xs py-1 border-b border-gray-50 last:border-0">
+                                  <div key={item.id} className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/30 last:border-0">
                                     <div className="flex items-center gap-1.5">
                                       <Badge className="text-[10px] px-1.5 py-0">{typeLabels[item.item_type] || item.item_type}</Badge>
-                                      <span className="text-gray-700 truncate max-w-[120px]">{item.name}</span>
-                                      {item.manufacturer && <span className="text-[10px] text-gray-400 truncate max-w-[80px]">· {item.manufacturer}</span>}
-                                      {item.quantity > 1 && <span className="text-gray-400">x{item.quantity}</span>}
+                                      <span className="text-on-surface truncate max-w-[120px]">{item.name}</span>
+                                      {item.manufacturer && <span className="text-[10px] text-outline truncate max-w-[80px]">· {item.manufacturer}</span>}
+                                      {item.quantity > 1 && <span className="text-outline">x{item.quantity}</span>}
                                     </div>
-                                    <span className="font-medium text-gray-900">R$ {(() => {
+                                    <span className="font-medium text-on-surface">R$ {(() => {
                                       const itemTotal = (item.price || 0) * (item.quantity || 1);
                                       const disc = item.discount_type === "percent"
                                         ? itemTotal * ((item.discount || 0) / 100)
@@ -678,12 +678,12 @@ export default function Plans() {
 
                     <div className="bg-gradient-to-r from-branding-primary/5 to-branding-secondary/5 px-6 py-4">
                       <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-branding-primary" /><span className="text-gray-600 text-sm">Por visita</span></div>
-                        <span className="text-xl font-bold text-gray-900">R$ {plan.price?.toFixed(2)}</span>
+                        <div className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-branding-primary" /><span className="text-on-surface-variant text-sm">Por visita</span></div>
+                        <span className="text-xl font-bold text-on-surface">R$ {plan.price?.toFixed(2)}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">Total ({plan.session_count} visitas)</span>
-                        <span className="text-sm font-semibold text-gray-600">R$ {((plan.price || 0) * (plan.session_count || 0) - (plan.discount || 0)).toFixed(2)}</span>
+                        <span className="text-xs text-muted-foreground">Total ({plan.session_count} visitas)</span>
+                        <span className="text-sm font-semibold text-on-surface-variant">R$ {((plan.price || 0) * (plan.session_count || 0) - (plan.discount || 0)).toFixed(2)}</span>
                       </div>
                       {plan.discount > 0 && (
                         <div className="flex items-center justify-between mt-1">
@@ -692,27 +692,27 @@ export default function Plans() {
                         </div>
                       )}
                       {plan.professional && (
-                        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-gray-200">
-                          <User className="w-3 h-3 text-gray-400" />
-                          <span className="text-xs text-gray-500">{plan.professional}</span>
+                        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-outline-variant">
+                          <User className="w-3 h-3 text-outline" />
+                          <span className="text-xs text-muted-foreground">{plan.professional}</span>
                         </div>
                       )}
                       {customersWithPlan.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                          <p className="text-xs text-gray-500">Clientes neste plano:</p>
+                        <div className="mt-3 pt-3 border-t border-outline-variant space-y-2">
+                          <p className="text-xs text-muted-foreground">Clientes neste plano:</p>
                           <div className="flex flex-wrap gap-1">
                             {customersWithPlan.slice(0, 3).map(s => (
-                              <span key={s.id} className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-700">{s.name}</span>
+                              <span key={s.id} className="text-xs bg-surface-container-low px-2 py-1 rounded-full text-on-surface">{s.name}</span>
                             ))}
                             {customersWithPlan.length > 3 && (
-                              <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-700">+{customersWithPlan.length - 3}</span>
+                              <span className="text-xs bg-surface-container-low px-2 py-1 rounded-full text-on-surface">+{customersWithPlan.length - 3}</span>
                             )}
                           </div>
                           {isAdmin && (() => {
                             const companiesInPlan = [...new Set(customersWithPlan.filter(s => s.company_id).map(s => s.company_id))];
                             return companiesInPlan.length > 0 ? (
                               <div>
-                                <p className="text-xs text-gray-500">Salões:</p>
+                                <p className="text-xs text-muted-foreground">Salões:</p>
                                 <div className="flex flex-wrap gap-1 mt-1">
                                   {companiesInPlan.map(cid => (
                                     <span key={cid} className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">{getCompanyName(cid)}</span>
@@ -759,7 +759,7 @@ export default function Plans() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-gray-500">Global = disponível para todos. Salão específico = visível apenas para ele.</p>
+                  <p className="text-xs text-muted-foreground">Global = disponível para todos. Salão específico = visível apenas para ele.</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-200 bg-amber-50">
@@ -797,7 +797,7 @@ export default function Plans() {
                         : (item.discount || 0);
                       const finalTotal = itemTotal - discountValue;
                       return (
-                        <div key={idx} className="bg-white border border-gray-200 rounded-xl p-4 hover:border-branding-primary/30 transition-colors space-y-3">
+                        <div key={idx} className="bg-card border border-outline-variant rounded-xl p-4 hover:border-branding-primary/30 transition-colors space-y-3">
                           <div className="flex items-center gap-2">
                             <Select
                               value={item.item_type}
@@ -882,7 +882,7 @@ export default function Plans() {
 
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div className="space-y-1">
-                              <label className="text-[11px] text-gray-500 font-medium">Qtd</label>
+                              <label className="text-[11px] text-muted-foreground font-medium">Qtd</label>
                               <Input
                                 type="number"
                                 min="1"
@@ -896,7 +896,7 @@ export default function Plans() {
                               />
                             </div>
                             <div className="space-y-1">
-                              <label className="text-[11px] text-gray-500 font-medium">Preço Unit. (R$)</label>
+                              <label className="text-[11px] text-muted-foreground font-medium">Preço Unit. (R$)</label>
                               <Input
                                 type="number"
                                 min="0"
@@ -911,7 +911,7 @@ export default function Plans() {
                               />
                             </div>
                             <div className="space-y-1">
-                              <label className="text-[11px] text-gray-500 font-medium">Desconto</label>
+                              <label className="text-[11px] text-muted-foreground font-medium">Desconto</label>
                               <div className="flex h-9">
                                 <div className="flex-1 min-w-0">
                                   <Input
@@ -944,7 +944,7 @@ export default function Plans() {
                               </div>
                             </div>
                             <div className="space-y-1">
-                              <label className="text-[11px] text-gray-500 font-medium">Comissão</label>
+                              <label className="text-[11px] text-muted-foreground font-medium">Comissão</label>
                               <div className="flex h-9">
                                 <div className="flex-1 min-w-0">
                                   <Input
@@ -978,9 +978,9 @@ export default function Plans() {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-                            <span className="text-xs text-gray-500">Subtotal</span>
-                            <span className="text-sm font-bold text-gray-900">R$ {finalTotal.toFixed(2)}</span>
+                          <div className="flex items-center justify-between bg-background rounded-lg px-3 py-2 border border-outline-variant/30">
+                            <span className="text-xs text-muted-foreground">Subtotal</span>
+                            <span className="text-sm font-bold text-on-surface">R$ {finalTotal.toFixed(2)}</span>
                           </div>
                         </div>
                       );
@@ -1005,20 +1005,20 @@ export default function Plans() {
                                 <div className="w-8 h-8 rounded-lg bg-branding-primary/10 flex items-center justify-center">
                                   <FileText className="w-4 h-4 text-branding-primary" />
                                 </div>
-                                <span className="text-xs text-gray-600">
-                                  <strong className="text-gray-800">{planItems.length}</strong> {planItems.length === 1 ? "item" : "itens"} · {" "}
-                                  <strong className="text-gray-800">{planItems.reduce((sum, item) => sum + (item.quantity || 1), 0)}</strong> {planItems.reduce((sum, item) => sum + (item.quantity || 1), 0) === 1 ? "unidade" : "unidades"}
+                                <span className="text-xs text-on-surface-variant">
+                                  <strong className="text-on-surface">{planItems.length}</strong> {planItems.length === 1 ? "item" : "itens"} · {" "}
+                                  <strong className="text-on-surface">{planItems.reduce((sum, item) => sum + (item.quantity || 1), 0)}</strong> {planItems.reduce((sum, item) => sum + (item.quantity || 1), 0) === 1 ? "unidade" : "unidades"}
                                 </span>
                               </div>
                               <div className="text-right">
-                                <span className="text-[11px] text-gray-500 block">Total do plano</span>
-                                <span className="text-lg font-bold text-gray-900">R$ {totalPlan.toFixed(2)}</span>
+                                <span className="text-[11px] text-muted-foreground block">Total do plano</span>
+                                <span className="text-lg font-bold text-on-surface">R$ {totalPlan.toFixed(2)}</span>
                               </div>
                             </div>
                             <div className="flex items-center justify-between pt-3 border-t border-branding-primary/10">
                               <div className="flex items-center gap-2">
                                 <DollarSign className="w-4 h-4 text-branding-primary" />
-                                <span className="text-xs text-gray-600">Valor por visita ({visits}x)</span>
+                                <span className="text-xs text-on-surface-variant">Valor por visita ({visits}x)</span>
                               </div>
                               <span className="text-sm font-semibold text-branding-primary">R$ {perVisit.toFixed(2)}</span>
                             </div>
@@ -1028,10 +1028,10 @@ export default function Plans() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-400 text-center py-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-                    <FileText className="w-6 h-6 mx-auto mb-2 text-gray-300" />
+                  <p className="text-xs text-outline text-center py-6 border-2 border-dashed border-outline-variant rounded-xl bg-background">
+                    <FileText className="w-6 h-6 mx-auto mb-2 text-outline" />
                     Nenhum item adicionado.<br />
-                    <span className="text-gray-400">Clique em "Adicionar Item" para começar.</span>
+                    <span className="text-outline">Clique em "Adicionar Item" para começar.</span>
                   </p>
                 )}
               </div>
@@ -1081,7 +1081,7 @@ export default function Plans() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-6 text-xs text-gray-500"
+                    className="h-6 text-xs text-muted-foreground"
                     onClick={() => setFormData((prev) => ({ ...prev, professional: "" }))}
                   >
                     Limpar seleção
@@ -1117,7 +1117,7 @@ export default function Plans() {
                   onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                   placeholder="Descreva os detalhes do plano..."
                   rows={3}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-branding-primary/50 resize-none"
+                  className="w-full rounded-xl border border-outline-variant px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-branding-primary/50 resize-none"
                 />
               </div>
 

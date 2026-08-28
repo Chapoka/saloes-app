@@ -24,8 +24,8 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
-      <Loader2 className="w-8 h-8 text-[#005b8a] animate-spin" />
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <Loader2 className="w-8 h-8 text-primary animate-spin" />
     </div>
   );
 }

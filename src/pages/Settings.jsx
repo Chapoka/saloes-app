@@ -24,6 +24,7 @@ import {
   Phone,
   User,
 } from "lucide-react";
+import { formatPhone, formatCPF, formatRG } from "@/utils/formatters";
 import CompanyIntegrationCard from "@/components/settings/CompanyIntegrationCard";
 import ModalitiesSection from "@/components/settings/ModalitiesSection";
 import CompanyBrandingCard from "@/components/settings/CompanyBrandingCard";
@@ -572,7 +573,7 @@ export default function Settings() {
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-branding-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-outline-variant border-t-branding-primary rounded-full animate-spin" />
       </div>
     );
   }
@@ -583,17 +584,17 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-branding-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-card to-branding-primary/5">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-on-surface flex items-center gap-3">
             <div className="p-2 rounded-xl bg-gradient-to-br from-branding-primary to-branding-secondary">
               <SettingsIcon className="w-6 h-6 text-white" />
             </div>
             Configurações
           </h1>
-          <p className="text-gray-500 mt-1">Configure as integrações do sistema</p>
+          <p className="text-muted-foreground mt-1">Configure as integrações do sistema</p>
         </div>
 
         <div className="space-y-6">
@@ -615,16 +616,16 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Chave de API (Conta Mestre)</Label>
+                  <Label className="text-sm font-medium text-on-surface">Chave de API (Conta Mestre)</Label>
                   <div className="relative">
                     <Input
                       type={showMasterKey ? "text" : "password"}
                       value={formData.asaas_master_api_key}
                       onChange={e => setFormData(f => ({ ...f, asaas_master_api_key: e.target.value }))}
                       placeholder="$aas_xxxxxxxxxxxxxxxx"
-                      className="pr-10 rounded-xl bg-white"
+                      className="pr-10 rounded-xl bg-card"
                     />
-                    <button type="button" onClick={() => setShowMasterKey(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    <button type="button" onClick={() => setShowMasterKey(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       {showMasterKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
@@ -658,13 +659,13 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">URL do app (sem barra no final)</Label>
+                  <Label className="text-sm font-medium text-on-surface">URL do app (sem barra no final)</Label>
                   <Input
                     type="url"
                     value={formData.app_url}
                     onChange={e => setFormData(f => ({ ...f, app_url: e.target.value }))}
                     placeholder="https://seu-app.db.app"
-                    className="rounded-xl bg-white"
+                    className="rounded-xl bg-card"
                   />
 {formData.app_url && (
                       <p className="text-xs text-blue-600">Link que será enviado: <strong>{formData.app_url}/portalcliente</strong></p>
@@ -683,7 +684,7 @@ export default function Settings() {
 
           {/* Integrations per company - Super Admin only */}
           {isSuperAdmin && companies.length > 0 && (
-            <Card className="rounded-2xl shadow-sm border border-gray-100">
+            <Card className="rounded-2xl shadow-sm border border-outline-variant/30">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -717,7 +718,7 @@ export default function Settings() {
 
           {/* Profissional/Admin: show own company integration (read-only summary) */}
           {(isProfissional || isAdmin) && (currentUser?.company_ids?.length || currentUser?.company_id) && (
-            <Card className="rounded-2xl shadow-sm border border-gray-100">
+            <Card className="rounded-2xl shadow-sm border border-outline-variant/30">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-branding-primary/10">
@@ -747,7 +748,7 @@ export default function Settings() {
 
           {/* Branding por Empresa */}
           {(isSuperAdmin || isAdmin) && companies.length > 0 && (
-            <Card className="rounded-2xl shadow-sm border border-gray-100">
+            <Card className="rounded-2xl shadow-sm border border-outline-variant/30">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-purple-100">
@@ -769,7 +770,7 @@ export default function Settings() {
 
           {/* Users Management */}
           {(isSuperAdmin || isAdmin) && (
-          <Card className="rounded-2xl shadow-sm border border-gray-100">
+          <Card className="rounded-2xl shadow-sm border border-outline-variant/30">
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -795,14 +796,14 @@ export default function Settings() {
                 {visibleUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-branding-primary to-branding-secondary flex items-center justify-center text-white font-semibold">
                         {user.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 flex items-center gap-1.5">
+                        <p className="font-medium text-on-surface flex items-center gap-1.5">
                           {user.full_name || "Sem nome"}
                           {user.is_master && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
@@ -811,12 +812,12 @@ export default function Settings() {
                             </span>
                           )}
                         </p>
-                        <p className="text-sm text-gray-500">{user.email}</p>
+                        <p className="text-sm text-muted-foreground">{user.email}</p>
                         {(() => {
                           const cIds = user.company_ids?.length ? user.company_ids : (user.company_id ? [user.company_id] : []);
                           if (cIds.length === 0) return null;
                           return (
-                            <p className="text-xs text-gray-500 flex items-center gap-1 flex-wrap">
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
                               🏢 {cIds.map(id => getCompanyName(id)).filter(Boolean).join(", ") || cIds[0]}
                             </p>
                           );
@@ -828,7 +829,7 @@ export default function Settings() {
                         user.role === "super_admin" ? "bg-purple-100 text-purple-700" :
                         user.role === "admin" ? "bg-amber-100 text-amber-700" :
                         user.role === "profissional" ? "bg-blue-100 text-blue-700" :
-                        "bg-gray-100 text-gray-600"
+                        "bg-surface-container-low text-on-surface-variant"
                        }`}>
                         {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Administrador" : user.role === "profissional" ? "Profissional" : "Cliente"}
                        </span>
@@ -849,7 +850,7 @@ export default function Settings() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleOpenUserModal(user)}
-                        className="text-gray-600 hover:text-branding-primary"
+                        className="text-on-surface-variant hover:text-branding-primary"
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -858,7 +859,7 @@ export default function Settings() {
                         size="icon"
                         onClick={() => handleDeleteUser(user.id)}
                         disabled={user.is_master && !isSuperAdmin}
-                        className={user.is_master && !isSuperAdmin ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-red-600"}
+                        className={user.is_master && !isSuperAdmin ? "text-outline cursor-not-allowed" : "text-on-surface-variant hover:text-red-600"}
                         title={user.is_master && !isSuperAdmin ? "Somente Super Admin pode excluir o Master" : "Excluir"}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -867,7 +868,7 @@ export default function Settings() {
                   </div>
                 ))}
                 {visibleUsers.length === 0 && (
-                  <p className="text-center text-gray-500 py-8">Nenhum usuário cadastrado</p>
+                  <p className="text-center text-muted-foreground py-8">Nenhum usuário cadastrado</p>
                 )}
               </div>
             </CardContent>
@@ -883,12 +884,12 @@ export default function Settings() {
         {/* Reset Password Modal */}
         {showResetPasswordModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4">
-              <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <div className="bg-card rounded-2xl max-w-sm w-full p-6 space-y-4">
+              <h3 className="text-xl font-semibold text-on-surface flex items-center gap-2">
                 <RefreshCw className="w-5 h-5 text-branding-primary" />
                 Redefinir Senha
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Defina uma nova senha temporária para <strong>{resetTargetUser?.full_name || resetTargetUser?.email}</strong>.
               </p>
 
@@ -905,7 +906,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                   >
                     {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -943,8 +944,8 @@ export default function Settings() {
         {/* Import Customer Modal */}
         {showImportCustomerModal && foundCustomer && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
-              <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <div className="bg-card rounded-2xl max-w-md w-full p-6 space-y-4">
+              <h3 className="text-xl font-semibold text-on-surface flex items-center gap-2">
                 <Users className="w-5 h-5 text-branding-primary" />
                 {foundCustomerHasUser ? "Cliente e Usuário Encontrado" : "Cliente Encontrado"}
               </h3>
@@ -970,27 +971,27 @@ export default function Settings() {
                   <li className="flex items-center gap-1.5"><span className="font-semibold text-emerald-600">●</span> <strong>Cliente</strong> — acesso ao portal do cliente com cobranças</li>
                 </ul>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
-                <p className="text-xs text-gray-500 font-medium mb-2">Dados que serão importados:</p>
+              <div className="bg-surface-container-low rounded-xl p-4 space-y-2 text-sm">
+                <p className="text-xs text-muted-foreground font-medium mb-2">Dados que serão importados:</p>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Nome:</span>
-                  <span className="font-medium text-gray-900">{foundCustomer.name || "-"}</span>
+                  <span className="text-muted-foreground">Nome:</span>
+                  <span className="font-medium text-on-surface">{foundCustomer.name || "-"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">WhatsApp:</span>
-                  <span className="font-medium text-gray-900">{foundCustomer.whatsapp || "-"}</span>
+                  <span className="text-muted-foreground">WhatsApp:</span>
+                  <span className="font-medium text-on-surface">{foundCustomer.whatsapp || "-"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">CPF:</span>
-                  <span className="font-medium text-gray-900">{foundCustomer.cpf || "-"}</span>
+                  <span className="text-muted-foreground">CPF:</span>
+                  <span className="font-medium text-on-surface">{foundCustomer.cpf || "-"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">RG:</span>
-                  <span className="font-medium text-gray-900">{foundCustomer.rg || "-"}</span>
+                  <span className="text-muted-foreground">RG:</span>
+                  <span className="font-medium text-on-surface">{foundCustomer.rg || "-"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Data de Nasc.:</span>
-                  <span className="font-medium text-gray-900">{foundCustomer.birth_date || "-"}</span>
+                  <span className="text-muted-foreground">Data de Nasc.:</span>
+                  <span className="font-medium text-on-surface">{foundCustomer.birth_date || "-"}</span>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -1008,8 +1009,8 @@ export default function Settings() {
         {/* Existing User Modal */}
         {showExistingUserModal && existingUserFound && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4">
-              <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <div className="bg-card rounded-2xl max-w-md w-full p-6 space-y-4">
+              <h3 className="text-xl font-semibold text-on-surface flex items-center gap-2">
                 <Users className="w-5 h-5 text-amber-600" />
                 Usuário Já Cadastrado
               </h3>
@@ -1017,19 +1018,19 @@ export default function Settings() {
                 <p>Este e-mail já está registrado como <strong>usuário do sistema</strong>.</p>
                 <p className="mt-1">Deseja editar o usuário existente ou cadastrar um novo?</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
-                <p className="text-xs text-gray-500 font-medium mb-2">Dados do usuário encontrado:</p>
+              <div className="bg-surface-container-low rounded-xl p-4 space-y-2 text-sm">
+                <p className="text-xs text-muted-foreground font-medium mb-2">Dados do usuário encontrado:</p>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Nome:</span>
-                  <span className="font-medium text-gray-900">{existingUserFound.full_name || "-"}</span>
+                  <span className="text-muted-foreground">Nome:</span>
+                  <span className="font-medium text-on-surface">{existingUserFound.full_name || "-"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">E-mail:</span>
-                  <span className="font-medium text-gray-900">{existingUserFound.email}</span>
+                  <span className="text-muted-foreground">E-mail:</span>
+                  <span className="font-medium text-on-surface">{existingUserFound.email}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Perfil:</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-muted-foreground">Perfil:</span>
+                  <span className="font-medium text-on-surface">
                     {existingUserFound.role === "super_admin" ? "Super Admin" :
                      existingUserFound.role === "admin" ? "Administrador" :
                      existingUserFound.role === "profissional" ? "Profissional" : "Cliente"}
@@ -1056,8 +1057,8 @@ export default function Settings() {
         {/* User Modal */}
         {showUserModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-              <h3 className="text-xl font-semibold text-gray-900">
+            <div className="bg-card rounded-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-xl font-semibold text-on-surface">
                 {editingUser ? "Editar Usuário" : "Novo Usuário"}
               </h3>
               
@@ -1088,7 +1089,7 @@ export default function Settings() {
                   <Label className="flex items-center gap-2"><Phone className="w-4 h-4" /> WhatsApp</Label>
                   <Input
                     value={userFormData.whatsapp}
-                    onChange={(e) => setUserFormData({ ...userFormData, whatsapp: e.target.value })}
+                    onChange={(e) => setUserFormData({ ...userFormData, whatsapp: formatPhone(e.target.value) })}
                     placeholder="(00) 00000-0000"
                     className="rounded-xl"
                   />
@@ -1113,7 +1114,7 @@ export default function Settings() {
                     <Label>CPF</Label>
                     <Input
                       value={userFormData.cpf}
-                      onChange={(e) => setUserFormData({ ...userFormData, cpf: e.target.value })}
+                      onChange={(e) => setUserFormData({ ...userFormData, cpf: formatCPF(e.target.value) })}
                       placeholder="000.000.000-00"
                       className="rounded-xl"
                     />
@@ -1123,7 +1124,7 @@ export default function Settings() {
                     <Label>RG</Label>
                     <Input
                       value={userFormData.rg}
-                      onChange={(e) => setUserFormData({ ...userFormData, rg: e.target.value })}
+                      onChange={(e) => setUserFormData({ ...userFormData, rg: formatRG(e.target.value) })}
                       placeholder="00.000.000-0"
                       className="rounded-xl"
                     />
@@ -1170,8 +1171,8 @@ export default function Settings() {
                             ? color === "purple" ? "border-purple-500 bg-purple-50 text-purple-700"
                             : color === "amber" ? "border-amber-500 bg-amber-50 text-amber-700"
                             : color === "blue" ? "border-blue-500 bg-blue-50 text-blue-700"
-                            : "border-gray-400 bg-gray-100 text-gray-700"
-                            : "border-gray-200 text-gray-500 hover:border-gray-300"
+                            : "border-outline bg-surface-container-low text-on-surface"
+                            : "border-outline-variant text-muted-foreground hover:border-outline"
                         }`}
                       >
                         {label}

@@ -95,7 +95,7 @@ export default function ModalitySelector({ value, onChange }) {
       <PopoverContent className="w-64 p-1" align="start">
         <div className="max-h-48 overflow-y-auto">
           {modalities.length === 0 && (
-            <p className="text-xs text-gray-500 px-2 py-2">Nenhum tipo de serviço cadastrado</p>
+            <p className="text-xs text-muted-foreground px-2 py-2">Nenhum tipo de serviço cadastrado</p>
           )}
           {modalities.map((m) => (
             <button
@@ -122,7 +122,7 @@ export default function ModalitySelector({ value, onChange }) {
                 className="h-7 text-xs rounded-lg"
               />
               <div className="relative">
-                <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+                <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                 <Input
                   type="number"
                   min="0"
@@ -134,7 +134,7 @@ export default function ModalitySelector({ value, onChange }) {
                 />
               </div>
               <div className="relative">
-                <Tag className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+                <Tag className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                 <Input
                   type="number"
                   min="0"

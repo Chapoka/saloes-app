@@ -59,7 +59,7 @@ const statusConfig = {
   pending: { label: "Pendente", icon: Clock, color: "bg-amber-100 text-amber-700 border-amber-200" },
   received: { label: "Pago", icon: CheckCircle, color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
   overdue: { label: "Vencida", icon: AlertCircle, color: "bg-red-100 text-red-700 border-red-200" },
-  cancelled: { label: "Cancelada", icon: XCircle, color: "bg-gray-100 text-gray-500 border-gray-200" },
+  cancelled: { label: "Cancelada", icon: XCircle, color: "bg-surface-container-low text-muted-foreground border-outline-variant" },
 };
 
 export default function Invoices() {
@@ -390,15 +390,15 @@ export default function Invoices() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Buscar por cliente ou ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 rounded-xl border-gray-200"
+                className="pl-10 rounded-xl border-outline-variant"
               />
             </div>
             <div className="w-full sm:w-48">
@@ -416,11 +416,11 @@ export default function Invoices() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex border border-gray-200 rounded-xl overflow-hidden flex-shrink-0">
-              <button onClick={() => setViewMode("list")} className={cn("px-3 py-2 transition-colors", viewMode === "list" ? "bg-branding-primary text-white" : "hover:bg-gray-50")}>
+            <div className="flex border border-outline-variant rounded-xl overflow-hidden flex-shrink-0">
+              <button onClick={() => setViewMode("list")} className={cn("px-3 py-2 transition-colors", viewMode === "list" ? "bg-branding-primary text-white" : "hover:bg-surface-container-low")}>
                 <List className="w-4 h-4" />
               </button>
-              <button onClick={() => setViewMode("grid")} className={cn("px-3 py-2 transition-colors", viewMode === "grid" ? "bg-branding-primary text-white" : "hover:bg-gray-50")}>
+              <button onClick={() => setViewMode("grid")} className={cn("px-3 py-2 transition-colors", viewMode === "grid" ? "bg-branding-primary text-white" : "hover:bg-surface-container-low")}>
                 <LayoutGrid className="w-4 h-4" />
               </button>
             </div>
@@ -437,7 +437,7 @@ export default function Invoices() {
                 variant="secondary"
                 onClick={handleBulkSend}
                 disabled={bulkSending}
-                className="rounded-xl bg-white text-branding-primary hover:bg-white/90 font-semibold"
+                className="rounded-xl bg-card text-branding-primary hover:bg-card/90 font-semibold"
               >
                 <MessageSquare className="w-4 h-4 mr-1.5" />
                 {bulkSending ? "Enviando..." : "Enviar via WhatsApp"}
@@ -446,7 +446,7 @@ export default function Invoices() {
                 size="sm"
                 variant="ghost"
                 onClick={() => setSelectedIds(new Set())}
-                className="rounded-xl text-white hover:bg-white/20"
+                className="rounded-xl text-white hover:bg-card/20"
               >
                 Cancelar
               </Button>
@@ -456,10 +456,10 @@ export default function Invoices() {
 
         {/* Table / Grid */}
         {viewMode === "list" ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+          <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-x-auto">
             <Table className="min-w-[700px]">
               <TableHeader>
-                <TableRow className="bg-gray-50/50">
+                <TableRow className="bg-background">
                   <TableHead className="w-10">
                     <Checkbox
                       checked={filteredInvoices.length > 0 && selectedIds.size === filteredInvoices.length}
@@ -478,15 +478,15 @@ export default function Invoices() {
               <TableBody>
                 {isLoading ? (
                   Array(5).fill(0).map((_, i) => (
-                    <TableRow key={i}><TableCell colSpan={6}><div className="h-12 bg-gray-100 animate-pulse rounded" /></TableCell></TableRow>
+                    <TableRow key={i}><TableCell colSpan={6}><div className="h-12 bg-surface-container-low animate-pulse rounded" /></TableCell></TableRow>
                   ))
                 ) : filteredInvoices.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="text-center py-12"><CreditCard className="w-12 h-12 text-gray-500 mx-auto mb-3" /><p className="text-gray-500">Nenhuma cobrança encontrada</p></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center py-12"><CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-3" /><p className="text-muted-foreground">Nenhuma cobrança encontrada</p></TableCell></TableRow>
                 ) : filteredInvoices.map((invoice) => {
                   const status = statusConfig[invoice.status] || statusConfig.pending;
                   const StatusIcon = status.icon;
                   return (
-                    <TableRow key={invoice.id} className={cn("hover:bg-gray-50/50", selectedIds.has(invoice.id) && "bg-branding-primary/5")}>
+                    <TableRow key={invoice.id} className={cn("hover:bg-surface-container-low", selectedIds.has(invoice.id) && "bg-branding-primary/5")}>
                       <TableCell>
                         <Checkbox
                           checked={selectedIds.has(invoice.id)}
@@ -497,7 +497,7 @@ export default function Invoices() {
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-branding-primary to-branding-secondary flex items-center justify-center text-white font-medium text-sm">{invoice.customer_name?.charAt(0)?.toUpperCase()}</div>
                           <div>
-                            <span className="font-medium text-gray-900">{invoice.customer_name}</span>
+                            <span className="font-medium text-on-surface">{invoice.customer_name}</span>
                             {(() => {
                               const st = customers.find(s => s.id === invoice.customer_id);
                               if (st?.guardian_id) {
@@ -511,7 +511,7 @@ export default function Invoices() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-gray-600">
+                      <TableCell className="text-on-surface-variant">
                         <div className="flex items-center gap-1.5">
                           <span>{invoice.plan_name || (customers.find(s => s.id === invoice.customer_id)?.custom_plan ? "Plano Personalizado" : "-")}</span>
                           {(invoice.plan_name === "Plano Personalizado" || (!invoice.plan_name && customers.find(s => s.id === invoice.customer_id)?.custom_plan)) && (
@@ -520,7 +520,7 @@ export default function Invoices() {
                         </div>
                       </TableCell>
                       {isSuperAdmin && (
-                        <TableCell className="text-gray-600 text-xs">
+                        <TableCell className="text-on-surface-variant text-xs">
                           {(() => {
                             const st = customers.find(s => s.id === invoice.customer_id);
                             const cid = invoice.company_id || st?.company_id || (st?.company_ids || [])[0];
@@ -530,8 +530,8 @@ export default function Invoices() {
                           })()}
                         </TableCell>
                       )}
-                      <TableCell className="font-semibold text-gray-900">R$ {invoice.value?.toFixed(2)}</TableCell>
-                      <TableCell className="text-gray-600">{invoice.due_date ? format(parseISO(invoice.due_date), "dd/MM/yyyy") : "-"}</TableCell>
+                      <TableCell className="font-semibold text-on-surface">R$ {invoice.value?.toFixed(2)}</TableCell>
+                      <TableCell className="text-on-surface-variant">{invoice.due_date ? format(parseISO(invoice.due_date), "dd/MM/yyyy") : "-"}</TableCell>
                       <TableCell><Badge className={cn("border gap-1", status.color)}><StatusIcon className="w-3 h-3" />{status.label}</Badge></TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -550,11 +550,11 @@ export default function Invoices() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {isLoading ? Array(6).fill(0).map((_, i) => <div key={i} className="bg-white rounded-2xl p-5 animate-pulse h-40" />) :
+            {isLoading ? Array(6).fill(0).map((_, i) => <div key={i} className="bg-card rounded-2xl p-5 animate-pulse h-40" />) :
             filteredInvoices.length === 0 ? (
-              <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-gray-100">
-                <CreditCard className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-                <p className="text-gray-500">Nenhuma cobrança encontrada</p>
+              <div className="col-span-full text-center py-12 bg-card rounded-2xl border border-outline-variant/30">
+                <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">Nenhuma cobrança encontrada</p>
               </div>
             ) : filteredInvoices.map((invoice) => {
               const status = statusConfig[invoice.status] || statusConfig.pending;
@@ -562,7 +562,7 @@ export default function Invoices() {
               const planName = invoice.plan_name || (customers.find(s => s.id === invoice.customer_id)?.custom_plan ? "Plano Personalizado" : "-");
               const isCustom = invoice.plan_name === "Plano Personalizado" || (!invoice.plan_name && customers.find(s => s.id === invoice.customer_id)?.custom_plan);
               return (
-                <div key={invoice.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-all flex flex-col gap-4">
+                <div key={invoice.id} className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-5 hover:shadow-md transition-all flex flex-col gap-4">
                   {/* Header: avatar + nome + badge */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-3 min-w-0">
@@ -570,9 +570,9 @@ export default function Invoices() {
                         {invoice.customer_name?.charAt(0)?.toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm leading-tight truncate">{invoice.customer_name}</p>
+                        <p className="font-semibold text-on-surface text-sm leading-tight truncate">{invoice.customer_name}</p>
                         <div className="flex items-center gap-1 mt-0.5">
-                          <p className="text-xs text-gray-500 truncate">{planName}</p>
+                          <p className="text-xs text-muted-foreground truncate">{planName}</p>
                           {isCustom && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium flex-shrink-0">Custom</span>}
                         </div>
                         {(() => {
@@ -591,9 +591,9 @@ export default function Invoices() {
                   </div>
 
                   {/* Valor + Vencimento */}
-                  <div className="flex items-end justify-between border-t border-gray-50 pt-3">
-                    <span className="text-2xl font-bold text-gray-900">R$ {invoice.value?.toFixed(2)}</span>
-                    <span className="text-xs text-gray-500 font-medium">
+                  <div className="flex items-end justify-between border-t border-outline-variant/30 pt-3">
+                    <span className="text-2xl font-bold text-on-surface">R$ {invoice.value?.toFixed(2)}</span>
+                    <span className="text-xs text-muted-foreground font-medium">
                       {invoice.due_date ? format(parseISO(invoice.due_date), "dd/MM/yyyy") : "-"}
                     </span>
                   </div>

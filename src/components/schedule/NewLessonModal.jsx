@@ -162,7 +162,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Tipo de Serviço</Label>
+            <Label className="text-sm font-medium text-on-surface">Tipo de Serviço</Label>
             <div className="grid grid-cols-3 gap-2">
               {APPOINTMENT_TYPES.map(type => {
                 const Icon = type.icon;
@@ -173,7 +173,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                     onClick={() => setAppointmentType(type.value)}
                     className={cn(
                       "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-xs font-medium",
-                      appointmentType === type.value ? type.color : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                      appointmentType === type.value ? type.color : "border-outline-variant bg-card text-muted-foreground hover:border-outline"
                     )}
                   >
                     <Icon className="w-4 h-4" />
@@ -185,7 +185,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700">Cliente</Label>
+            <Label className="text-sm font-medium text-on-surface">Cliente</Label>
             <Select value={formData.customer_id} onValueChange={handleCustomerChange}>
               <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Selecione o cliente" />
@@ -194,10 +194,10 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                 {customers?.map(cust => (
                   <SelectItem key={cust.id} value={cust.id}>
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-500" />
+                      <User className="w-4 h-4 text-muted-foreground" />
                       {cust.name}
                       {appointmentType === "plan" && (
-                        <span className="text-gray-500 text-xs">
+                        <span className="text-muted-foreground text-xs">
                           ({cust.current_credits || 0} créd.)
                         </span>
                       )}
@@ -214,7 +214,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             return (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                <Label className="text-sm font-medium text-on-surface flex items-center gap-1.5">
                   <User className="w-4 h-4 text-purple-500" />
                   Mesmo responsável
                 </Label>
@@ -242,7 +242,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                       "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
                       extraCustomerIds.includes(s.id)
                         ? "bg-purple-100 text-purple-700 font-medium"
-                        : "text-gray-600 hover:bg-gray-50"
+                        : "text-on-surface-variant hover:bg-surface-container-low"
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -250,13 +250,13 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                         "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                         extraCustomerIds.includes(s.id)
                           ? "bg-purple-500 border-purple-500"
-                          : "border-gray-300"
+                          : "border-outline"
                       )}>
                         {extraCustomerIds.includes(s.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
                       <span>{s.name}</span>
                     </div>
-                    <span className="text-xs text-gray-500">({s.current_credits || 0} créd.)</span>
+                    <span className="text-xs text-muted-foreground">({s.current_credits || 0} créd.)</span>
                   </button>
                 ))}
               </div>
@@ -274,12 +274,12 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             if (otherCustomers.length === 0) return null;
             return (
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+              <Label className="text-sm font-medium text-on-surface flex items-center gap-1.5">
                 <Users className="w-4 h-4 text-branding-primary" />
                 Outros clientes
-                <span className="text-gray-500 font-normal">— opcional</span>
+                <span className="text-muted-foreground font-normal">— opcional</span>
               </Label>
-              <div className="space-y-1.5 max-h-32 overflow-y-auto border border-gray-200 rounded-xl p-2">
+              <div className="space-y-1.5 max-h-32 overflow-y-auto border border-outline-variant rounded-xl p-2">
                 {otherCustomers.map(s => (
                   <button
                     key={s.id}
@@ -289,7 +289,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                       "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
                       extraCustomerIds.includes(s.id)
                         ? "bg-branding-primary/10 text-branding-primary font-medium"
-                        : "text-gray-600 hover:bg-gray-50"
+                        : "text-on-surface-variant hover:bg-surface-container-low"
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -297,13 +297,13 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                         "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                         extraCustomerIds.includes(s.id)
                           ? "bg-branding-primary border-branding-primary"
-                          : "border-gray-300"
+                          : "border-outline"
                       )}>
                         {extraCustomerIds.includes(s.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
                       <span>{s.name}</span>
                     </div>
-                    <span className="text-xs text-gray-500">({s.current_credits || 0} créd.)</span>
+                    <span className="text-xs text-muted-foreground">({s.current_credits || 0} créd.)</span>
                   </button>
                 ))}
               </div>
@@ -320,11 +320,11 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           {appointmentType === "makeup" && formData.customer_id && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">
-                Serviço de origem (ausência) <span className="text-gray-500 font-normal">— opcional</span>
+              <Label className="text-sm font-medium text-on-surface">
+                Serviço de origem (ausência) <span className="text-muted-foreground font-normal">— opcional</span>
               </Label>
               {absentAppointments.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">Nenhuma falta registrada para este cliente</p>
+                <p className="text-sm text-muted-foreground italic">Nenhuma falta registrada para este cliente</p>
               ) : (
                 <Select value={formData.original_appointment_id} onValueChange={(v) => setFormData(prev => ({ ...prev, original_appointment_id: v }))}>
                   <SelectTrigger className="rounded-xl">
@@ -344,9 +344,9 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Data</Label>
+              <Label className="text-sm font-medium text-on-surface">Data</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="date"
                   value={formData.date}
@@ -358,11 +358,11 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Horário</Label>
+              <Label className="text-sm font-medium text-on-surface">Horário</Label>
               <Select value={formData.start_time} onValueChange={(v) => handleChange("start_time", v)}>
                 <SelectTrigger className="rounded-xl">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gray-500" />
+                    <Clock className="w-4 h-4 text-muted-foreground" />
                     <SelectValue />
                   </div>
                 </SelectTrigger>
@@ -377,7 +377,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Duração</Label>
+              <Label className="text-sm font-medium text-on-surface">Duração</Label>
               <Select
                 value={formData.duration_mins.toString()}
                 onValueChange={(v) => handleChange("duration_mins", parseInt(v))}
@@ -395,7 +395,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Tipo de Serviço</Label>
+              <Label className="text-sm font-medium text-on-surface">Tipo de Serviço</Label>
               <Select value={formData.service_category} onValueChange={(v) => handleChange("service_category", v)}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />

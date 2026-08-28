@@ -2,6 +2,7 @@ import { useState } from "react";
 import { db } from "@/api/dbClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/components/auth/useCurrentUser";
+import { formatPhone } from "@/utils/formatters";
 import { 
   ListOrdered, 
   Plus, 
@@ -122,13 +123,13 @@ export default function WaitingList() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-branding-primary to-branding-secondary">
                 <ListOrdered className="w-6 h-6 text-white" />
               </div>
               Fila de Espera
             </h1>
-            <p className="text-gray-500 mt-1">{filteredList.length} pessoa(s) aguardando vaga</p>
+            <p className="text-muted-foreground mt-1">{filteredList.length} pessoa(s) aguardando vaga</p>
           </div>
           
           <Button
@@ -141,15 +142,15 @@ export default function WaitingList() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Buscar por nome..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 rounded-xl border-gray-200"
+                className="pl-10 rounded-xl border-outline-variant"
               />
             </div>
             <div className="w-full sm:w-48">
@@ -172,14 +173,14 @@ export default function WaitingList() {
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white rounded-2xl p-6 animate-pulse h-32" />
+              <div key={i} className="bg-card rounded-2xl p-6 animate-pulse h-32" />
             ))}
           </div>
         ) : filteredList.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-            <ListOrdered className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Fila vazia</h3>
-            <p className="text-gray-500 mb-6">Nenhum cliente aguardando vaga no momento</p>
+          <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-12 text-center">
+            <ListOrdered className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-on-surface mb-2">Fila vazia</h3>
+            <p className="text-muted-foreground mb-6">Nenhum cliente aguardando vaga no momento</p>
             <Button
               onClick={() => setShowAddModal(true)}
               className="btn-branding rounded-xl"
@@ -193,7 +194,7 @@ export default function WaitingList() {
             {filteredList.map((item, index) => (
               <div 
                 key={item.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all"
+                className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-6 hover:shadow-md transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start gap-4">
@@ -209,7 +210,7 @@ export default function WaitingList() {
                     </div>
                     
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">{item.customer_name}</h3>
+                      <h3 className="text-lg font-bold text-on-surface">{item.customer_name}</h3>
                       <div className="flex flex-wrap items-center gap-2 mt-2">
                         <Badge                         className={cn(
                           "border",
@@ -224,7 +225,7 @@ export default function WaitingList() {
                           {item.duration_mins}min
                         </Badge>
                         {item.whatsapp && (
-                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                          <span className="text-sm text-on-surface-variant flex items-center gap-1">
                             <MessageCircle className="w-4 h-4" />
                             {item.whatsapp}
                           </span>
@@ -233,7 +234,7 @@ export default function WaitingList() {
                       
                       {item.preferred_days && item.preferred_days.length > 0 && (
                         <div className="mt-3 flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-500" />
+                          <Calendar className="w-4 h-4 text-muted-foreground" />
                           <div className="flex gap-1">
                             {daysOfWeek.map((day, idx) => (
                               <div
@@ -242,7 +243,7 @@ export default function WaitingList() {
                                   "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-semibold",
                                   item.preferred_days.includes(idx)
                                     ? "bg-branding-primary text-white"
-                                    : "bg-gray-100 text-gray-500"
+                                    : "bg-surface-container-low text-muted-foreground"
                                 )}
                               >
                                 {day.charAt(0)}
@@ -256,7 +257,7 @@ export default function WaitingList() {
                 </div>
 
                 {item.notes && (
-                  <p className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm text-on-surface-variant mb-4 bg-background p-3 rounded-lg">
                     {item.notes}
                   </p>
                 )}
@@ -313,7 +314,7 @@ export default function WaitingList() {
                 <Label>WhatsApp</Label>
                 <Input
                   value={formData.whatsapp}
-                  onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, whatsapp: formatPhone(e.target.value) })}
                   placeholder="(11) 99999-9999"
                   className="rounded-xl"
                 />
@@ -366,7 +367,7 @@ export default function WaitingList() {
                         "flex-1 h-10 rounded-lg text-xs font-bold transition-all",
                         formData.preferred_days?.includes(idx)
                           ? "bg-branding-primary text-white"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
                       )}
                     >
                       {day.charAt(0)}

@@ -71,7 +71,7 @@ export default function CustomerDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-branding-primary/5 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background via-card to-branding-primary/5 flex items-center justify-center">
         <Droplets className="w-8 h-8 text-branding-primary animate-spin" />
       </div>
     );
@@ -79,10 +79,10 @@ export default function CustomerDetail() {
 
   if (!customer) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-branding-primary/5 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-background via-card to-branding-primary/5 flex items-center justify-center p-4">
         <div className="text-center">
           <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-          <p className="text-gray-600">Cliente não encontrado</p>
+          <p className="text-on-surface-variant">Cliente não encontrado</p>
           <Button variant="ghost" onClick={() => window.history.back()} className="mt-4">
             <ChevronLeft className="w-4 h-4 mr-2" /> Voltar
           </Button>
@@ -156,7 +156,7 @@ export default function CustomerDetail() {
   const totalAbsent = appointments.filter(l => l.status === "absent").length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-branding-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-card to-branding-primary/5">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
@@ -168,18 +168,18 @@ export default function CustomerDetail() {
               {customer.name?.charAt(0)?.toUpperCase()}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{customer.name}</h1>
+              <h1 className="text-2xl font-bold text-on-surface">{customer.name}</h1>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <Badge variant="outline" className={cn(
-                  customer.status === "active" ? "border-emerald-300 text-emerald-700" :
-                  customer.status === "inactive" ? "border-gray-300 text-gray-500" :
-                  "border-amber-300 text-amber-700"
+                  customer.status === "active" ? "border-green-400 text-green-400" :
+                  customer.status === "inactive" ? "border-outline text-muted-foreground" :
+                  "border-amber-400 text-on-surface-variant"
                 )}>
                   {customer.status === "active" ? "Ativo" : customer.status === "inactive" ? "Inativo" : "Pendente"}
                 </Badge>
-                {plan && <span className="text-sm text-gray-500">{plan.name}</span>}
+                {plan && <span className="text-sm text-muted-foreground">{plan.name}</span>}
                 {guardian && (
-                  <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+                  <Badge className="bg-surface-container-low text-on-surface border-outline-variant">
                     👤 Dependente de {guardian.name}
                   </Badge>
                 )}
@@ -189,7 +189,7 @@ export default function CustomerDetail() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 w-fit">
+        <div className="flex gap-1 bg-surface-container-low rounded-xl p-1 mb-6 w-fit">
           {[
             { id: "overview", label: "Visão Geral", icon: User },
             { id: "appointments", label: "Serviços", icon: BookOpen },
@@ -200,7 +200,7 @@ export default function CustomerDetail() {
               onClick={() => setActiveTab(tab.id)}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                activeTab === tab.id ? "bg-white text-branding-primary shadow-sm" : "text-gray-500 hover:text-gray-700"
+                activeTab === tab.id ? "bg-card text-branding-primary shadow-sm" : "text-muted-foreground hover:text-on-surface"
               )}
             >
               <tab.icon className="w-4 h-4" />
@@ -216,9 +216,9 @@ export default function CustomerDetail() {
         {activeTab === "appointments" && (
           <div className="space-y-6">
             {/* Future Appointments */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+            <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+              <div className="p-4 border-b border-outline-variant/30 flex items-center justify-between">
+                <h3 className="font-semibold text-on-surface flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-branding-primary" /> Serviços Futuros
                   <Badge variant="secondary" className="ml-1 text-xs">{futureAppointments.length}</Badge>
                 </h3>
@@ -226,7 +226,7 @@ export default function CustomerDetail() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={toggleSelectAll}
-                      className="text-xs text-gray-500 hover:text-branding-primary transition-colors"
+                      className="text-xs text-muted-foreground hover:text-branding-primary transition-colors"
                     >
                       {selectedAppointments.size === futureAppointments.length ? "Desmarcar todos" : "Selecionar todos"}
                     </button>
@@ -245,25 +245,25 @@ export default function CustomerDetail() {
                 )}
               </div>
               {futureAppointments.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">Nenhum serviço agendado</div>
+                <div className="p-8 text-center text-muted-foreground">Nenhum serviço agendado</div>
               ) : (
-                <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+                <div className="divide-y divide-outline-variant/30 max-h-80 overflow-y-auto">
                   {futureAppointments.map(appointment => (
-                    <div key={appointment.id} className={cn("p-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors", selectedAppointments.has(appointment.id) && "bg-blue-50/50")}>
+                    <div key={appointment.id} className={cn("p-4 flex items-center justify-between hover:bg-surface-container-low/50 transition-colors", selectedAppointments.has(appointment.id) && "bg-primary-container/20")}>
                       <div className="flex items-center gap-3">
                         <Checkbox
                           checked={selectedAppointments.has(appointment.id)}
                           onCheckedChange={() => toggleSelect(appointment.id)}
                           className="rounded"
                         />
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                          <Calendar className="w-4 h-4 text-blue-500" />
+                        <div className="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center">
+                          <Calendar className="w-4 h-4 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-on-surface">
                             {format(parseISO(appointment.date), "dd/MM/yyyy")}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             {appointment.start_time} • {appointment.duration_mins}min • {" "}
                              {(appointment.service_category || appointment.modality) === "corte" ? "Corte" : (appointment.service_category || appointment.modality) === "barba" ? "Barba" : "Serviço"}
                           </p>
@@ -271,14 +271,14 @@ export default function CustomerDetail() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className={cn("text-xs",
-                          appointment.status === "confirmed" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"
+                          appointment.status === "confirmed" ? "bg-primary-container/20 text-primary" : "bg-surface-container-low text-on-surface-variant"
                         )}>
                           {appointment.status === "confirmed" ? "Confirmada" : "Agendada"}
                         </Badge>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                          className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg"
                           onClick={() => setCancelConfirm({ type: "single", appointment })}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -291,45 +291,45 @@ export default function CustomerDetail() {
             </div>
 
             {/* Past Appointments */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+            <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+              <div className="p-4 border-b border-outline-variant/30">
+                <h3 className="font-semibold text-on-surface flex items-center gap-2">
                   <History className="w-4 h-4 text-branding-secondary" /> Histórico de Serviços
                 </h3>
               </div>
               {pastAppointments.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">Nenhum serviço no histórico</div>
+                <div className="p-8 text-center text-muted-foreground">Nenhum serviço no histórico</div>
               ) : (
-                <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+                <div className="divide-y divide-outline-variant/30 max-h-80 overflow-y-auto">
                   {pastAppointments.map(appointment => (
                     <div key={appointment.id} className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={cn("w-8 h-8 rounded-full flex items-center justify-center",
-                          appointment.status === "present" ? "bg-emerald-100" :
-                          appointment.status === "absent" ? "bg-red-100" :
-                          appointment.status === "cancelled" ? "bg-gray-100" : "bg-blue-100"
+                          appointment.status === "present" ? "bg-green-500/20" :
+                          appointment.status === "absent" ? "bg-error-container/20" :
+                          appointment.status === "cancelled" ? "bg-surface-container-low" : "bg-primary-container/20"
                         )}>
-                          {appointment.status === "present" ? <CheckCircle className="w-4 h-4 text-emerald-600" /> :
-                           appointment.status === "absent" ? <XCircle className="w-4 h-4 text-red-600" /> :
-                           appointment.status === "cancelled" ? <XCircle className="w-4 h-4 text-gray-500" /> :
-                           <Calendar className="w-4 h-4 text-blue-500" />}
+                          {appointment.status === "present" ? <CheckCircle className="w-4 h-4 text-green-400" /> :
+                           appointment.status === "absent" ? <XCircle className="w-4 h-4 text-error" /> :
+                           appointment.status === "cancelled" ? <XCircle className="w-4 h-4 text-muted-foreground" /> :
+                           <Calendar className="w-4 h-4 text-primary" />}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-on-surface">
                             {format(parseISO(appointment.date), "dd/MM/yyyy")}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             {appointment.start_time} • {appointment.duration_mins}min • {" "}
                              {(appointment.service_category || appointment.modality) === "corte" ? "Corte" : (appointment.service_category || appointment.modality) === "barba" ? "Barba" : "Serviço"}
                           </p>
                         </div>
                       </div>
                       <Badge className={cn("text-xs",
-                        appointment.status === "present" ? "bg-emerald-100 text-emerald-700" :
-                        appointment.status === "absent" ? "bg-red-100 text-red-700" :
-                        appointment.status === "cancelled" ? "bg-gray-100 text-gray-500" :
-                        appointment.status === "confirmed" ? "bg-blue-100 text-blue-700" :
-                        "bg-slate-100 text-slate-600"
+                        appointment.status === "present" ? "bg-green-500/20 text-green-400" :
+                        appointment.status === "absent" ? "bg-error-container/20 text-error" :
+                        appointment.status === "cancelled" ? "bg-surface-container-low text-muted-foreground" :
+                        appointment.status === "confirmed" ? "bg-primary-container/20 text-primary" :
+                        "bg-surface-container-low text-on-surface-variant"
                       )}>
                         {appointment.status === "present" ? "Presente" :
                          appointment.status === "absent" ? "Falta" :
@@ -381,7 +381,7 @@ export default function CustomerDetail() {
                 <span className="opacity-70 mb-1">de {plan?.session_count || "?"}</span>
               </div>
               {(customer.current_credits || 0) <= 1 && (
-                <div className="mt-3 bg-white/20 rounded-xl p-2 flex items-center gap-2 text-sm">
+                <div className="mt-3 bg-card/20 rounded-xl p-2 flex items-center gap-2 text-sm">
                   <AlertTriangle className="w-4 h-4 text-amber-300 flex-shrink-0" />
                   Créditos acabando!
                 </div>
@@ -389,35 +389,35 @@ export default function CustomerDetail() {
             </div>
 
             {/* Stats */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
-              <h3 className="font-semibold text-gray-700 text-sm">Frequência</h3>
+            <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-4 space-y-3">
+              <h3 className="font-semibold text-on-surface text-sm">Frequência</h3>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Presenças</span>
-                <span className="font-medium text-emerald-600">{totalPresent}</span>
+                <span className="text-muted-foreground">Presenças</span>
+                <span className="font-medium text-green-400">{totalPresent}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Faltas</span>
+                <span className="text-muted-foreground">Faltas</span>
                 <span className="font-medium text-red-500">{totalAbsent}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Cancelamentos</span>
-                <span className="font-medium text-gray-500">{totalCancelled}</span>
+                <span className="text-muted-foreground">Cancelamentos</span>
+                <span className="font-medium text-muted-foreground">{totalCancelled}</span>
               </div>
             </div>
 
             {/* Contact */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-2">
-              <h3 className="font-semibold text-gray-700 text-sm mb-3">Contato</h3>
-              {customer.whatsapp && <p className="text-sm text-gray-600">📱 {customer.whatsapp}</p>}
-              {customer.email && <p className="text-sm text-gray-600">✉️ {customer.email}</p>}
-              {customer.cpf && <p className="text-sm text-gray-600">🪪 {customer.cpf}</p>}
-              {customer.birth_date && <p className="text-sm text-gray-600">🎂 {format(parseISO(customer.birth_date), "dd/MM/yyyy")}</p>}
+            <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-4 space-y-2">
+              <h3 className="font-semibold text-on-surface text-sm mb-3">Contato</h3>
+              {customer.whatsapp && <p className="text-sm text-on-surface-variant">📱 {customer.whatsapp}</p>}
+              {customer.email && <p className="text-sm text-on-surface-variant">✉️ {customer.email}</p>}
+              {customer.cpf && <p className="text-sm text-on-surface-variant">🪪 {customer.cpf}</p>}
+              {customer.birth_date && <p className="text-sm text-on-surface-variant">🎂 {format(parseISO(customer.birth_date), "dd/MM/yyyy")}</p>}
             </div>
 
             {/* Document */}
             {customer.medical_certificate_url && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                <h3 className="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2">
+              <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-4">
+                <h3 className="font-semibold text-on-surface text-sm mb-3 flex items-center gap-2">
                   <FileText className="w-4 h-4" /> Atestado Médico
                 </h3>
                 <a href={customer.medical_certificate_url} target="_blank" rel="noopener noreferrer"
@@ -432,18 +432,18 @@ export default function CustomerDetail() {
           <div className="lg:col-span-2 space-y-6">
             {/* Pending invoice */}
             {pendingInvoice && (
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+              <div className="bg-surface-container-low border border-outline-variant rounded-2xl p-4">
                 <div className="flex items-center gap-3">
                   <CreditCard className="w-5 h-5 text-amber-600" />
                   <div className="flex-1">
-                    <p className="font-medium text-amber-900">Fatura Pendente</p>
-                    <p className="text-sm text-amber-700">
+                    <p className="font-medium text-on-surface">Fatura Pendente</p>
+                    <p className="text-sm text-on-surface-variant">
                       R$ {pendingInvoice.value?.toFixed(2)} • Vence {pendingInvoice.due_date ? format(parseISO(pendingInvoice.due_date), "dd/MM") : "N/A"}
                     </p>
                   </div>
                   {pendingInvoice.asaas_url && (
                     <a href={pendingInvoice.asaas_url} target="_blank" rel="noopener noreferrer"
-                      className="text-amber-700 hover:text-amber-800">
+                      className="text-on-surface-variant hover:text-amber-800">
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   )}
@@ -453,16 +453,16 @@ export default function CustomerDetail() {
 
             {/* Next appointment */}
             {nextAppointment && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-5">
+                <h3 className="font-semibold text-on-surface mb-3 flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-branding-primary" /> Próximo Serviço
                 </h3>
                 <div className="flex items-center gap-4">
                   <div>
-                    <p className="text-xl font-bold text-gray-900">{format(parseISO(nextAppointment.date), "dd/MM")}</p>
-                    <p className="text-sm text-gray-500 capitalize">{format(parseISO(nextAppointment.date), "EEEE", { locale: ptBR })}</p>
+                    <p className="text-xl font-bold text-on-surface">{format(parseISO(nextAppointment.date), "dd/MM")}</p>
+                    <p className="text-sm text-muted-foreground capitalize">{format(parseISO(nextAppointment.date), "EEEE", { locale: ptBR })}</p>
                   </div>
-                  <div className="flex items-center gap-1 text-gray-600">
+                  <div className="flex items-center gap-1 text-on-surface-variant">
                     <Clock className="w-4 h-4" />
                     <span className="font-medium">{nextAppointment.start_time}</span>
                   </div>
@@ -474,37 +474,37 @@ export default function CustomerDetail() {
             )}
 
             {/* Invoices */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+            <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-hidden">
+              <div className="p-4 border-b border-outline-variant/30">
+                <h3 className="font-semibold text-on-surface flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-branding-primary" /> Cobranças
                 </h3>
               </div>
               {invoices.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">Nenhuma cobrança registrada</div>
+                <div className="p-8 text-center text-muted-foreground">Nenhuma cobrança registrada</div>
               ) : (
-                <div className="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                <div className="divide-y divide-outline-variant/30 max-h-64 overflow-y-auto">
                   {invoices.map(inv => (
                     <div key={inv.id} className="p-4 flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">R$ {inv.value?.toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm font-medium text-on-surface">R$ {inv.value?.toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">
                           Vencimento: {inv.due_date ? format(parseISO(inv.due_date), "dd/MM/yyyy") : "—"}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className={cn("text-xs",
-                          inv.status === "received" ? "bg-emerald-100 text-emerald-700" :
-                          inv.status === "pending" ? "bg-amber-100 text-amber-700" :
-                          inv.status === "overdue" ? "bg-red-100 text-red-700" :
-                          "bg-gray-100 text-gray-500"
+                          inv.status === "received" ? "bg-green-500/20 text-green-400" :
+                          inv.status === "pending" ? "bg-amber-100 text-on-surface-variant" :
+                          inv.status === "overdue" ? "bg-error-container/20 text-error" :
+                          "bg-surface-container-low text-muted-foreground"
                         )}>
                           {inv.status === "received" ? "Pago" :
                            inv.status === "pending" ? "Pendente" :
                            inv.status === "overdue" ? "Vencido" : "Cancelado"}
                         </Badge>
                         {inv.asaas_url && (
-                          <a href={inv.asaas_url} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-branding-primary">
+                          <a href={inv.asaas_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-branding-primary">
                             <ExternalLink className="w-4 h-4" />
                           </a>
                         )}

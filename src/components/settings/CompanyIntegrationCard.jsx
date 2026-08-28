@@ -10,23 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { formatPhone, formatCPF, formatCNPJ, formatCEP } from "@/utils/formatters";
 
 const masks = {
   cpfCnpj: (v, personType) => {
-    const n = v.replace(/\D/g, "");
-    if (personType === "JURIDICA") {
-      return n.slice(0,14).replace(/(\d{2})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1/$2").replace(/(\d{4})(\d{1,2})/, "$1-$2");
-    }
-    return n.slice(0,11).replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})/, "$1-$2");
+    if (personType === "JURIDICA") return formatCNPJ(v);
+    return formatCPF(v);
   },
-  mobilePhone: (v) => {
-    const n = v.replace(/\D/g, "").slice(0,11);
-    return n.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
-  },
-  postalCode: (v) => {
-    const n = v.replace(/\D/g, "").slice(0,8);
-    return n.replace(/(\d{5})(\d)/, "$1-$2");
-  },
+  mobilePhone: (v) => formatPhone(v),
+  postalCode: (v) => formatCEP(v),
   incomeValue: (v) => {
     const n = v.replace(/\D/g, "");
     if (!n) return "";
@@ -197,41 +189,41 @@ export default function CompanyIntegrationCard({ company }) {
   const isConnected = cfg?.whatsapp_connected;
 
   return (
-    <div className="border border-gray-200 rounded-2xl overflow-hidden">
+    <div className="border border-outline-variant rounded-2xl overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-branding-primary to-branding-secondary flex items-center justify-center">
             <Building2 className="w-4 h-4 text-white" />
           </div>
           <div className="text-left">
-            <p className="font-semibold text-gray-900">{company.name}</p>
+            <p className="font-semibold text-on-surface">{company.name}</p>
             <div className="flex items-center gap-3 mt-0.5">
               {cfg?.asaas_api_key ? (
                 <span className="flex items-center gap-1 text-xs text-emerald-600"><CheckCircle className="w-3 h-3" />Asaas</span>
               ) : (
-                <span className="flex items-center gap-1 text-xs text-gray-500"><AlertCircle className="w-3 h-3" />Asaas</span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground"><AlertCircle className="w-3 h-3" />Asaas</span>
               )}
               {cfg?.whatsapp_api_token ? (
                 <span className="flex items-center gap-1 text-xs text-emerald-600"><CheckCircle className="w-3 h-3" />WhatsApp ({cfg.whatsapp_provider})</span>
               ) : (
-                <span className="flex items-center gap-1 text-xs text-gray-500"><AlertCircle className="w-3 h-3" />WhatsApp</span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground"><AlertCircle className="w-3 h-3" />WhatsApp</span>
               )}
             </div>
           </div>
         </div>
-        {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
       </button>
 
       {/* Subaccount creation modal */}
       {showSubaccountModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-card rounded-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Criar Subconta Asaas</h3>
-              <button onClick={() => { setShowSubaccountModal(false); setSubaccountResult(null); }} className="text-gray-500 hover:text-gray-600"><X className="w-5 h-5" /></button>
+              <h3 className="text-lg font-semibold text-on-surface">Criar Subconta Asaas</h3>
+              <button onClick={() => { setShowSubaccountModal(false); setSubaccountResult(null); }} className="text-muted-foreground hover:text-on-surface-variant"><X className="w-5 h-5" /></button>
             </div>
 
             {/* Success result */}
@@ -269,16 +261,16 @@ export default function CompanyIntegrationCard({ company }) {
 
             {!subaccountResult?.success && (
               <>
-                <p className="text-sm text-gray-500">Crie uma subconta no Asaas vinculada a <strong>{company.name}</strong> para gerenciar pagamentos.</p>
+                <p className="text-sm text-muted-foreground">Crie uma subconta no Asaas vinculada a <strong>{company.name}</strong> para gerenciar pagamentos.</p>
 
                 {/* Person type */}
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Tipo de Pessoa</Label>
+                  <Label className="text-sm font-medium text-on-surface mb-2 block">Tipo de Pessoa</Label>
                   <div className="grid grid-cols-2 gap-3">
                     {[{ v: "JURIDICA", l: "Pessoa Jurídica (CNPJ)" }, { v: "FISICA", l: "Pessoa Física (CPF)" }].map(({ v, l }) => (
                       <button key={v} type="button"
                         onClick={() => setSubaccountForm(f => ({ ...f, personType: v }))}
-                        className={`py-2 px-3 rounded-xl border-2 text-sm font-medium transition-all ${subaccountForm.personType === v ? "border-branding-primary bg-branding-primary/10 text-branding-primary" : "border-gray-200 text-gray-500"}`}
+                        className={`py-2 px-3 rounded-xl border-2 text-sm font-medium transition-all ${subaccountForm.personType === v ? "border-branding-primary bg-branding-primary/10 text-branding-primary" : "border-outline-variant text-muted-foreground"}`}
                       >{l}</button>
                     ))}
                   </div>
@@ -298,22 +290,22 @@ export default function CompanyIntegrationCard({ company }) {
                     { key: "postalCode", label: "CEP *", placeholder: "00000-000" },
                   ].map(({ key, label, placeholder }) => (
                     <div key={key}>
-                      <Label className="text-xs text-gray-600 mb-1 block">{label}</Label>
+                      <Label className="text-xs text-on-surface-variant mb-1 block">{label}</Label>
                       <input
                         type="text"
                         value={subaccountForm[key] || ""}
                         onChange={e => setSubaccountForm(f => ({ ...f, [key]: applyMask(key, e.target.value, f.personType) }))}
                         placeholder={placeholder}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-branding-primary"
+                        className="w-full border border-outline-variant rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-branding-primary"
                       />
                     </div>
                   ))}
                   <div>
-                    <Label className="text-xs text-gray-600 mb-1 block">Tipo de Salão</Label>
+                    <Label className="text-xs text-on-surface-variant mb-1 block">Tipo de Salão</Label>
                     <select
                       value={subaccountForm.companyType || "LIMITED"}
                       onChange={e => setSubaccountForm(f => ({ ...f, companyType: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-branding-primary"
+                      className="w-full border border-outline-variant rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-branding-primary"
                     >
                       <option value="MEI">MEI</option>
                       <option value="LIMITED">Limitada (LTDA)</option>
@@ -340,13 +332,13 @@ export default function CompanyIntegrationCard({ company }) {
       )}
 
       {open && (
-        <div className="border-t border-gray-100 p-5 space-y-6 bg-gray-50/30">
+        <div className="border-t border-outline-variant/30 p-5 space-y-6 bg-surface-container-low/30">
           {/* Asaas */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Key className="w-4 h-4 text-branding-primary" />
-                <p className="font-semibold text-gray-800">Asaas</p>
+                <p className="font-semibold text-on-surface">Asaas</p>
               </div>
               <button
                 type="button"
@@ -364,20 +356,20 @@ export default function CompanyIntegrationCard({ company }) {
               </div>
             )}
             <div>
-              <Label className="text-xs text-gray-600 mb-1 block">API Key da Subconta</Label>
+              <Label className="text-xs text-on-surface-variant mb-1 block">API Key da Subconta</Label>
               <div className="relative">
                 <Input
                   type={showSecrets["asaas_api_key"] ? "text" : "password"}
                   value={currentForm.asaas_api_key || ""}
                   onChange={e => setField("asaas_api_key", e.target.value)}
                   placeholder="$aas_xxxxxxxxxxxxxxxx"
-                  className="pr-10 rounded-xl bg-white text-sm"
+                  className="pr-10 rounded-xl bg-card text-sm"
                 />
-                <button type="button" onClick={() => toggleSecret("asaas_api_key")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <button type="button" onClick={() => toggleSecret("asaas_api_key")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {showSecrets["asaas_api_key"] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1 italic">Se preenchida, substitui a Chave Mestre para este salão.</p>
+              <p className="text-xs text-muted-foreground mt-1 italic">Se preenchida, substitui a Chave Mestre para este salão.</p>
             </div>
 
             <div className="space-y-2">
@@ -411,12 +403,12 @@ export default function CompanyIntegrationCard({ company }) {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <MessageCircle className="w-4 h-4 text-[#25D366]" />
-              <p className="font-semibold text-gray-800">WhatsApp</p>
+              <p className="font-semibold text-on-surface">WhatsApp</p>
             </div>
 
             <div className="space-y-3">
               <div>
-                <Label className="text-xs text-gray-600 mb-1 block">Provedor</Label>
+                <Label className="text-xs text-on-surface-variant mb-1 block">Provedor</Label>
                 <div className="grid grid-cols-3 gap-2">
                   {["meta", "evolution", "waha"].map(p => (
                     <button
@@ -427,19 +419,19 @@ export default function CompanyIntegrationCard({ company }) {
                         "py-2 px-3 rounded-xl border-2 text-xs font-medium transition-all",
                         (currentForm.whatsapp_provider || "meta") === p
                           ? "border-[#25D366] bg-[#25D366]/10 text-[#128C7E]"
-                          : "border-gray-200 text-gray-500 hover:border-gray-300"
+                          : "border-outline-variant text-muted-foreground hover:border-outline"
                       )}
                     >
                       {p === "meta" ? "Meta / Business" : p === "evolution" ? "Evolution API" : "WAHA"}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{providerLabel}</p>
+                <p className="text-xs text-muted-foreground mt-1">{providerLabel}</p>
               </div>
 
               {providerFields.map(field => (
                 <div key={field.key}>
-                  <Label className="text-xs text-gray-600 mb-1 block">{field.label}</Label>
+                  <Label className="text-xs text-on-surface-variant mb-1 block">{field.label}</Label>
                   {field.secret ? (
                     <div className="relative">
                       <Input
@@ -447,9 +439,9 @@ export default function CompanyIntegrationCard({ company }) {
                         value={currentForm[field.key] || ""}
                         onChange={e => setField(field.key, e.target.value)}
                         placeholder={field.placeholder}
-                        className="pr-10 rounded-xl bg-white text-sm"
+                        className="pr-10 rounded-xl bg-card text-sm"
                       />
-                      <button type="button" onClick={() => toggleSecret(field.key)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      <button type="button" onClick={() => toggleSecret(field.key)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                         {showSecrets[field.key] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
@@ -458,7 +450,7 @@ export default function CompanyIntegrationCard({ company }) {
                       value={currentForm[field.key] || ""}
                       onChange={e => setField(field.key, e.target.value)}
                       placeholder={field.placeholder}
-                      className="rounded-xl bg-white text-sm"
+                      className="rounded-xl bg-card text-sm"
                     />
                   )}
                 </div>

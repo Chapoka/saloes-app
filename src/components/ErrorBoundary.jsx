@@ -25,13 +25,13 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
+        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+          <div className="max-w-md w-full bg-card rounded-2xl shadow-lg p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-4 text-red-500">
               <AlertCircle className="w-full h-full" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Erro na Aplicação</h2>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-2xl font-bold text-on-surface mb-2">Erro na Aplicação</h2>
+            <p className="text-on-surface-variant mb-4">
               Ocorreu um erro inesperado. Verifique o console do navegador (F12) para mais detalhes.
             </p>
             {this.state.error && (

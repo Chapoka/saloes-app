@@ -132,7 +132,7 @@ export default function CalendarSettings() {
         <Card className="rounded-2xl">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-card border border-outline-variant flex items-center justify-center">
                 <svg viewBox="0 0 24 24" className="w-5 h-5">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -181,7 +181,7 @@ export default function CalendarSettings() {
                 )}
                 <Button
                   onClick={connectGoogle}
-                  className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                  className="w-full bg-card text-on-surface border border-outline hover:bg-surface-container-low"
                   disabled={!GOOGLE_CLIENT_ID}
                 >
                   <svg viewBox="0 0 24 24" className="w-4 h-4 mr-2">
@@ -201,7 +201,7 @@ export default function CalendarSettings() {
         <Card className="rounded-2xl">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-card border border-outline-variant flex items-center justify-center">
                 <svg viewBox="0 0 24 24" className="w-5 h-5">
                   <path fill="#0078D4" d="M21.5 4.5H9.5v15h12V4.5zM11 6v12H3V6h8zm8 12V9l-6 4.5V9"/>
                   <path fill="#0078D4" d="M1 4.5h8v15H1z" opacity="0.3"/>
@@ -248,7 +248,7 @@ export default function CalendarSettings() {
                 )}
                 <Button
                   onClick={connectMicrosoft}
-                  className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                  className="w-full bg-card text-on-surface border border-outline hover:bg-surface-container-low"
                   disabled={!MICROSOFT_CLIENT_ID}
                 >
                   <svg viewBox="0 0 24 24" className="w-4 h-4 mr-2">
@@ -279,34 +279,34 @@ export default function CalendarSettings() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
             <div className="flex items-center gap-3">
               <RefreshCw className="w-4 h-4 text-branding-primary" />
               <div>
-                <p className="text-sm font-medium text-gray-900">Sincronização Automática</p>
-                <p className="text-xs text-gray-500">Sincroniza ao criar, atualizar ou excluir agendamentos</p>
+                <p className="text-sm font-medium text-on-surface">Sincronização Automática</p>
+                <p className="text-xs text-muted-foreground">Sincroniza ao criar, atualizar ou excluir agendamentos</p>
               </div>
             </div>
             <Switch checked={syncEnabled} onCheckedChange={setSyncEnabled} />
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
             <div className="flex items-center gap-3">
               <Mail className="w-4 h-4 text-branding-primary" />
               <div>
-                <p className="text-sm font-medium text-gray-900">E-mail de Confirmação</p>
-                <p className="text-xs text-gray-500">Envia e-mail ao cliente ao agendar com .ics para adicionar ao celular</p>
+                <p className="text-sm font-medium text-on-surface">E-mail de Confirmação</p>
+                <p className="text-xs text-muted-foreground">Envia e-mail ao cliente ao agendar com .ics para adicionar ao celular</p>
               </div>
             </div>
             <Switch checked={emailEnabled} onCheckedChange={setEmailEnabled} />
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+          <div className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
             <div className="flex items-center gap-3">
               <Bell className="w-4 h-4 text-branding-primary" />
               <div>
-                <p className="text-sm font-medium text-gray-900">Lembrete por E-mail</p>
-                <p className="text-xs text-gray-500">Envia lembrete 1 dia antes do agendamento</p>
+                <p className="text-sm font-medium text-on-surface">Lembrete por E-mail</p>
+                <p className="text-xs text-muted-foreground">Envia lembrete 1 dia antes do agendamento</p>
               </div>
             </div>
             <Switch checked={true} />
@@ -326,7 +326,7 @@ export default function CalendarSettings() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-gray-600">
+        <CardContent className="space-y-3 text-sm text-on-surface-variant">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-branding-primary/10 text-branding-primary flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
             <p><strong>Conecte</strong> sua conta Google ou Microsoft usando OAuth seguro</p>
@@ -365,27 +365,27 @@ export default function CalendarSettings() {
               href="https://calendar.google.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 p-3 border rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 p-3 border rounded-xl hover:bg-surface-container-low transition-colors"
             >
-              <ExternalLink className="w-4 h-4 text-gray-500" />
+              <ExternalLink className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm">Abrir Google Calendar</span>
             </a>
             <a
               href="https://outlook.live.com/calendar"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 p-3 border rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 p-3 border rounded-xl hover:bg-surface-container-low transition-colors"
             >
-              <ExternalLink className="w-4 h-4 text-gray-500" />
+              <ExternalLink className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm">Abrir Outlook Calendar</span>
             </a>
             <a
               href="https://calendar.apple.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 p-3 border rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 p-3 border rounded-xl hover:bg-surface-container-low transition-colors"
             >
-              <ExternalLink className="w-4 h-4 text-gray-500" />
+              <ExternalLink className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm">Abrir Apple Calendar</span>
             </a>
           </div>

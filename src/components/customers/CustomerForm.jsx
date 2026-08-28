@@ -12,13 +12,14 @@ import { db } from "@/api/dbClient";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { logger } from "@/lib/debugLogger";
+import { formatPhone, formatCPF, formatCEP } from "@/utils/formatters";
 
 const InputWithIcon = ({ icon: Icon, label, id, ...props }) => (
   <div className="space-y-2">
-    <Label className="text-sm font-medium text-gray-700">{label}</Label>
+    <Label className="text-sm font-medium text-on-surface">{label}</Label>
     <div className="relative">
-      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-      <Input {...props} className="pl-10 rounded-xl border-gray-200 focus:border-branding-primary focus:ring-branding-primary" />
+      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <Input {...props} className="pl-10 rounded-xl border-outline-variant focus:border-branding-primary focus:ring-branding-primary" />
     </div>
   </div>
 );
@@ -176,21 +177,6 @@ logger.info("Guardian created via mini-form", guardian);
     } finally {
       setUploading(false);
     }
-  };
-
-  const formatCPF = (value) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 11);
-    return numbers.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})/, "$1-$2");
-  };
-
-  const formatPhone = (value) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 11);
-    return numbers.replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
-  };
-
-  const formatCEP = (value) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 8);
-    return numbers.replace(/(\d{5})(\d)/, "$1-$2");
   };
 
   const lookupCep = async (cep) => {
@@ -353,8 +339,8 @@ logger.info("Guardian created via mini-form", guardian);
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Customer Type Selection */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <div className="bg-card rounded-2xl p-6 shadow-sm border border-outline-variant/30">
+        <h3 className="text-lg font-semibold text-on-surface mb-4 flex items-center gap-2">
           <Users className="w-5 h-5 text-branding-primary" />
           Tipo de Cliente
         </h3>
@@ -370,7 +356,7 @@ logger.info("Guardian created via mini-form", guardian);
                 "flex-1 min-w-[180px] cursor-pointer rounded-xl border-2 p-4 transition-all",
                 customerType === opt.value
                   ? "border-branding-primary bg-branding-primary/5 shadow-sm"
-                  : "border-gray-200 hover:border-gray-300"
+                  : "border-outline-variant hover:border-outline"
               )}
             >
               <input
@@ -381,10 +367,10 @@ logger.info("Guardian created via mini-form", guardian);
                 onChange={() => handleTypeChange(opt.value)}
                 className="sr-only"
               />
-              <p className={cn("font-medium text-sm", customerType === opt.value ? "text-branding-primary" : "text-gray-700")}>
+              <p className={cn("font-medium text-sm", customerType === opt.value ? "text-branding-primary" : "text-on-surface")}>
                 {opt.label}
               </p>
-              <p className="text-xs text-gray-500 mt-1">{opt.desc}</p>
+              <p className="text-xs text-muted-foreground mt-1">{opt.desc}</p>
             </label>
           ))}
         </div>
@@ -392,8 +378,8 @@ logger.info("Guardian created via mini-form", guardian);
 
       {/* Guardian section */}
       {isGuardian && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-outline-variant/30">
+          <h3 className="text-lg font-semibold text-on-surface mb-4 flex items-center gap-2">
             <Users className="w-5 h-5 text-purple-500" />
             Dependentes
           </h3>
@@ -401,7 +387,7 @@ logger.info("Guardian created via mini-form", guardian);
           {/* Currently linked dependents */}
           {dependentIds.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs text-gray-500 mb-2">{dependentIds.length} dependente(s) vinculado(s):</p>
+              <p className="text-xs text-muted-foreground mb-2">{dependentIds.length} dependente(s) vinculado(s):</p>
               <div className="flex flex-wrap gap-2">
                 {dependentIds.map(id => {
                   const dep = customers.find(c => c.id === id);
@@ -428,14 +414,14 @@ logger.info("Guardian created via mini-form", guardian);
 
           {/* Search + add dependents */}
           <div>
-            <p className="text-sm text-gray-500 mb-3">Buscar cliente para vincular como dependente:</p>
+            <p className="text-sm text-muted-foreground mb-3">Buscar cliente para vincular como dependente:</p>
             <div className="relative mb-3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 value={dependentSearch}
                 onChange={(e) => setDependentSearch(e.target.value)}
                 placeholder="Buscar por nome ou CPF..."
-                className="pl-10 rounded-xl border-gray-200"
+                className="pl-10 rounded-xl border-outline-variant"
               />
             </div>
             
@@ -452,7 +438,7 @@ logger.info("Guardian created via mini-form", guardian);
               });
               
               return results.length > 0 ? (
-                <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                <div className="border border-outline-variant rounded-xl overflow-hidden divide-y divide-outline-variant/30 max-h-48 overflow-y-auto">
                   {results.map(c => (
                     <button
                       key={c.id}
@@ -464,15 +450,15 @@ logger.info("Guardian created via mini-form", guardian);
                       className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-purple-50 transition-colors text-left"
                     >
                       <div>
-                        <p className="text-sm font-medium text-gray-700">{c.name}</p>
-                        {c.cpf && <p className="text-xs text-gray-500">CPF: {c.cpf}</p>}
+                        <p className="text-sm font-medium text-on-surface">{c.name}</p>
+                        {c.cpf && <p className="text-xs text-muted-foreground">CPF: {c.cpf}</p>}
                       </div>
                       <Plus className="w-4 h-4 text-purple-500 flex-shrink-0" />
                     </button>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-gray-500">Nenhum cliente encontrado.</p>
+                <p className="text-xs text-muted-foreground">Nenhum cliente encontrado.</p>
               );
             })()}
           </div>
@@ -481,8 +467,8 @@ logger.info("Guardian created via mini-form", guardian);
 
       {/* Dependent section */}
       {isDependent && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-outline-variant/30">
+          <h3 className="text-lg font-semibold text-on-surface mb-4 flex items-center gap-2">
             <Users className="w-5 h-5 text-orange-500" />
             Responsável Financeiro
           </h3>
@@ -493,7 +479,7 @@ logger.info("Guardian created via mini-form", guardian);
               handleChange("billing_mode", "consolidated");
             }}
           >
-            <SelectTrigger className="rounded-xl border-gray-200">
+            <SelectTrigger className="rounded-xl border-outline-variant">
               <SelectValue placeholder="Selecione o responsável" />
             </SelectTrigger>
             <SelectContent>
@@ -542,13 +528,13 @@ logger.info("Guardian created via mini-form", guardian);
             return null;
           })()}
           
-          <p className="text-xs text-gray-500 mt-2">As cobranças serão feitas no responsável selecionado.</p>
+          <p className="text-xs text-muted-foreground mt-2">As cobranças serão feitas no responsável selecionado.</p>
         </div>
       )}
 
       {/* Personal Info */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+      <div className="bg-card rounded-2xl p-6 shadow-sm border border-outline-variant/30">
+        <h3 className="text-lg font-semibold text-on-surface mb-6 flex items-center gap-2">
           <User className="w-5 h-5 text-branding-primary" />
           Dados Pessoais
         </h3>
@@ -611,19 +597,19 @@ logger.info("Guardian created via mini-form", guardian);
           {isTeacher ? (
             teacherCompanyId && companies.length > 0 && (
               <div className="md:col-span-2 space-y-2">
-                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-gray-500" />
+                <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-muted-foreground" />
                   Salão
                 </Label>
-                <div className="px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 text-sm">
+                <div className="px-3 py-2 rounded-xl border border-outline-variant bg-background text-on-surface text-sm">
                   {companies.find(c => c.id === teacherCompanyId)?.name || teacherCompanyId}
                 </div>
               </div>
             )
           ) : companies.length > 0 && (
             <div className="md:col-span-2 space-y-2">
-              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-gray-500" />
+              <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-muted-foreground" />
                 Salões / Filiais
               </Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
@@ -632,7 +618,7 @@ logger.info("Guardian created via mini-form", guardian);
                   return (
                     <label key={c.id} className={cn(
                       "flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all",
-                      isChecked ? "border-branding-primary bg-branding-primary/5" : "border-gray-200 hover:border-gray-300"
+                      isChecked ? "border-branding-primary bg-branding-primary/5" : "border-outline-variant hover:border-outline"
                     )}>
                       <input
                         type="checkbox"
@@ -643,14 +629,14 @@ logger.info("Guardian created via mini-form", guardian);
                         }}
                         className="w-4 h-4 rounded text-branding-primary focus:ring-branding-primary"
                       />
-                      <span className="text-sm text-gray-700">{c.name}</span>
+                      <span className="text-sm text-on-surface">{c.name}</span>
                       {c.has_branch && <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto">Filial</Badge>}
                     </label>
                   );
                 })}
               </div>
               {(formData.company_ids || []).length === 0 && (
-                <p className="text-xs text-gray-500">Selecione um ou mais salões</p>
+                <p className="text-xs text-muted-foreground">Selecione um ou mais salões</p>
               )}
             </div>
           )}
@@ -658,8 +644,8 @@ logger.info("Guardian created via mini-form", guardian);
       </div>
 
       {/* Address */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+      <div className="bg-card rounded-2xl p-6 shadow-sm border border-outline-variant/30">
+        <h3 className="text-lg font-semibold text-on-surface mb-6 flex items-center gap-2">
           <MapPin className="w-5 h-5 text-branding-secondary" />
           Endereço
         </h3>
@@ -667,77 +653,77 @@ logger.info("Guardian created via mini-form", guardian);
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:col-span-1">
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">CEP</Label>
+              <Label className="text-sm font-medium text-on-surface">CEP</Label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   value={formData.address_zipcode}
                   onChange={handleCepChange}
                   placeholder="00000-000"
-                  className="pl-10 rounded-xl border-gray-200 focus:border-branding-primary focus:ring-branding-primary"
+                  className="pl-10 rounded-xl border-outline-variant focus:border-branding-primary focus:ring-branding-primary"
                 />
                 {cepLoading && (
                   <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-branding-primary animate-spin" />
                 )}
               </div>
-              <p className="text-xs text-gray-500">Digite o CEP para preencher o endereço automaticamente</p>
+              <p className="text-xs text-muted-foreground">Digite o CEP para preencher o endereço automaticamente</p>
             </div>
           </div>
 
           <div className="md:col-span-3">
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Rua</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Rua</Label>
             <Input
               value={formData.address_street}
               onChange={(e) => handleChange("address_street", e.target.value)}
               placeholder="Nome da rua"
-              className="rounded-xl border-gray-200"
+              className="rounded-xl border-outline-variant"
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Número</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Número</Label>
             <Input
               value={formData.address_number}
               onChange={(e) => handleChange("address_number", e.target.value)}
               placeholder="Nº"
-              className="rounded-xl border-gray-200"
+              className="rounded-xl border-outline-variant"
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Complemento</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Complemento</Label>
             <Input
               value={formData.address_complement}
               onChange={(e) => handleChange("address_complement", e.target.value)}
               placeholder="Apto, Bloco..."
-              className="rounded-xl border-gray-200"
+              className="rounded-xl border-outline-variant"
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Bairro</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Bairro</Label>
             <Input
               value={formData.address_neighborhood}
               onChange={(e) => handleChange("address_neighborhood", e.target.value)}
               placeholder="Bairro"
-              className="rounded-xl border-gray-200"
+              className="rounded-xl border-outline-variant"
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Cidade</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Cidade</Label>
             <Input
               value={formData.address_city}
               onChange={(e) => handleChange("address_city", e.target.value)}
               placeholder="Cidade"
-              className="rounded-xl border-gray-200"
+              className="rounded-xl border-outline-variant"
             />
           </div>
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Estado</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Estado</Label>
             <Select value={formData.address_state} onValueChange={(v) => handleChange("address_state", v)}>
-              <SelectTrigger className="rounded-xl border-gray-200">
+              <SelectTrigger className="rounded-xl border-outline-variant">
                 <SelectValue placeholder="UF" />
               </SelectTrigger>
               <SelectContent>
@@ -751,8 +737,8 @@ logger.info("Guardian created via mini-form", guardian);
       </div>
 
       {/* Plan & Documents */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+      <div className="bg-card rounded-2xl p-6 shadow-sm border border-outline-variant/30">
+        <h3 className="text-lg font-semibold text-on-surface mb-6 flex items-center gap-2">
           <FileText className="w-5 h-5 text-branding-primary" />
           Plano e Documentos
         </h3>
@@ -772,7 +758,7 @@ logger.info("Guardian created via mini-form", guardian);
         {/* Billing mode - only for dependents */}
         {guardianMode && (
           <div className="mb-4">
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Modo de Cobrança</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Modo de Cobrança</Label>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -782,7 +768,7 @@ logger.info("Guardian created via mini-form", guardian);
                   onChange={() => handleChange("billing_mode", "individual")}
                   className="w-4 h-4 text-branding-primary"
                 />
-                <span className="text-gray-700">Cobrança Individual</span>
+                <span className="text-on-surface">Cobrança Individual</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -792,7 +778,7 @@ logger.info("Guardian created via mini-form", guardian);
                   onChange={() => handleChange("billing_mode", "consolidated")}
                   className="w-4 h-4 text-branding-primary"
                 />
-                <span className="text-gray-700">Junto ao Responsável ({guardianName})</span>
+                <span className="text-on-surface">Junto ao Responsável ({guardianName})</span>
               </label>
             </div>
           </div>
@@ -801,7 +787,7 @@ logger.info("Guardian created via mini-form", guardian);
         <div className="space-y-6">
           {/* Plan Type Selection */}
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block">Tipo de Plano</Label>
+            <Label className="text-sm font-medium text-on-surface mb-3 block">Tipo de Plano</Label>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -814,7 +800,7 @@ logger.info("Guardian created via mini-form", guardian);
                   }}
                   className="w-4 h-4 text-branding-primary"
                 />
-                <span className="text-gray-700">Plano Padrão</span>
+                <span className="text-on-surface">Plano Padrão</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -835,7 +821,7 @@ logger.info("Guardian created via mini-form", guardian);
                   }}
                   className="w-4 h-4 text-branding-primary"
                 />
-                <span className="text-gray-700">Plano Personalizado</span>
+                <span className="text-on-surface">Plano Personalizado</span>
               </label>
             </div>
           </div>
@@ -843,9 +829,9 @@ logger.info("Guardian created via mini-form", guardian);
           {/* Standard Plan */}
           {planType === "standard" && (
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">Plano</Label>
+              <Label className="text-sm font-medium text-on-surface mb-2 block">Plano</Label>
               <Select value={formData.plan_id} onValueChange={(v) => handleChange("plan_id", v)}>
-                <SelectTrigger className="rounded-xl border-gray-200">
+                <SelectTrigger className="rounded-xl border-outline-variant">
                   <SelectValue placeholder="Selecione um plano" />
                 </SelectTrigger>
                 <SelectContent>
@@ -861,15 +847,15 @@ logger.info("Guardian created via mini-form", guardian);
 
           {/* Custom Plan */}
           {planType === "custom" && formData.custom_plan && (
-            <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+            <div className="space-y-4 p-4 bg-background rounded-xl">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Tipo de Serviço</Label>
+                  <Label className="text-sm font-medium text-on-surface mb-2 block">Tipo de Serviço</Label>
                   <Select 
                     value={formData.custom_plan.modality} 
                     onValueChange={(v) => handleChange("custom_plan", {...formData.custom_plan, modality: v})}
                   >
-                    <SelectTrigger className="rounded-xl border-gray-200">
+                    <SelectTrigger className="rounded-xl border-outline-variant">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -880,12 +866,12 @@ logger.info("Guardian created via mini-form", guardian);
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Duração do Serviço</Label>
+                  <Label className="text-sm font-medium text-on-surface mb-2 block">Duração do Serviço</Label>
                   <Select 
                     value={formData.custom_plan.duration_mins.toString()} 
                     onValueChange={(v) => handleChange("custom_plan", {...formData.custom_plan, duration_mins: parseInt(v)})}
                   >
-                    <SelectTrigger className="rounded-xl border-gray-200">
+                    <SelectTrigger className="rounded-xl border-outline-variant">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -897,19 +883,19 @@ logger.info("Guardian created via mini-form", guardian);
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Valor por Serviço (R$)</Label>
+                  <Label className="text-sm font-medium text-on-surface mb-2 block">Valor por Serviço (R$)</Label>
                   <Input
                     type="number"
                     min="0"
                     step="0.01"
                     value={formData.custom_plan.price_per_service}
                     onChange={(e) => handleChange("custom_plan", {...formData.custom_plan, price_per_service: parseFloat(e.target.value) || 0})}
-                    className="rounded-xl border-gray-200"
+                    className="rounded-xl border-outline-variant"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Frequência</Label>
+                  <Label className="text-sm font-medium text-on-surface mb-2 block">Frequência</Label>
                   <Select 
                     value={formData.custom_plan.frequency_type} 
                     onValueChange={(v) => {
@@ -918,7 +904,7 @@ logger.info("Guardian created via mini-form", guardian);
                       handleChange("custom_plan", {...formData.custom_plan, frequency_type: v, total_services: total});
                     }}
                   >
-                    <SelectTrigger className="rounded-xl border-gray-200">
+                    <SelectTrigger className="rounded-xl border-outline-variant">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -930,7 +916,7 @@ logger.info("Guardian created via mini-form", guardian);
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <Label className="text-sm font-medium text-on-surface mb-2 block">
                     Quantas vezes por {formData.custom_plan.frequency_type === "weekly" ? "semana" : formData.custom_plan.frequency_type === "daily" ? "dia" : "mês"}
                   </Label>
                   <Input
@@ -943,29 +929,29 @@ logger.info("Guardian created via mini-form", guardian);
                       const total = type === "weekly" ? count * 4 : type === "daily" ? count * 30 : count;
                       handleChange("custom_plan", {...formData.custom_plan, frequency_count: count, total_services: total});
                     }}
-                    className="rounded-xl border-gray-200"
+                    className="rounded-xl border-outline-variant"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Total de Serviços por mês</Label>
+                  <Label className="text-sm font-medium text-on-surface mb-2 block">Total de Serviços por mês</Label>
                   <Input
                     type="number"
                     min="1"
                     value={formData.custom_plan.total_services}
                     onChange={(e) => handleChange("custom_plan", {...formData.custom_plan, total_services: parseInt(e.target.value) || 1})}
-                    className="rounded-xl border-gray-200"
+                    className="rounded-xl border-outline-variant"
                   />
                   {formData.custom_plan.frequency_type === "weekly" && (
-                    <p className="text-xs text-gray-500 mt-1">{formData.custom_plan.frequency_count || 1}x/semana × 4 semanas = {(formData.custom_plan.frequency_count || 1) * 4} serviços</p>
+                    <p className="text-xs text-muted-foreground mt-1">{formData.custom_plan.frequency_count || 1}x/semana × 4 semanas = {(formData.custom_plan.frequency_count || 1) * 4} serviços</p>
                   )}
                 </div>
               </div>
 
               {/* Summary */}
-              <div className="p-3 bg-white rounded-lg border border-gray-200">
-                <p className="text-sm font-medium text-gray-700 mb-1">Resumo do Plano</p>
-                <div className="flex items-center justify-between text-sm text-gray-600">
+              <div className="p-3 bg-card rounded-lg border border-outline-variant">
+                <p className="text-sm font-medium text-on-surface mb-1">Resumo do Plano</p>
+                <div className="flex items-center justify-between text-sm text-on-surface-variant">
                   <span>Valor Total Estimado:</span>
                   <span className="font-bold text-branding-primary text-lg">
                     R$ {((formData.custom_plan.price_per_service || 0) * (formData.custom_plan.total_services || 0)).toFixed(2)}
@@ -976,10 +962,10 @@ logger.info("Guardian created via mini-form", guardian);
           )}
 
           <div>
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Documento</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Documento</Label>
             <div className="flex items-center gap-3">
               <label className="flex-1 cursor-pointer">
-                <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 hover:border-branding-primary transition-colors flex items-center justify-center gap-2 text-gray-500 hover:text-branding-primary">
+                <div className="border-2 border-dashed border-outline-variant rounded-xl p-4 hover:border-branding-primary transition-colors flex items-center justify-center gap-2 text-muted-foreground hover:text-branding-primary">
                   <Upload className="w-5 h-5" />
                   <span className="text-sm font-medium">
                     {uploading ? "Enviando..." : formData.medical_certificate_url ? "Arquivo enviado" : "Fazer upload"}
@@ -1006,12 +992,12 @@ logger.info("Guardian created via mini-form", guardian);
           </div>
 
           <div className="md:col-span-2">
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">Observações</Label>
+            <Label className="text-sm font-medium text-on-surface mb-2 block">Observações</Label>
             <Textarea
               value={formData.notes}
               onChange={(e) => handleChange("notes", e.target.value)}
               placeholder="Observações sobre o cliente..."
-              className="rounded-xl border-gray-200 resize-none"
+              className="rounded-xl border-outline-variant resize-none"
               rows={3}
             />
           </div>
@@ -1019,15 +1005,15 @@ logger.info("Guardian created via mini-form", guardian);
       </div>
 
       {/* Portal Access */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <div className="bg-card rounded-2xl p-6 shadow-sm border border-outline-variant/30">
+        <h3 className="text-lg font-semibold text-on-surface mb-4 flex items-center gap-2">
           <Users className="w-5 h-5 text-branding-primary" />
           Portal do Cliente
         </h3>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-700">Acesso ao Portal</p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-sm font-medium text-on-surface">Acesso ao Portal</p>
+            <p className="text-xs text-muted-foreground mt-1">
               {formData.email
                 ? `Acessa com ${formData.email} e senha padrão 123456`
                 : "Informe o e-mail do cliente para liberar o portal"}
@@ -1063,9 +1049,9 @@ logger.info("Guardian created via mini-form", guardian);
       {/* Guardian Creation Modal */}
       {showGuardianModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <div className="bg-card rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-outline-variant/30 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-on-surface flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-orange-500" />
                 Cadastrar Responsável Financeiro
               </h3>
@@ -1073,13 +1059,13 @@ logger.info("Guardian created via mini-form", guardian);
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowGuardianModal(false)}
-                className="text-gray-500 hover:text-gray-600"
+                className="text-muted-foreground hover:text-on-surface-variant"
               >
                 <X className="w-5 h-5" />
               </Button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-on-surface-variant">
                 O dependente precisa de um responsável financeiro. Cadastre um novo responsável:
               </p>
               
@@ -1121,7 +1107,7 @@ logger.info("Guardian created via mini-form", guardian);
                 />
               </div>
               
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/30">
                 <Button
                   variant="outline"
                   onClick={() => setShowGuardianModal(false)}

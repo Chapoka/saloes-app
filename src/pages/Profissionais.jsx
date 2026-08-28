@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/components/auth/useCurrentUser";
 import { useThemeMode } from "@/hooks/useThemeMode";
+import { formatPhone } from "@/utils/formatters";
 import {
   UserCog,
   Plus,
@@ -340,16 +341,16 @@ export default function Profissionais() {
         </div>
 
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Buscar profissional..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
 
         {loadingUsers ? (
-          <div className="text-center py-12 text-gray-500">Carregando...</div>
+          <div className="text-center py-12 text-muted-foreground">Carregando...</div>
         ) : professionals.length === 0 ? (
           <div className="text-center py-12">
-            <UserCog className="w-12 h-12 mx-auto text-gray-500 mb-3" />
-            <p className="text-gray-500">Nenhum profissional encontrado</p>
+            <UserCog className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+            <p className="text-muted-foreground">Nenhum profissional encontrado</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -370,23 +371,23 @@ export default function Profissionais() {
                         </div>
                       )}
                       <div>
-                        <h3 className="font-semibold text-gray-900">{prof.full_name || "Sem nome"}</h3>
-                        <p className="text-xs text-gray-500">{prof.email}</p>
+                        <h3 className="font-semibold text-on-surface">{prof.full_name || "Sem nome"}</h3>
+                        <p className="text-xs text-muted-foreground">{prof.email}</p>
                         {prof.company_id && (
-                          <p className="text-xs text-gray-400">{allCompanies.find(c => c.id === prof.company_id)?.name || ""}</p>
+                          <p className="text-xs text-outline">{allCompanies.find(c => c.id === prof.company_id)?.name || ""}</p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={cn("text-xs", prof.active !== false ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-500 border-gray-200")}>
+                      <Badge variant="outline" className={cn("text-xs", prof.active !== false ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-surface-container-low text-muted-foreground border-outline-variant")}>
                         {prof.active !== false ? "Ativo" : "Inativo"}
                       </Badge>
                       {svcCount > 0 && <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">{svcCount} serviços</Badge>}
                       {prodCount > 0 && <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">{prodCount} produtos</Badge>}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button onClick={e => e.stopPropagation()} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-                            <MoreVertical className="w-4 h-4 text-gray-500" />
+                          <button onClick={e => e.stopPropagation()} className="p-1 rounded-lg hover:bg-surface-container transition-colors">
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -412,7 +413,7 @@ export default function Profissionais() {
         <Dialog open={!!deletingProf} onOpenChange={() => setDeletingProf(null)}>
           <DialogContent className="sm:max-w-md rounded-2xl">
             <DialogHeader><DialogTitle>Excluir profissional?</DialogTitle></DialogHeader>
-            <p className="text-sm text-gray-500">"{deletingProf?.full_name}" será removido permanentemente.</p>
+            <p className="text-sm text-muted-foreground">"{deletingProf?.full_name}" será removido permanentemente.</p>
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setDeletingProf(null)}>Cancelar</Button>
               <Button onClick={() => deleteProf.mutate(deletingProf.id)} className="bg-red-600 text-white hover:bg-red-700">Excluir</Button>
@@ -427,11 +428,11 @@ export default function Profissionais() {
               {/* Photo */}
               <div className="flex flex-col items-center gap-3">
                 <Label className="text-sm font-medium">Foto do Profissional</Label>
-                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200">
+                <div className="w-20 h-20 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden border-2 border-outline-variant">
                   {profForm.photo_url ? (
                     <img src={profForm.photo_url} alt="Foto" className="w-full h-full object-cover" />
                   ) : (
-                    <User className="w-10 h-10 text-gray-400" />
+                    <User className="w-10 h-10 text-outline" />
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -496,7 +497,7 @@ export default function Profissionais() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium">Telefone</Label>
-                  <Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: e.target.value }))} placeholder="(00) 00000-0000" className="mt-1" />
+                  <Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: formatPhone(e.target.value) }))} placeholder="(00) 00000-0000" className="mt-1" />
                 </div>
                 <div>
                   <Label className="text-sm font-medium">Comissão (%)</Label>
@@ -514,7 +515,7 @@ export default function Profissionais() {
               <div>
                 <Label className="text-sm font-medium">Serviços Vinculados</Label>
               {allServices.filter(s => getEffectiveActive(s)).length === 0 ? (
-                  <p className="text-xs text-gray-400 mt-1">Nenhum serviço criado ainda. Deseja <a href="/Servicos" className="text-branding-primary underline">criar um</a>?</p>
+                  <p className="text-xs text-outline mt-1">Nenhum serviço criado ainda. Deseja <a href="/Servicos" className="text-branding-primary underline">criar um</a>?</p>
                 ) : (
                   <div className="space-y-2 mt-2">
                     <Select onValueChange={(v) => {
@@ -539,7 +540,7 @@ export default function Profissionais() {
                           return svc ? (
                             <Badge key={sid} variant="outline" className="text-xs gap-1">
                               {svc.name}
-                              <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-gray-400 hover:text-red-500 ml-1">&times;</button>
+                              <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-outline hover:text-red-500 ml-1">&times;</button>
                             </Badge>
                           ) : null;
                         })}
@@ -576,7 +577,7 @@ export default function Profissionais() {
               <div className="flex items-center justify-between p-3 rounded-xl border" style={{ borderColor: "var(--border, #e5e7eb)" }}>
                 <div>
                   <p className="text-sm font-medium">Profissional Ativo</p>
-                  <p className="text-xs text-gray-500">Disponível para agendamento</p>
+                  <p className="text-xs text-muted-foreground">Disponível para agendamento</p>
                 </div>
                 <Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} />
               </div>
@@ -598,7 +599,7 @@ export default function Profissionais() {
   return (
     <div className={cn("max-w-6xl mx-auto p-4 sm:p-6 space-y-6", theme.pageBg)}>
       <div className="flex items-center gap-3">
-        <button onClick={() => setSelectedProf(null)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+        <button onClick={() => setSelectedProf(null)} className="p-2 rounded-lg hover:bg-surface-container transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-3">
@@ -616,10 +617,10 @@ export default function Profissionais() {
         </div>
       </div>
 
-      <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit" style={{ background: theme.isDark ? "rgba(255,255,255,0.06)" : "#f3f4f6" }}>
+      <div className="flex gap-1 bg-surface-container-low rounded-lg p-1 w-fit" style={{ background: theme.isDark ? "rgba(255,255,255,0.06)" : "#f3f4f6" }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key)}
-            className={cn("px-5 py-2 rounded-md text-sm font-medium transition-all", activeTab === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}>
+            className={cn("px-5 py-2 rounded-md text-sm font-medium transition-all", activeTab === t.key ? "bg-card text-on-surface shadow-sm" : "text-muted-foreground hover:text-on-surface")}>
             {t.label}
           </button>
         ))}
@@ -630,17 +631,17 @@ export default function Profissionais() {
           <h2 className="text-lg font-semibold" style={{ color: theme.cardText }}>Dados do Profissional</h2>
           {selectedProf.photo_url && (
             <div className="flex justify-center mb-4">
-              <img src={selectedProf.photo_url} alt={selectedProf.full_name} className="w-20 h-20 rounded-full object-cover border-2 border-gray-200" />
+              <img src={selectedProf.photo_url} alt={selectedProf.full_name} className="w-20 h-20 rounded-full object-cover border-2 border-outline-variant" />
             </div>
           )}
           {[["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Empresa", allCompanies.find(c => c.id === selectedProf.company_id)?.name || "-"], ["Serviços", allProServ.filter(ps => ps.professional_id === selectedProf.id).map(ps => allServices.find(s => s.id === ps.service_id)?.name).filter(Boolean).join(", ") || "-"], ["Comissão", `${selectedProf.commission_pct || 0}%`], ["Dias", (selectedProf.work_days || []).map(d => WORK_DAYS.find(w => w.key === d)?.label).filter(Boolean).join(", ") || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
-            <div key={l}><p className="text-xs text-gray-500">{l}</p><p className="text-sm font-medium">{v}</p></div>
+            <div key={l}><p className="text-xs text-muted-foreground">{l}</p><p className="text-sm font-medium">{v}</p></div>
           ))}
           <div className="flex gap-2 pt-2">
             <Button variant="outline" onClick={() => { const profServiceIds = allProServ.filter(ps => ps.professional_id === selectedProf.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id); setEditingProf(selectedProf); setProfForm({ name: selectedProf.full_name || "", email: selectedProf.email || "", phone: selectedProf.phone || "", active: selectedProf.active !== false, commission_pct: selectedProf.commission_pct || 0, photo_url: selectedProf.photo_url || "", work_days: selectedProf.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: profServiceIds }); setShowForm(true); }}>
               <Edit className="w-4 h-4 mr-2" /> Editar
             </Button>
-            <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setDeletingProf(selectedProf)}>
+            <Button variant="outline" className="text-red-600 border-red-200 hover:bg-error-container/20" onClick={() => setDeletingProf(selectedProf)}>
               <Trash2 className="w-4 h-4 mr-2" /> Excluir
             </Button>
           </div>
@@ -663,7 +664,7 @@ export default function Profissionais() {
           </div>
 
           {selectedProfServices.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 text-sm rounded-xl border" style={{ borderColor: theme.cardBorder }}>
+            <div className="text-center py-8 text-muted-foreground text-sm rounded-xl border" style={{ borderColor: theme.cardBorder }}>
               Nenhum {activeTab === "services" ? "serviço" : "produto"} vinculado.
             </div>
           ) : (
@@ -709,11 +710,11 @@ export default function Profissionais() {
                             <Input type="number" min={0} max={100} step={0.5} value={ps.commission_pct || 0}
                               onChange={e => saveLink.mutate({ professionalId: selectedProf.id, serviceId: ps.service_id, commission: parseFloat(e.target.value) || 0, performs_service: ps.performs_service, price_override: ps.price_override, duration_override: ps.duration_override })}
                               className="h-8 w-16 text-xs text-center" />
-                            <span className="text-xs text-gray-400">%</span>
+                            <span className="text-xs text-outline">%</span>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <button onClick={() => removeLink.mutate(ps.id)} className="p-1 rounded hover:bg-red-50 text-red-500">
+                          <button onClick={() => removeLink.mutate(ps.id)} className="p-1 rounded hover:bg-error-container/20 text-red-500">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </td>
@@ -734,11 +735,11 @@ export default function Profissionais() {
             {/* Photo */}
             <div className="flex flex-col items-center gap-3">
               <Label className="text-sm font-medium">Foto do Profissional</Label>
-              <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200">
+              <div className="w-20 h-20 rounded-full bg-surface-container-low flex items-center justify-center overflow-hidden border-2 border-outline-variant">
                 {profForm.photo_url ? (
                   <img src={profForm.photo_url} alt="Foto" className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-10 h-10 text-gray-400" />
+                  <User className="w-10 h-10 text-outline" />
                 )}
               </div>
               <div className="flex gap-2">
@@ -803,7 +804,7 @@ export default function Profissionais() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm font-medium">Telefone</Label>
-                <Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: e.target.value }))} placeholder="(00) 00000-0000" className="mt-1" />
+                <Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: formatPhone(e.target.value) }))} placeholder="(00) 00000-0000" className="mt-1" />
               </div>
               <div>
                 <Label className="text-sm font-medium">Comissão (%)</Label>
@@ -821,7 +822,7 @@ export default function Profissionais() {
             <div>
               <Label className="text-sm font-medium">Serviços Vinculados</Label>
               {allServices.filter(s => getEffectiveActive(s)).length === 0 ? (
-                <p className="text-xs text-gray-400 mt-1">Nenhum serviço criado ainda. Deseja <a href="/Servicos" className="text-branding-primary underline">criar um</a>?</p>
+                <p className="text-xs text-outline mt-1">Nenhum serviço criado ainda. Deseja <a href="/Servicos" className="text-branding-primary underline">criar um</a>?</p>
               ) : (
                 <div className="space-y-2 mt-2">
                   <Select onValueChange={(v) => {
@@ -846,7 +847,7 @@ export default function Profissionais() {
                         return svc ? (
                           <Badge key={sid} variant="outline" className="text-xs gap-1">
                             {svc.name}
-                            <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-gray-400 hover:text-red-500 ml-1">&times;</button>
+                            <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-outline hover:text-red-500 ml-1">&times;</button>
                           </Badge>
                         ) : null;
                       })}
@@ -883,7 +884,7 @@ export default function Profissionais() {
             <div className="flex items-center justify-between p-3 rounded-xl border" style={{ borderColor: "var(--border, #e5e7eb)" }}>
               <div>
                 <p className="text-sm font-medium">Profissional Ativo</p>
-                <p className="text-xs text-gray-500">Disponível para agendamento</p>
+                <p className="text-xs text-muted-foreground">Disponível para agendamento</p>
               </div>
               <Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} />
             </div>
@@ -899,7 +900,7 @@ export default function Profissionais() {
       <Dialog open={!!deletingProf} onOpenChange={() => setDeletingProf(null)}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader><DialogTitle>Excluir profissional?</DialogTitle></DialogHeader>
-          <p className="text-sm text-gray-500">"{deletingProf?.full_name}" será removido permanentemente.</p>
+          <p className="text-sm text-muted-foreground">"{deletingProf?.full_name}" será removido permanentemente.</p>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setDeletingProf(null)}>Cancelar</Button>
             <Button onClick={() => deleteProf.mutate(deletingProf.id)} className="bg-red-600 text-white hover:bg-red-700">Excluir</Button>

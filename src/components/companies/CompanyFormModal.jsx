@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Search, Loader2, Building2, MapPin, Phone, User, MessageCircle, PaintBucket, Image, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { PALETTE_LIST, COLOR_PALETTES } from "@/lib/colorPalettes";
+import { formatPhone, formatCPF, formatCNPJ, formatCEP } from "@/utils/formatters";
 
 const emptyForm = {
   name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
@@ -22,31 +23,6 @@ const ESTABLISHMENT_THEMES = {
   salao_beleza: { primary: COLOR_PALETTES.salao.colors.primary, secondary: COLOR_PALETTES.salao.colors.secondary, label: "Salão de Beleza" },
   studio_manicure: { primary: COLOR_PALETTES.studio.colors.primary, secondary: COLOR_PALETTES.studio.colors.secondary, label: "Studio / Manicure" },
 };
-
-function formatPhone(value) {
-  const d = value.replace(/\D/g, "").slice(0, 11);
-  if (d.length <= 10) {
-    return d.replace(/^(\d{2})(\d{0,4})(\d{0,4}).*/, "($1) $2-$3").replace(/-$/, "");
-  }
-  return d.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, "($1) $2-$3").replace(/-$/, "");
-}
-
-function formatCnpj(value) {
-  const d = value.replace(/\D/g, "").slice(0, 14);
-  return d
-    .replace(/^(\d{2})(\d)/, "$1.$2")
-    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3/$4")
-    .replace(/(\d{3})(\d)$/, "$1-$2");
-}
-
-function formatCpf(value) {
-  const d = value.replace(/\D/g, "").slice(0, 11);
-  return d
-    .replace(/^(\d{3})(\d)/, "$1.$2")
-    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/(\d{3})(\d)$/, "$1-$2");
-}
 
 function validateCpf(cpf) {
   const clean = cpf.replace(/\D/g, "");
@@ -170,26 +146,26 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[92vh] overflow-y-auto">
-        <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+      <div className="bg-card rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[92vh] overflow-y-auto">
+        <h3 className="text-xl font-semibold text-on-surface flex items-center gap-2">
           <Building2 className="w-5 h-5 text-branding-primary" />
           {editing ? "Editar Salão" : "Novo Salão"}
         </h3>
 
         {/* Consulta de documento */}
-        <div className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-100">
+        <div className="bg-background rounded-xl p-4 space-y-3 border border-outline-variant/30">
           <Label className="text-sm font-semibold">Consultar Documento</Label>
           <div className="flex gap-2">
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              className="rounded-xl border border-input bg-white px-3 text-sm h-9"
+              className="rounded-xl border border-input bg-card px-3 text-sm h-9"
             >
               <option value="cnpj">CNPJ</option>
               <option value="cpf">CPF</option>
             </select>
             <Input
-              value={docType === "cnpj" ? formatCnpj(docValue) : formatCpf(docValue)}
+              value={docType === "cnpj" ? formatCNPJ(docValue) : formatCPF(docValue)}
               onChange={(e) => setDocValue(e.target.value)}
               placeholder={docType === "cnpj" ? "00.000.000/0000-00" : "000.000.000-00"}
               className="rounded-xl flex-1"
@@ -203,20 +179,20 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
               Consultar
             </Button>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             CNPJ preenche os dados cadastrais. CPF é salvo no campo do responsável.
           </p>
         </div>
 
         {/* Dados Cadastrais */}
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-on-surface flex items-center gap-2">
             <Building2 className="w-4 h-4" /> Dados Cadastrais
           </h4>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1 col-span-2">
               <Label>CNPJ</Label>
-              <Input value={formatCnpj(form.cnpj)} onChange={(e) => setForm((prev) => ({ ...prev, cnpj: e.target.value }))} placeholder="00.000.000/0000-00" className="rounded-xl" />
+              <Input value={formatCNPJ(form.cnpj)} onChange={(e) => setForm((prev) => ({ ...prev, cnpj: e.target.value }))} placeholder="00.000.000/0000-00" className="rounded-xl" />
             </div>
             <div className="space-y-1">
               <Label>Tipo</Label>
@@ -248,7 +224,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
                 ))}
               </select>
               {form.estabelecimento_tipo && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Cores aplicadas: primária <strong style={{ color: form.branding_primary_color }}>{form.branding_primary_color}</strong> e secundária <strong style={{ color: form.branding_secondary_color }}>{form.branding_secondary_color}</strong>
                 </p>
               )}
@@ -272,15 +248,15 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
                     }))}
                     className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
                       form.branding_palette === palette.id
-                        ? "border-branding-primary bg-branding-primary/5 text-gray-900 shadow-sm"
-                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                        ? "border-branding-primary bg-branding-primary/5 text-on-surface shadow-sm"
+                        : "border-outline-variant text-muted-foreground hover:border-outline"
                     }`}
                   >
                     <span className="flex -space-x-1">
                       {Object.values(palette.colors).map((color, i) => (
                         <span
                           key={i}
-                          className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                          className="w-4 h-4 rounded-full border-2 border-surface shadow-sm"
                           style={{ background: color }}
                         />
                       ))}
@@ -296,70 +272,70 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
               <Label className="flex items-center gap-1.5"><PaintBucket className="w-4 h-4" /> Cores da Marca</Label>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-gray-500">Primária</Label>
+                  <Label className="text-xs text-muted-foreground">Primária</Label>
                   <div className="flex items-center gap-2 mt-0.5">
                     <input
                       type="color"
                       value={form.branding_primary_color || "#0077b6"}
                       onChange={(e) => setForm((prev) => ({ ...prev, branding_primary_color: e.target.value }))}
-                      className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer"
+                      className="w-9 h-9 rounded-lg border border-outline-variant cursor-pointer"
                     />
                     <Input
                       value={form.branding_primary_color || ""}
                       onChange={(e) => setForm((prev) => ({ ...prev, branding_primary_color: e.target.value }))}
                       placeholder="#0077b6"
-                      className="rounded-xl bg-white text-sm font-mono h-9"
+                      className="rounded-xl bg-card text-sm font-mono h-9"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">Secundária</Label>
+                  <Label className="text-xs text-muted-foreground">Secundária</Label>
                   <div className="flex items-center gap-2 mt-0.5">
                     <input
                       type="color"
                       value={form.branding_secondary_color || "#2a9d8f"}
                       onChange={(e) => setForm((prev) => ({ ...prev, branding_secondary_color: e.target.value }))}
-                      className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer"
+                      className="w-9 h-9 rounded-lg border border-outline-variant cursor-pointer"
                     />
                     <Input
                       value={form.branding_secondary_color || ""}
                       onChange={(e) => setForm((prev) => ({ ...prev, branding_secondary_color: e.target.value }))}
                       placeholder="#2a9d8f"
-                      className="rounded-xl bg-white text-sm font-mono h-9"
+                      className="rounded-xl bg-card text-sm font-mono h-9"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">Destaque</Label>
+                  <Label className="text-xs text-muted-foreground">Destaque</Label>
                   <div className="flex items-center gap-2 mt-0.5">
                     <input
                       type="color"
                       value={form.branding_accent_color || "#1e293b"}
                       onChange={(e) => setForm((prev) => ({ ...prev, branding_accent_color: e.target.value }))}
-                      className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer"
+                      className="w-9 h-9 rounded-lg border border-outline-variant cursor-pointer"
                     />
                     <Input
                       value={form.branding_accent_color || ""}
                       onChange={(e) => setForm((prev) => ({ ...prev, branding_accent_color: e.target.value }))}
                       placeholder="#1e293b"
-                      className="rounded-xl bg-white text-sm font-mono h-9"
+                      className="rounded-xl bg-card text-sm font-mono h-9"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">Fundo</Label>
+                  <Label className="text-xs text-muted-foreground">Fundo</Label>
                   <div className="flex items-center gap-2 mt-0.5">
                     <input
                       type="color"
                       value={form.branding_background_color || "#f8fafc"}
                       onChange={(e) => setForm((prev) => ({ ...prev, branding_background_color: e.target.value }))}
-                      className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer"
+                      className="w-9 h-9 rounded-lg border border-outline-variant cursor-pointer"
                     />
                     <Input
                       value={form.branding_background_color || ""}
                       onChange={(e) => setForm((prev) => ({ ...prev, branding_background_color: e.target.value }))}
                       placeholder="#f8fafc"
-                      className="rounded-xl bg-white text-sm font-mono h-9"
+                      className="rounded-xl bg-card text-sm font-mono h-9"
                     />
                   </div>
                 </div>
@@ -370,7 +346,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
                   <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_secondary_color }} />
                   <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_accent_color || "#1e293b" }} />
                   <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_background_color || "#f8fafc" }} />
-                  <span className="text-xs text-gray-500">Pré-visualização</span>
+                  <span className="text-xs text-muted-foreground">Pré-visualização</span>
                 </div>
               )}
             </div>
@@ -383,7 +359,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
                   value={form.branding_logo_url || ""}
                   onChange={(e) => setForm((prev) => ({ ...prev, branding_logo_url: e.target.value }))}
                   placeholder="URL da logo"
-                  className="rounded-xl bg-white text-sm flex-1"
+                  className="rounded-xl bg-card text-sm flex-1"
                 />
                 <Button
                   type="button"
@@ -411,7 +387,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
                 </Button>
               </div>
               {form.branding_logo_url && (
-                <div className="mt-2 p-2 bg-gray-50 rounded-xl border inline-flex items-center gap-2">
+                <div className="mt-2 p-2 bg-background rounded-xl border inline-flex items-center gap-2">
                   <img
                     src={form.branding_logo_url}
                     alt="Preview"
@@ -470,7 +446,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
 
         {/* Endereço */}
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-on-surface flex items-center gap-2">
             <MapPin className="w-4 h-4" /> Endereço
           </h4>
           <div className="grid grid-cols-2 gap-3">
@@ -480,7 +456,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
                 <Input value={formatCep(form.cep)} onChange={onCepChange} placeholder="00000-000" className="rounded-xl pr-9" />
                 {cepLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-branding-primary" />}
               </div>
-              <p className="text-xs text-gray-500">Digite o CEP para preencher o endereço</p>
+              <p className="text-xs text-muted-foreground">Digite o CEP para preencher o endereço</p>
             </div>
             <div className="space-y-1">
               <Label>UF</Label>
@@ -511,7 +487,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
 
         {/* Contato */}
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-on-surface flex items-center gap-2">
             <Phone className="w-4 h-4" /> Contato
           </h4>
           <div className="grid grid-cols-2 gap-3">
@@ -533,7 +509,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
 
         {/* Responsável */}
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-on-surface flex items-center gap-2">
             <User className="w-4 h-4" /> Responsável
           </h4>
           <div className="grid grid-cols-2 gap-3">
@@ -544,7 +520,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
             <div className="space-y-1">
               <Label>CPF do Responsável</Label>
               <Input
-                value={formatCpf(form.owner_cpf || "")}
+                value={formatCPF(form.owner_cpf || "")}
                 onChange={(e) => setForm((prev) => ({ ...prev, owner_cpf: e.target.value.replace(/\D/g, "") }))}
                 placeholder="000.000.000-00"
                 className="rounded-xl"
@@ -582,7 +558,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
 
         {/* Status */}
         <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700">Status</h4>
+          <h4 className="text-sm font-semibold text-on-surface">Status</h4>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <input type="checkbox" id="active" checked={form.active} onChange={(e) => setForm((prev) => ({ ...prev, active: e.target.checked }))} className="w-4 h-4" />
@@ -595,7 +571,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2 sticky bottom-0 bg-white pb-1">
+        <div className="flex gap-3 pt-2 sticky bottom-0 bg-card pb-1">
           <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl">Cancelar</Button>
           <Button onClick={onSave} disabled={saving} className="flex-1 btn-branding rounded-xl">
             {saving ? "Salvando..." : "Salvar"}

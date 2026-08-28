@@ -54,7 +54,7 @@ export default function PeriodFilter({ invoices = [], period, setPeriod, selecte
   return (
     <div className="flex items-center gap-2 flex-wrap self-start">
       {/* Quick period buttons */}
-      <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="flex items-center bg-card border border-outline-variant rounded-xl overflow-hidden shadow-sm">
         {QUICK_OPTIONS.map(opt => (
           <button
             key={opt.value}
@@ -63,7 +63,7 @@ export default function PeriodFilter({ invoices = [], period, setPeriod, selecte
               "px-3 py-2 text-sm font-medium transition-colors",
               period === opt.value
                 ? "bg-branding-primary text-white"
-                : "text-gray-600 hover:bg-gray-50"
+                : "text-on-surface-variant hover:bg-surface-container-low"
             )}
           >
             {opt.label}
@@ -75,9 +75,9 @@ export default function PeriodFilter({ invoices = [], period, setPeriod, selecte
       {period === "year" && (
         <Popover open={yearOpen} onOpenChange={setYearOpen}>
           <PopoverTrigger asChild>
-            <button className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors">
+            <button className="flex items-center gap-1.5 bg-card border border-outline-variant rounded-xl px-3 py-2 text-sm font-medium text-on-surface hover:bg-surface-container-low shadow-sm transition-colors">
               {selectedYear}
-              <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="p-2 w-28" align="end">
@@ -88,7 +88,7 @@ export default function PeriodFilter({ invoices = [], period, setPeriod, selecte
                   onClick={() => { setSelectedYear(year); setYearOpen(false); }}
                   className={cn(
                     "px-3 py-1.5 rounded-lg text-sm font-medium text-left transition-colors",
-                    selectedYear === year ? "bg-branding-primary text-white" : "hover:bg-gray-100 text-gray-700"
+                    selectedYear === year ? "bg-branding-primary text-white" : "hover:bg-surface-container text-on-surface"
                   )}
                 >
                   {year}
@@ -107,7 +107,7 @@ export default function PeriodFilter({ invoices = [], period, setPeriod, selecte
               "flex items-center gap-1.5 border rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition-colors",
               period === "custom"
                 ? "bg-branding-primary text-white border-branding-primary"
-                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                : "bg-card text-on-surface-variant border-outline-variant hover:bg-surface-container-low"
             )}
           >
             <CalendarIcon className="w-4 h-4" />
