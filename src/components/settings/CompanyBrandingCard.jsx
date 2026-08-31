@@ -66,14 +66,14 @@ export default function CompanyBrandingCard({ company }) {
   const [uploading, setUploading] = useState(false);
 
   return (
-    <div className="border border-gray-200 rounded-2xl overflow-hidden">
+    <div className="border border-outline-variant/30 rounded-2xl overflow-hidden bg-surface-container-low">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors"
       >
         <div className="flex items-center gap-3">
           {form.branding_logo_url ? (
-            <img src={form.branding_logo_url} alt="" className="w-9 h-9 rounded-xl object-cover bg-white border" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+            <img src={form.branding_logo_url} alt="" className="w-9 h-9 rounded-xl object-cover border border-outline-variant/20" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
           ) : null}
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center"
@@ -82,44 +82,42 @@ export default function CompanyBrandingCard({ company }) {
             <Building2 className="w-4 h-4 text-white" />
           </div>
           <div className="text-left">
-            <p className="font-semibold text-gray-900">{company.name}</p>
-            <p className="text-xs text-gray-500">
+            <p className="font-semibold text-on-surface">{company.name}</p>
+            <p className="text-xs text-on-surface-variant">
               {form.branding_app_name || "Salon Management"} • Cores e logo
             </p>
           </div>
         </div>
-        {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+        {open ? <ChevronUp className="w-4 h-4 text-on-surface-variant" /> : <ChevronDown className="w-4 h-4 text-on-surface-variant" />}
       </button>
 
       {open && (
-        <div className="border-t border-gray-100 p-5 space-y-5 bg-gray-50/30">
-          {/* App Name */}
+        <div className="border-t border-outline-variant/20 p-5 space-y-5 bg-surface-container/50">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Type className="w-4 h-4 text-gray-500" />
-              <p className="font-semibold text-gray-800">Nome do App</p>
+              <Type className="w-4 h-4 text-on-surface-variant" />
+              <p className="font-semibold text-on-surface">Nome do App</p>
             </div>
             <Input
               value={form.branding_app_name}
               onChange={e => setField("branding_app_name", e.target.value)}
               placeholder="Salon Management"
-              className="rounded-xl bg-white text-sm"
+              className="rounded-xl bg-surface-container-lowest text-sm"
             />
-            <p className="text-xs text-gray-500 mt-1">Exibido no canto superior esquerdo do menu</p>
+            <p className="text-xs text-on-surface-variant mt-1">Exibido no canto superior esquerdo do menu</p>
           </div>
 
-          {/* Logo URL */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Image className="w-4 h-4 text-gray-500" />
-              <p className="font-semibold text-gray-800">Logo</p>
+              <Image className="w-4 h-4 text-on-surface-variant" />
+              <p className="font-semibold text-on-surface">Logo</p>
             </div>
             <div className="flex items-center gap-2">
               <Input
                 value={form.branding_logo_url}
                 onChange={e => setField("branding_logo_url", e.target.value)}
                 placeholder="URL da imagem"
-                className="rounded-xl bg-white text-sm flex-1"
+                className="rounded-xl bg-surface-container-lowest text-sm flex-1"
               />
               <Button
                 type="button"
@@ -150,18 +148,17 @@ export default function CompanyBrandingCard({ company }) {
               </Button>
             </div>
             {form.branding_logo_url && (
-              <div className="mt-2 p-2 bg-white rounded-xl border inline-flex items-center gap-2">
+              <div className="mt-2 p-2 bg-surface-container-lowest rounded-xl border border-outline-variant/20 inline-flex items-center gap-2">
                 <img src={form.branding_logo_url} alt="Preview" className="h-10 object-contain" onError={(e) => { e.target.style.display = 'none'; }} />
-                <button type="button" onClick={() => setField("branding_logo_url", "")} className="text-xs text-red-500 hover:underline">Remover</button>
+                <button type="button" onClick={() => setField("branding_logo_url", "")} className="text-xs text-error hover:underline">Remover</button>
               </div>
             )}
           </div>
 
-          {/* Palette Presets */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Palette className="w-4 h-4 text-gray-500" />
-              <p className="font-semibold text-gray-800">Paleta de Cores</p>
+              <Palette className="w-4 h-4 text-on-surface-variant" />
+              <p className="font-semibold text-on-surface">Paleta de Cores</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {availablePalettes.map((palette) => (
@@ -170,8 +167,8 @@ export default function CompanyBrandingCard({ company }) {
                   onClick={() => handlePaletteSelect(palette.id)}
                   className={`p-3 rounded-xl border-2 transition-all text-left ${
                     form.branding_palette === palette.id
-                      ? "border-branding-primary bg-branding-primary/5 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300 bg-white"
+                      ? "border-primary bg-primary/10 shadow-sm"
+                      : "border-outline-variant/30 hover:border-outline bg-surface-container-lowest"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
@@ -179,95 +176,93 @@ export default function CompanyBrandingCard({ company }) {
                       {Object.values(palette.colors).map((color, i) => (
                         <div
                           key={i}
-                          className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                          className="w-4 h-4 rounded-full border-2 border-surface-container-low shadow-sm"
                           style={{ background: color }}
                         />
                       ))}
                     </div>
-                    <span className="font-medium text-sm text-gray-800">{palette.name}</span>
+                    <span className="font-medium text-sm text-on-surface">{palette.name}</span>
                   </div>
-                  <p className="text-xs text-gray-500">{palette.description}</p>
+                  <p className="text-xs text-on-surface-variant">{palette.description}</p>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Individual Colors */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <PaintBucket className="w-4 h-4 text-gray-500" />
-              <p className="font-semibold text-gray-800">Cores Individuais</p>
+              <PaintBucket className="w-4 h-4 text-on-surface-variant" />
+              <p className="font-semibold text-on-surface">Cores Individuais</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-xs text-gray-600 mb-1 block">Primária</Label>
+                <Label className="text-xs text-on-surface-variant mb-1 block">Primária</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     value={primary}
                     onChange={e => setField("branding_primary_color", e.target.value)}
-                    className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+                    className="w-10 h-10 rounded-lg border border-outline-variant/30 cursor-pointer"
                   />
                   <Input
                     value={primary}
                     onChange={e => setField("branding_primary_color", e.target.value)}
-                    className="rounded-xl bg-white text-sm font-mono"
+                    className="rounded-xl bg-surface-container-lowest text-sm font-mono"
                   />
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-gray-600 mb-1 block">Secundária</Label>
+                <Label className="text-xs text-on-surface-variant mb-1 block">Secundária</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     value={secondary}
                     onChange={e => setField("branding_secondary_color", e.target.value)}
-                    className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+                    className="w-10 h-10 rounded-lg border border-outline-variant/30 cursor-pointer"
                   />
                   <Input
                     value={secondary}
                     onChange={e => setField("branding_secondary_color", e.target.value)}
-                    className="rounded-xl bg-white text-sm font-mono"
+                    className="rounded-xl bg-surface-container-lowest text-sm font-mono"
                   />
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-gray-600 mb-1 block">Destaque</Label>
+                <Label className="text-xs text-on-surface-variant mb-1 block">Destaque</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     value={accent}
                     onChange={e => setField("branding_accent_color", e.target.value)}
-                    className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+                    className="w-10 h-10 rounded-lg border border-outline-variant/30 cursor-pointer"
                   />
                   <Input
                     value={accent}
                     onChange={e => setField("branding_accent_color", e.target.value)}
-                    className="rounded-xl bg-white text-sm font-mono"
+                    className="rounded-xl bg-surface-container-lowest text-sm font-mono"
                   />
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-gray-600 mb-1 block">Fundo</Label>
+                <Label className="text-xs text-on-surface-variant mb-1 block">Fundo</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     value={background}
                     onChange={e => setField("branding_background_color", e.target.value)}
-                    className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer"
+                    className="w-10 h-10 rounded-lg border border-outline-variant/30 cursor-pointer"
                   />
                   <Input
                     value={background}
                     onChange={e => setField("branding_background_color", e.target.value)}
-                    className="rounded-xl bg-white text-sm font-mono"
+                    className="rounded-xl bg-surface-container-lowest text-sm font-mono"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Live preview */}
-            <div className="mt-4 p-4 rounded-xl border" style={{ background: accent }}>
-              <p className="text-xs text-gray-500 mb-3">Pré-visualização do menu:</p>
+            <div className="mt-4 p-4 rounded-xl border border-outline-variant/20" style={{ background: accent }}>
+              <p className="text-xs text-white/60 mb-3">Pré-visualização do menu:</p>
               <div className="flex items-center gap-3 mb-2">
                 <div
                   className="p-2 rounded-lg flex items-center justify-center"

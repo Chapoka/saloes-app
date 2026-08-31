@@ -18,7 +18,6 @@ import {
   List,
   Layers,
   PaintBucket,
-  Award,
   Crown,
   UserCog,
   Phone,
@@ -38,7 +37,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import PageNotFound from "@/lib/PageNotFound";
-import { cn } from "@/lib/utils";
 
 export default function Settings() {
   const queryClient = useQueryClient();
@@ -572,7 +570,7 @@ export default function Settings() {
   // While loading user, show nothing (prevent flash of Settings for profissionais)
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-outline-variant border-t-branding-primary rounded-full animate-spin" />
       </div>
     );
@@ -600,11 +598,11 @@ export default function Settings() {
         <div className="space-y-6">
           {/* Asaas Master Account - Super Admin only */}
           {isSuperAdmin && (
-            <Card className="rounded-2xl shadow-sm border border-amber-100 bg-amber-50/30">
+            <Card className="rounded-2xl shadow-sm border border-outline-variant/30 bg-surface-container-low">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-100">
-                    <Key className="w-5 h-5 text-amber-600" />
+                  <div className="p-2 rounded-lg bg-tertiary/10">
+                    <Key className="w-5 h-5 text-tertiary" />
                   </div>
                   <div>
                     <CardTitle className="text-lg">Conta Mestre Asaas</CardTitle>
@@ -633,7 +631,7 @@ export default function Settings() {
                 <Button
                   onClick={() => saveMutation.mutate({ asaas_master_api_key: formData.asaas_master_api_key })}
                   disabled={saveMutation.isPending}
-                  className="bg-amber-500 hover:bg-amber-600 rounded-xl"
+                  className="bg-branding-primary hover:bg-branding-primary/90 rounded-xl"
                 >
                   {saveMutation.isPending ? "Salvando..." : <><Save className="w-4 h-4 mr-2" />Salvar Conta Mestre</>}
                 </Button>
@@ -643,11 +641,11 @@ export default function Settings() {
 
           {/* Portal URL - Super Admin only */}
           {isSuperAdmin && (
-            <Card className="rounded-2xl shadow-sm border border-blue-100 bg-blue-50/30">
+            <Card className="rounded-2xl shadow-sm border border-outline-variant/30 bg-surface-container-low">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-100">
-                    <Layers className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Layers className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <CardTitle className="text-lg">URL do Portal do Cliente</CardTitle>
@@ -668,13 +666,13 @@ export default function Settings() {
                     className="rounded-xl bg-card"
                   />
 {formData.app_url && (
-                      <p className="text-xs text-blue-600">Link que será enviado: <strong>{formData.app_url}/portalcliente</strong></p>
+                      <p className="text-xs text-primary">Link que será enviado: <strong>{formData.app_url}/portalcliente</strong></p>
                     )}
                 </div>
                 <Button
                   onClick={() => saveMutation.mutate({ app_url: formData.app_url })}
                   disabled={saveMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-700 rounded-xl"
+                  className="bg-primary hover:bg-primary/90 rounded-xl text-primary-foreground"
                 >
                   <Save className="w-4 h-4 mr-2" />Salvar URL
                 </Button>
@@ -751,8 +749,8 @@ export default function Settings() {
             <Card className="rounded-2xl shadow-sm border border-outline-variant/30">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-purple-100">
-                    <PaintBucket className="w-5 h-5 text-purple-600" />
+                  <div className="p-2 rounded-lg bg-secondary/10">
+                    <PaintBucket className="w-5 h-5 text-secondary" />
                   </div>
                   <div>
                     <CardTitle className="text-lg">Marca por Salão</CardTitle>
@@ -806,7 +804,7 @@ export default function Settings() {
                         <p className="font-medium text-on-surface flex items-center gap-1.5">
                           {user.full_name || "Sem nome"}
                           {user.is_master && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/20 text-tertiary text-xs font-semibold">
                               <Crown className="w-3 h-3" />
                               Master
                             </span>
@@ -826,15 +824,15 @@ export default function Settings() {
                     </div>
                     <div className="flex items-center gap-2">
 <span className={`px-2 py-1 text-xs rounded-full ${
-                        user.role === "super_admin" ? "bg-purple-100 text-purple-700" :
-                        user.role === "admin" ? "bg-amber-100 text-amber-700" :
-                        user.role === "profissional" ? "bg-blue-100 text-blue-700" :
-                        "bg-surface-container-low text-on-surface-variant"
+                        user.role === "super_admin" ? "bg-secondary/20 text-secondary" :
+                        user.role === "admin" ? "bg-tertiary/20 text-tertiary" :
+                        user.role === "profissional" ? "bg-primary/20 text-primary" :
+                        "bg-surface-container-high text-on-surface-variant"
                        }`}>
                         {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Administrador" : user.role === "profissional" ? "Profissional" : "Cliente"}
                        </span>
                       {customerEmailSet.has(user.email) && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700 font-semibold">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-400 font-semibold">
                           <User className="w-3 h-3" />
                           Também cliente
                         </span>
@@ -913,7 +911,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              <label className="flex items-center gap-3 cursor-pointer p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <label className="flex items-center gap-3 cursor-pointer p-3 bg-tertiary/10 border border-tertiary/20 rounded-xl">
                 <input
                   type="checkbox"
                   checked={mustChangeOnLogin}
@@ -921,8 +919,8 @@ export default function Settings() {
                   className="w-4 h-4 text-branding-primary"
                 />
                 <div>
-                  <p className="text-sm font-medium text-amber-900">Solicitar troca no próximo login</p>
-                  <p className="text-xs text-amber-600">O usuário deverá criar uma nova senha ao entrar</p>
+                  <p className="text-sm font-medium text-on-surface">Solicitar troca no próximo login</p>
+                  <p className="text-xs text-on-surface-variant">O usuário deverá criar uma nova senha ao entrar</p>
                 </div>
               </label>
 
@@ -949,7 +947,7 @@ export default function Settings() {
                 <Users className="w-5 h-5 text-branding-primary" />
                 {foundCustomerHasUser ? "Cliente e Usuário Encontrado" : "Cliente Encontrado"}
               </h3>
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-800">
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 text-sm text-on-surface">
                 {foundCustomerHasUser ? (
                   <>
                     <p>Este e-mail já está cadastrado como <strong>cliente</strong> e também como <strong>usuário do sistema</strong>.</p>
@@ -962,13 +960,13 @@ export default function Settings() {
                   </>
                 )}
                 {foundCustomer && foundCustomer.email !== importEmailChecked && (
-                  <p className="mt-2 text-xs text-amber-600 font-medium">
+                  <p className="mt-2 text-xs text-tertiary font-medium">
                     ⚠️ Cliente encontrado pelo nome "{foundCustomer.name}". E-mail do cliente: {foundCustomer.email || "não informado"}
                   </p>
                 )}
                 <ul className="mt-2 space-y-1 text-xs">
-                  <li className="flex items-center gap-1.5"><span className="font-semibold text-blue-600">●</span> <strong>Administrador</strong> — acesso ao painel do sistema</li>
-                  <li className="flex items-center gap-1.5"><span className="font-semibold text-emerald-600">●</span> <strong>Cliente</strong> — acesso ao portal do cliente com cobranças</li>
+                  <li className="flex items-center gap-1.5"><span className="font-semibold text-primary">●</span> <strong>Administrador</strong> — acesso ao painel do sistema</li>
+                  <li className="flex items-center gap-1.5"><span className="font-semibold text-emerald-400">●</span> <strong>Cliente</strong> — acesso ao portal do cliente com cobranças</li>
                 </ul>
               </div>
               <div className="bg-surface-container-low rounded-xl p-4 space-y-2 text-sm">
@@ -1011,10 +1009,10 @@ export default function Settings() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
             <div className="bg-card rounded-2xl max-w-md w-full p-6 space-y-4">
               <h3 className="text-xl font-semibold text-on-surface flex items-center gap-2">
-                <Users className="w-5 h-5 text-amber-600" />
+                <Users className="w-5 h-5 text-tertiary" />
                 Usuário Já Cadastrado
               </h3>
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+              <div className="bg-tertiary/10 border border-tertiary/20 rounded-xl p-3 text-sm text-on-surface">
                 <p>Este e-mail já está registrado como <strong>usuário do sistema</strong>.</p>
                 <p className="mt-1">Deseja editar o usuário existente ou cadastrar um novo?</p>
               </div>
@@ -1168,9 +1166,9 @@ export default function Settings() {
                         onClick={() => setUserFormData({ ...userFormData, role: value })}
                         className={`py-2 px-3 rounded-xl border-2 text-sm font-medium transition-all ${
                           userFormData.role === value
-                            ? color === "purple" ? "border-purple-500 bg-purple-50 text-purple-700"
-                            : color === "amber" ? "border-amber-500 bg-amber-50 text-amber-700"
-                            : color === "blue" ? "border-blue-500 bg-blue-50 text-blue-700"
+                            ? color === "purple" ? "border-secondary bg-secondary/10 text-secondary"
+                            : color === "amber" ? "border-tertiary bg-tertiary/10 text-tertiary"
+                            : color === "blue" ? "border-primary bg-primary/10 text-primary"
                             : "border-outline bg-surface-container-low text-on-surface"
                             : "border-outline-variant text-muted-foreground hover:border-outline"
                         }`}
@@ -1194,37 +1192,37 @@ export default function Settings() {
                 )}
 
                 {/* Professional toggle */}
-                <label className="flex items-center gap-3 cursor-pointer p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                <label className="flex items-center gap-3 cursor-pointer p-3 bg-primary/10 border border-primary/20 rounded-xl">
                   <input
                     type="checkbox"
                     checked={userFormData.is_professional || false}
                     onChange={(e) => setUserFormData({ ...userFormData, is_professional: e.target.checked })}
-                    className="w-4 h-4 text-blue-500"
+                    className="w-4 h-4 text-primary"
                   />
                   <div>
-                    <p className="text-sm font-medium text-blue-900 flex items-center gap-1.5">
+                    <p className="text-sm font-medium text-on-surface flex items-center gap-1.5">
                       <UserCog className="w-4 h-4" />
                       É profissional
                     </p>
-                    <p className="text-xs text-blue-600">Permitirá agendar este usuário como profissional nos atendimentos</p>
+                    <p className="text-xs text-on-surface-variant">Permitirá agendar este usuário como profissional nos atendimentos</p>
                   </div>
                 </label>
 
                 {/* Master toggle - only super_admin */}
                 {isSuperAdmin && editingUser && (
-                  <label className="flex items-center gap-3 cursor-pointer p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <label className="flex items-center gap-3 cursor-pointer p-3 bg-tertiary/10 border border-tertiary/20 rounded-xl">
                     <input
                       type="checkbox"
                       checked={userFormData.is_master || false}
                       onChange={(e) => setUserFormData({ ...userFormData, is_master: e.target.checked })}
-                      className="w-4 h-4 text-amber-500"
+                      className="w-4 h-4 text-tertiary"
                     />
                     <div>
-                      <p className="text-sm font-medium text-amber-900 flex items-center gap-1.5">
+                      <p className="text-sm font-medium text-on-surface flex items-center gap-1.5">
                         <Crown className="w-4 h-4" />
                         Master da Conta
                       </p>
-                      <p className="text-xs text-amber-600">Responsável pelo recebimento de cobranças. Não pode ser excluído.</p>
+                      <p className="text-xs text-on-surface-variant">Responsável pelo recebimento de cobranças. Não pode ser excluído.</p>
                     </div>
                   </label>
                 )}
