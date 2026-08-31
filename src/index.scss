@@ -16,74 +16,74 @@
 
 @layer base {
   :root {
-    --background: 248 250 252;
-    --foreground: 15 23 42;
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
-    --primary: 250 204 21;
-    --primary-foreground: 5 5 5;
-    --secondary: 241 245 249;
-    --secondary-foreground: 15 23 42;
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
-    --accent: 250 204 21;
-    --accent-foreground: 71 42 0;
-    --destructive: 239 68 68;
+    --background: 248 245 240;
+    --foreground: 30 27 24;
+    --card: 255 248 243;
+    --card-foreground: 30 27 24;
+    --popover: 255 248 243;
+    --popover-foreground: 30 27 24;
+    --primary: 115 90 54;
+    --primary-foreground: 255 255 255;
+    --secondary: 95 94 94;
+    --secondary-foreground: 255 255 255;
+    --muted: 244 236 231;
+    --muted-foreground: 78 69 59;
+    --accent: 115 90 54;
+    --accent-foreground: 255 255 255;
+    --destructive: 186 26 26;
     --destructive-foreground: 255 255 255;
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 250 204 21;
+    --border: 209 197 183;
+    --input: 226 225 226;
+    --ring: 115 90 54;
     --radius: 0.75rem;
-    --chart-1: 250 204 21;
+    --chart-1: 115 90 54;
     --chart-2: 16 185 129;
     --chart-3: 239 68 68;
-    --chart-4: 0 229 255;
-    --chart-5: 168 85 247;
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 100 116 139;
-    --sidebar-primary: 250 204 21;
-    --sidebar-primary-foreground: 5 5 5;
-    --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 15 23 42;
-    --sidebar-border: 226 232 240;
-    --sidebar-ring: 250 204 21;
+    --chart-4: 80 95 119;
+    --chart-5: 200 169 126;
+    --sidebar-background: 30 27 24;
+    --sidebar-foreground: 255 248 243;
+    --sidebar-primary: 115 90 54;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 244 236 231;
+    --sidebar-accent-foreground: 30 27 24;
+    --sidebar-border: 209 197 183;
+    --sidebar-ring: 115 90 54;
   }
 
   .dark {
-    --background: 5 5 5;
-    --foreground: 229 226 225;
-    --card: 17 24 39;
-    --card-foreground: 229 226 225;
-    --popover: 17 24 39;
-    --popover-foreground: 229 226 225;
-    --primary: 250 204 21;
-    --primary-foreground: 5 5 5;
-    --secondary: 189 199 217;
-    --secondary-foreground: 39 49 63;
-    --muted: 31 41 55;
-    --muted-foreground: 154 144 120;
-    --accent: 250 204 21;
+    --background: 11 19 38;
+    --foreground: 218 226 253;
+    --card: 23 31 51;
+    --card-foreground: 218 226 253;
+    --popover: 23 31 51;
+    --popover-foreground: 218 226 253;
+    --primary: 192 193 255;
+    --primary-foreground: 16 0 169;
+    --secondary: 208 188 255;
+    --secondary-foreground: 60 0 145;
+    --muted: 23 31 51;
+    --muted-foreground: 199 196 215;
+    --accent: 255 185 95;
     --accent-foreground: 71 42 0;
     --destructive: 255 180 171;
-    --destructive-foreground: 5 5 5;
-    --border: 38 38 38;
-    --input: 31 41 55;
-    --ring: 250 204 21;
-    --chart-1: 250 204 21;
+    --destructive-foreground: 105 0 5;
+    --border: 70 69 84;
+    --input: 45 52 73;
+    --ring: 192 193 255;
+    --chart-1: 192 193 255;
     --chart-2: 16 185 129;
-    --chart-3: 239 68 68;
-    --chart-4: 0 229 255;
-    --chart-5: 168 85 247;
-    --sidebar-background: 5 5 5;
-    --sidebar-foreground: 154 144 120;
-    --sidebar-primary: 250 204 21;
-    --sidebar-primary-foreground: 5 5 5;
-    --sidebar-accent: 31 41 55;
-    --sidebar-accent-foreground: 229 226 225;
-    --sidebar-border: 38 38 38;
-    --sidebar-ring: 250 204 21;
+    --chart-3: 255 185 95;
+    --chart-4: 128 131 255;
+    --chart-5: 255 180 171;
+    --sidebar-background: 19 27 46;
+    --sidebar-foreground: 199 196 215;
+    --sidebar-primary: 192 193 255;
+    --sidebar-primary-foreground: 16 0 169;
+    --sidebar-accent: 23 31 51;
+    --sidebar-accent-foreground: 199 196 215;
+    --sidebar-border: 34 42 61;
+    --sidebar-ring: 192 193 255;
   }
 }
 
@@ -165,7 +165,7 @@
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(to right, #c0c1ff, #571bc1);
+  background: linear-gradient(to right, rgb(192 193 255), rgb(255 185 95));
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -242,24 +242,24 @@
 
 /* Force light mode variables inside login page */
 .login-light {
-  --background: 245 243 255;
-  --foreground: 15 23 42;
+  --background: 248 245 240;
+  --foreground: 30 27 24;
   --card: 255 255 255;
-  --card-foreground: 15 23 42;
+  --card-foreground: 30 27 24;
   --popover: 255 255 255;
-  --popover-foreground: 15 23 42;
-  --primary: 124 58 237;
+  --popover-foreground: 30 27 24;
+  --primary: 115 90 54;
   --primary-foreground: 255 255 255;
-  --secondary: 241 245 249;
-  --secondary-foreground: 100 116 139;
-  --muted: 241 245 249;
-  --muted-foreground: 100 116 139;
-  --accent: 241 245 249;
-  --accent-foreground: 100 116 139;
-  --destructive: 239 68 68;
+  --secondary: 95 94 94;
+  --secondary-foreground: 255 255 255;
+  --muted: 244 236 231;
+  --muted-foreground: 78 69 59;
+  --accent: 115 90 54;
+  --accent-foreground: 255 255 255;
+  --destructive: 186 26 26;
   --destructive-foreground: 255 255 255;
-  --border: 226 232 240;
-  --input: 226 232 240;
-  --ring: 124 58 237;
+  --border: 209 197 183;
+  --input: 226 225 226;
+  --ring: 115 90 54;
   color-scheme: light;
 }
