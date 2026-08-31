@@ -71,7 +71,7 @@ async function attachUserRole(req, res, next) {
   try {
     const { data: profile, error } = await req.supabase
       .from("users")
-      .select("role, company_id, company_ids")
+      .select("role, company_id")
       .eq("id", req.user.id)
       .single();
 
@@ -79,9 +79,17 @@ async function attachUserRole(req, res, next) {
       return res.status(403).json({ error: "Perfil de usuário não encontrado" });
     }
 
+    const { data: userCompanies } = await req.supabase
+      .from("user_companies")
+      .select("company_id")
+      .eq("user_id", req.user.id);
+
     req.userRole = profile.role === "teacher" ? "professor" : profile.role;
     req.userCompanyId = profile.company_id;
-    req.userCompanyIds = profile.company_ids || (profile.company_id ? [profile.company_id] : []);
+    req.userCompanyIds = (userCompanies || []).map(uc => uc.company_id);
+    if (req.userCompanyIds.length === 0 && profile.company_id) {
+      req.userCompanyIds = [profile.company_id];
+    }
     next();
   } catch (err) {
     return res.status(500).json({ error: "Erro ao buscar perfil do usuário" });

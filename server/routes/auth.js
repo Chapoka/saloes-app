@@ -34,7 +34,7 @@ router.post("/confirm-email", async (req, res) => {
 // POST /api/auth/admin-create-user — criar um usuário (auth + public)
 router.post("/admin-create-user", async (req, res) => {
   try {
-    const { email, password, full_name, role, phone, commission_pct, specialty, photo_url, work_days, company_id, company_ids, whatsapp, cpf, rg, birth_date } = req.body;
+    const { email, password, full_name, role, phone, commission_pct, specialty, photo_url, work_days, company_id, whatsapp, cpf, rg, birth_date } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "email e password são obrigatórios" });
     }
@@ -89,7 +89,6 @@ router.post("/admin-create-user", async (req, res) => {
     if (photo_url) updateData.photo_url = photo_url;
     if (work_days) updateData.work_days = work_days;
     if (company_id) updateData.company_id = company_id;
-    if (company_ids) updateData.company_ids = company_ids;
     if (whatsapp) updateData.whatsapp = whatsapp;
     if (cpf) updateData.cpf = cpf;
     if (rg) updateData.rg = rg;
@@ -168,14 +167,13 @@ router.post("/admin-delete-user", async (req, res) => {
         .select("company_id")
         .eq("user_id", callerId);
 
-      const { data: targetUser } = await req.supabase
-        .from("users")
-        .select("company_id, company_ids")
-        .eq("id", user_id)
-        .single();
+      const { data: targetCompanies } = await req.supabase
+        .from("user_companies")
+        .select("company_id")
+        .eq("user_id", user_id);
 
       const callerCompanyIds = (callerCompanies || []).map(c => c.company_id);
-      const targetCompanyIds = [targetUser?.company_id, ...(targetUser?.company_ids || [])].filter(Boolean);
+      const targetCompanyIds = (targetCompanies || []).map(c => c.company_id);
       const hasAccess = targetCompanyIds.some(id => callerCompanyIds.includes(id));
       if (targetCompanyIds.length > 0 && !hasAccess) {
         return res.status(403).json({ error: "Acesso negado: usuário não pertence à sua empresa" });

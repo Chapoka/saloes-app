@@ -56,8 +56,12 @@ export default function Layout({ children, currentPageName }) {
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
-      const { data } = await supabase.from("users").select("*").eq("id", session.user.id).single();
-      return data || session.user;
+      const { data } = await supabase.from("users").select("*, user_companies(company_id)").eq("id", session.user.id).single();
+      if (!data) return session.user;
+      return {
+        ...data,
+        company_ids: data.user_companies?.map(uc => uc.company_id) || (data.company_id ? [data.company_id] : []),
+      };
     },
     staleTime: 5 * 60 * 1000,
   });

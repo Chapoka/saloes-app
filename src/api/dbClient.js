@@ -563,10 +563,14 @@ export const db = {
       if (!data.session) return null;
       const { data: user } = await supabase
         .from("users")
-        .select("*")
+        .select("*, user_companies(company_id)")
         .eq("id", data.session.user.id)
         .single();
-      return user || data.session.user;
+      if (!user) return data.session.user;
+      return {
+        ...user,
+        company_ids: user.user_companies?.map(uc => uc.company_id) || (user.company_id ? [user.company_id] : []),
+      };
     },
     logout: async () => {
       await supabase.auth.signOut();
@@ -602,7 +606,6 @@ export const db = {
             photo_url: extra.photo_url,
             work_days: extra.work_days,
             company_id: extra.company_id,
-            company_ids: extra.company_ids,
           }),
         });
 
