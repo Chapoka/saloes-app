@@ -8,7 +8,17 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { COLOR_PALETTES, PALETTE_LIST } from "@/lib/colorPalettes";
 
+const TYPE_PALETTE_MAP = {
+  barbearia: ["barbearia_amber", "barbearia_cyber", "barbearia_kinetic"],
+  salao_beleza: ["salao"],
+  clinica_estetica: ["clinica"],
+  studio_manicure: ["studio"],
+};
+
 export default function CompanyBrandingCard({ company }) {
+  const companyType = company.estabelecimento_tipo || "barbearia";
+  const allowedPaletteIds = TYPE_PALETTE_MAP[companyType] || [];
+  const availablePalettes = PALETTE_LIST.filter(p => allowedPaletteIds.includes(p.id));
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
   const [form, setForm] = useState({
@@ -154,7 +164,7 @@ export default function CompanyBrandingCard({ company }) {
               <p className="font-semibold text-gray-800">Paleta de Cores</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {PALETTE_LIST.map((palette) => (
+              {availablePalettes.map((palette) => (
                 <button
                   key={palette.id}
                   onClick={() => handlePaletteSelect(palette.id)}

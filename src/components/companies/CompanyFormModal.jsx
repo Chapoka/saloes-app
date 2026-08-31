@@ -24,6 +24,13 @@ const ESTABLISHMENT_THEMES = {
   studio_manicure: { primary: COLOR_PALETTES.studio.colors.primary, secondary: COLOR_PALETTES.studio.colors.secondary, label: "Studio / Manicure" },
 };
 
+const TYPE_PALETTE_MAP = {
+  barbearia: ["barbearia_amber", "barbearia_cyber", "barbearia_kinetic"],
+  salao_beleza: ["salao"],
+  clinica_estetica: ["clinica"],
+  studio_manicure: ["studio"],
+};
+
 function validateCpf(cpf) {
   const clean = cpf.replace(/\D/g, "");
   if (clean.length !== 11) return false;
@@ -234,7 +241,10 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
             <div className="space-y-1 col-span-2">
               <Label className="flex items-center gap-1.5"><Palette className="w-4 h-4" /> Paleta de Cores</Label>
               <div className="grid grid-cols-2 gap-2">
-                {PALETTE_LIST.map((palette) => (
+                {(form.estabelecimento_tipo
+                  ? PALETTE_LIST.filter(p => (TYPE_PALETTE_MAP[form.estabelecimento_tipo] || []).includes(p.id))
+                  : PALETTE_LIST
+                ).map((palette) => (
                   <button
                     key={palette.id}
                     type="button"

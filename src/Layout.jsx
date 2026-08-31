@@ -22,7 +22,7 @@ import {
   Moon,
   UserCog,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClient";
 import { db } from "@/api/dbClient";
@@ -100,6 +100,29 @@ export default function Layout({ children, currentPageName }) {
   const theme = useThemeMode(branding.palette);
   const toggleTheme = useToggleTheme();
   const loading = userLoading || (userCompanyId && companyLoading);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const p = branding.primaryColor;
+    const s = branding.secondaryColor;
+    const a = branding.accentColor;
+    const b = branding.backgroundColor;
+    const toRgb = (hex) => {
+      const c = hex.replace("#", "");
+      const r = parseInt(c.substring(0, 2), 16);
+      const g = parseInt(c.substring(2, 4), 16);
+      const b = parseInt(c.substring(4, 6), 16);
+      return `${r} ${g} ${b}`;
+    };
+    root.style.setProperty("--branding-primary", toRgb(p));
+    root.style.setProperty("--branding-secondary", toRgb(s));
+    root.style.setProperty("--branding-accent", toRgb(a));
+    root.style.setProperty("--branding-background", toRgb(b));
+    root.style.setProperty("--branding-primary-hex", p);
+    root.style.setProperty("--branding-secondary-hex", s);
+    root.style.setProperty("--branding-accent-hex", a);
+    root.style.setProperty("--branding-background-hex", b);
+  }, [branding]);
 
   const handleLogout = () => {
     supabase.auth.signOut();
