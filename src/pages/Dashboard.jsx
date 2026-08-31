@@ -58,7 +58,7 @@ export default function Dashboard() {
   });
 
   const userCompany = companies.find(c => c.id === companyId);
-  const brandingPalette = userCompany?.branding_palette || "barbearia";
+  const brandingPalette = userCompany?.branding_palette || "barbearia_amber";
   const theme = useThemeMode(brandingPalette);
 
   const { data: allUsers = [] } = useQuery({

@@ -18,7 +18,7 @@ export default function CompanyBrandingCard({ company }) {
     branding_secondary_color: company.branding_secondary_color || "#2a9d8f",
     branding_accent_color: company.branding_accent_color || "#1e293b",
     branding_background_color: company.branding_background_color || "#f8fafc",
-    branding_palette: company.branding_palette || "barbearia",
+    branding_palette: company.branding_palette || "barbearia_amber",
   });
 
   const saveMutation = useMutation({

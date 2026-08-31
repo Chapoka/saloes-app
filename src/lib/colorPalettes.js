@@ -1,13 +1,35 @@
 export const COLOR_PALETTES = {
-  barbearia: {
-    id: "barbearia",
-    name: "Barbearia",
-    description: "Clássico & Sofisticado — Dourado, Preto e tons escuros",
+  barbearia_amber: {
+    id: "barbearia_amber",
+    name: "Onyx & Amber",
+    description: "Clássico & Sofisticado — Âmbar, Preto e tons dourados",
     colors: {
-      primary: "#C8A97E",
+      primary: "#F5A623",
       secondary: "#1A1A1A",
-      accent: "#B8956A",
-      background: "#0F0F0F",
+      accent: "#C8A97E",
+      background: "#121212",
+    },
+  },
+  barbearia_cyber: {
+    id: "barbearia_cyber",
+    name: "Cyber-Electric Vision",
+    description: "Moderno & Eletrizante — Vermelho, Ciano e tons futuristas",
+    colors: {
+      primary: "#FF1744",
+      secondary: "#1A1A2E",
+      accent: "#00E5FF",
+      background: "#0F0F1A",
+    },
+  },
+  barbearia_kinetic: {
+    id: "barbearia_kinetic",
+    name: "Obsidian Kinetic",
+    description: "Minimalista & Premium — Ciano, Obsidiana e tons degrafite",
+    colors: {
+      primary: "#00BCD4",
+      secondary: "#263238",
+      accent: "#00E5FF",
+      background: "#0b1326",
     },
   },
   salao: {

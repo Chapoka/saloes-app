@@ -128,7 +128,7 @@ export default function Companies() {
         branding_secondary_color: company.branding_secondary_color || "",
         branding_accent_color: company.branding_accent_color || "",
         branding_background_color: company.branding_background_color || "",
-        branding_palette: company.branding_palette || "barbearia",
+        branding_palette: company.branding_palette || "barbearia_amber",
       });
     } else {
       setEditing(null);
@@ -138,7 +138,7 @@ export default function Companies() {
         natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
         logradouro: "", numero: "", complemento: "", phone: "", email: "",
         owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
-    branding_primary_color: "", branding_secondary_color: "", branding_accent_color: "", branding_background_color: "", branding_palette: "barbearia",
+    branding_primary_color: "", branding_secondary_color: "", branding_accent_color: "", branding_background_color: "", branding_palette: "barbearia_amber",
       });
     }
     setShowModal(true);

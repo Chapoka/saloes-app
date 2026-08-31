@@ -14,11 +14,11 @@ const emptyForm = {
   natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
   logradouro: "", numero: "", complemento: "", phone: "", email: "",
   owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
-  branding_primary_color: "", branding_secondary_color: "", branding_accent_color: "", branding_background_color: "", branding_palette: "barbearia",
+  branding_primary_color: "", branding_secondary_color: "", branding_accent_color: "", branding_background_color: "", branding_palette: "barbearia_amber",
 };
 
 const ESTABLISHMENT_THEMES = {
-  barbearia: { primary: COLOR_PALETTES.barbearia.colors.primary, secondary: COLOR_PALETTES.barbearia.colors.secondary, label: "Barbearia" },
+  barbearia: { primary: COLOR_PALETTES.barbearia_amber.colors.primary, secondary: COLOR_PALETTES.barbearia_amber.colors.secondary, label: "Barbearia" },
   clinica_estetica: { primary: COLOR_PALETTES.clinica.colors.primary, secondary: COLOR_PALETTES.clinica.colors.secondary, label: "Clínica / Estética" },
   salao_beleza: { primary: COLOR_PALETTES.salao.colors.primary, secondary: COLOR_PALETTES.salao.colors.secondary, label: "Salão de Beleza" },
   studio_manicure: { primary: COLOR_PALETTES.studio.colors.primary, secondary: COLOR_PALETTES.studio.colors.secondary, label: "Studio / Manicure" },

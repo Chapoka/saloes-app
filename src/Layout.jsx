@@ -82,7 +82,7 @@ export default function Layout({ children, currentPageName }) {
     appName: "Salon Management", logoUrl: null,
     primaryColor: "#0077b6", secondaryColor: "#2a9d8f",
     accentColor: "#1e293b", backgroundColor: "#f8fafc",
-    palette: "barbearia",
+    palette: "barbearia_amber",
   }), []);
 
   const branding = userCompany
@@ -93,7 +93,7 @@ export default function Layout({ children, currentPageName }) {
         secondaryColor: userCompany.branding_secondary_color || "#2a9d8f",
         accentColor: userCompany.branding_accent_color || "#1e293b",
         backgroundColor: userCompany.branding_background_color || "#f8fafc",
-        palette: userCompany.branding_palette || "barbearia",
+        palette: userCompany.branding_palette || "barbearia_amber",
       }
     : defaultBranding;
 
