@@ -160,33 +160,31 @@ export default function CompanyBrandingCard({ company }) {
               <Palette className="w-4 h-4 text-on-surface-variant" />
               <p className="font-semibold text-on-surface">Paleta de Cores</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {availablePalettes.map((palette) => (
-                <button
-                  key={palette.id}
-                  onClick={() => handlePaletteSelect(palette.id)}
-                  className={`p-3 rounded-xl border-2 transition-all text-left ${
-                    form.branding_palette === palette.id
-                      ? "border-primary bg-primary/10 shadow-sm"
-                      : "border-outline-variant/30 hover:border-outline bg-surface-container-lowest"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex -space-x-1">
-                      {Object.values(palette.colors).map((color, i) => (
-                        <div
-                          key={i}
-                          className="w-4 h-4 rounded-full border-2 border-surface-container-low shadow-sm"
-                          style={{ background: color }}
-                        />
-                      ))}
-                    </div>
-                    <span className="font-medium text-sm text-on-surface">{palette.name}</span>
-                  </div>
-                  <p className="text-xs text-on-surface-variant">{palette.description}</p>
-                </button>
-              ))}
+            <div className="flex items-center gap-3">
+              <select
+                value={form.branding_palette || ""}
+                onChange={e => handlePaletteSelect(e.target.value)}
+                className="flex-1 h-9 rounded-lg border border-outline-variant/30 bg-surface-container-lowest text-on-surface px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                {availablePalettes.map((palette) => (
+                  <option key={palette.id} value={palette.id}>{palette.name}</option>
+                ))}
+              </select>
+              {availablePalettes.find(p => p.id === form.branding_palette) && (
+                <div className="flex -space-x-1.5">
+                  {Object.values(availablePalettes.find(p => p.id === form.branding_palette).colors).map((color, i) => (
+                    <div
+                      key={i}
+                      className="w-5 h-5 rounded-full border-2 border-surface-container-low shadow-sm"
+                      style={{ background: color }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
+            {availablePalettes.find(p => p.id === form.branding_palette) && (
+              <p className="text-xs text-on-surface-variant mt-2">{availablePalettes.find(p => p.id === form.branding_palette).description}</p>
+            )}
           </div>
 
           <div>

@@ -18,15 +18,13 @@ import {
    Loader2,
   Award,
   Link2,
-  Sun,
-  Moon,
   UserCog,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClient";
 import { db } from "@/api/dbClient";
-import { useThemeMode, useToggleTheme } from "@/hooks/useThemeMode";
+import { useThemeMode } from "@/hooks/useThemeMode";
 import { useQuery } from "@tanstack/react-query";
 
 const allNavItems = [
@@ -98,7 +96,6 @@ export default function Layout({ children, currentPageName }) {
     : defaultBranding;
 
   const theme = useThemeMode(branding.palette);
-  const toggleTheme = useToggleTheme();
   const loading = userLoading || (userCompanyId && companyLoading);
 
   useEffect(() => {
@@ -300,27 +297,9 @@ export default function Layout({ children, currentPageName }) {
           </nav>
         </div>
 
-        {/* Theme toggle + Logout */}
+        {/* User + Logout */}
         <div className="p-4 border-t" style={{ borderColor: theme.sidebarBorder }}>
-          {/* Theme toggle */}
-          <div className="flex items-center gap-2 px-2 mb-3">
-            <span className="text-xs font-medium flex-1" style={{ color: theme.sidebarText }}>Tema</span>
-            <button
-              onClick={toggleTheme}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-              style={{
-                background: theme.isDark ? "rgba(251,191,36,0.15)" : "rgba(99,102,241,0.15)",
-                color: theme.isDark ? "#FCD34D" : "#6366F1",
-                border: `1px solid ${theme.isDark ? "rgba(251,191,36,0.3)" : "rgba(99,102,241,0.3)"}`,
-              }}
-            >
-              {theme.isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-              {theme.isDark ? "Claro" : "Escuro"}
-            </button>
-          </div>
-
           {/* Divider */}
-          <div className="h-px mb-3" style={{ background: theme.sidebarBorder }} />
 
           <div className="flex items-center gap-3 px-2 mb-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold" style={{
