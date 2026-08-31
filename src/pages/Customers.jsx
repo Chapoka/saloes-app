@@ -599,13 +599,13 @@ export default function Customers() {
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <p className="text-sm text-muted-foreground">{getPlanName(customer)}</p>
                         {customer.custom_plan && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">Personalizado</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">Personalizado</span>
                         )}
                         {customer.guardian_id && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 font-medium">Dependente</span>
                         )}
                         {guardianIds.has(customer.id) && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">Responsável</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">Responsável</span>
                         )}
                       </div>
                       {showCompanyColumn && (() => {
@@ -690,7 +690,7 @@ export default function Customers() {
                   })()}
                 </div>
                 <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-outline-variant/30 flex items-center justify-between">
-                  <Badge variant="outline" className={cn(customer.status === "active" ? "border-green-400 text-green-400" : customer.status === "inactive" ? "border-outline text-muted-foreground" : "border-amber-400 text-amber-700")}>
+                  <Badge variant="outline" className={cn(customer.status === "active" ? "border-green-400 text-green-400" : customer.status === "inactive" ? "border-outline text-muted-foreground" : "border-amber-500/70 text-amber-300")}>
                     {customer.status === "active" ? "Ativo" : customer.status === "inactive" ? "Inativo" : "Pendente"}
                   </Badge>
                   <Switch checked={customer.status === "active"} onCheckedChange={(checked) => toggleStatusMutation.mutate({ id: customer.id, status: checked ? "active" : "inactive" })} />
@@ -731,13 +731,13 @@ export default function Customers() {
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="text-on-surface-variant">{getPlanName(customer)}</span>
                         {customer.custom_plan && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">Personalizado</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">Personalizado</span>
                         )}
                         {customer.guardian_id && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 font-medium">Dependente</span>
                         )}
                         {guardianIds.has(customer.id) && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">Responsável</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">Responsável</span>
                         )}
                       </div>
                     </td>
@@ -867,7 +867,7 @@ export default function Customers() {
               <AlertDialogAction
                 onClick={() => confirmAction === "delete" ? deleteMutation.mutate(deletingCustomer) : inactivateMutation.mutate(deletingCustomer)}
                 disabled={confirmAction === "delete" ? deleteMutation.isPending : inactivateMutation.isPending}
-                className={confirmAction === "delete" ? "bg-red-600 hover:bg-red-700 rounded-xl" : "bg-orange-600 hover:bg-orange-700 rounded-xl"}
+                className={confirmAction === "delete" ? "bg-error hover:bg-error/80 rounded-xl" : "bg-orange-600 hover:bg-orange-700 rounded-xl"}
               >
                 {confirmAction === "delete"
                   ? (deleteMutation.isPending ? "Excluindo..." : "Excluir cliente")

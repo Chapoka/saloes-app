@@ -69,33 +69,33 @@ export default function InvoiceDetailModal({ invoice, customer, appointments, on
 
         <div className="space-y-6 py-4">
           {/* Student Info */}
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-surface-container-low rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-gray-900">{customer?.name || invoice.customer_name || "Cliente"}</h3>
+              <h3 className="font-semibold text-on-surface">{customer?.name || invoice.customer_name || "Cliente"}</h3>
               <Badge className={cn(
-                invoice.status === "received" ? "bg-green-100 text-green-700" :
-                invoice.status === "pending" ? "bg-amber-100 text-amber-700" :
-                "bg-red-100 text-red-700"
+                invoice.status === "received" ? "bg-green-500/20 text-green-300" :
+                invoice.status === "pending" ? "bg-amber-500/20 text-amber-300" :
+                "bg-red-500/20 text-red-300"
               )}>
                 {invoice.status === "received" ? "Pago" :
                  invoice.status === "pending" ? "Pendente" : "Vencido"}
               </Badge>
             </div>
-            <p className="text-sm text-gray-600">{customer?.whatsapp || "-"}</p>
+            <p className="text-sm text-on-surface-variant">{customer?.whatsapp || "-"}</p>
           </div>
 
           {/* Period Info */}
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-3">
+            <h4 className="text-sm font-medium text-on-surface mb-3">
               Período: {format(monthStart, "MMMM/yyyy", { locale: ptBR })}
             </h4>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Plano contratado:</span>
+                <span className="text-on-surface-variant">Plano contratado:</span>
                 <span className="font-medium">{invoice.plan_name || "N/A"}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Valor por serviço:</span>
+                <span className="text-on-surface-variant">Valor por serviço:</span>
                 <span className="font-medium">R$ {invoice.value.toFixed(2)}</span>
               </div>
             </div>
@@ -103,23 +103,23 @@ export default function InvoiceDetailModal({ invoice, customer, appointments, on
 
           {/* Appointments Summary */}
           <div className="border-t pt-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">Resumo de Serviços</h4>
+            <h4 className="text-sm font-medium text-on-surface mb-3">Resumo de Serviços</h4>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-gray-600">Serviços realizados</span>
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span className="text-sm text-on-surface-variant">Serviços realizados</span>
                 </div>
-                <span className="font-semibold text-green-600">{totalCompleted}</span>
+                <span className="font-semibold text-green-400">{totalCompleted}</span>
               </div>
               
               {absentCount > 0 && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <XCircle className="w-4 h-4 text-red-600" />
-                    <span className="text-sm text-gray-600">Faltas</span>
+                    <XCircle className="w-4 h-4 text-red-400" />
+                    <span className="text-sm text-on-surface-variant">Faltas</span>
                   </div>
-                  <span className="font-semibold text-red-600">{absentCount}</span>
+                  <span className="font-semibold text-red-400">{absentCount}</span>
                 </div>
               )}
             </div>
@@ -128,14 +128,14 @@ export default function InvoiceDetailModal({ invoice, customer, appointments, on
           {/* Calculation */}
           <div className="bg-branding-primary/5 rounded-xl p-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Valor unitário:</span>
+              <span className="text-on-surface-variant">Valor unitário:</span>
               <span>R$ {pricePerService.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Quantidade de serviços:</span>
+              <span className="text-on-surface-variant">Quantidade de serviços:</span>
               <span>× {presentCount}</span>
             </div>
-            <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+            <div className="flex justify-between text-lg font-bold pt-2 border-t border-outline-variant/30">
               <span>Total:</span>
               <span className="text-branding-primary">R$ {finalValue.toFixed(2)}</span>
             </div>

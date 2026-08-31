@@ -94,7 +94,7 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
 
         {noCompany ? (
           <div className="py-4">
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-700 flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-300 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span>Nenhum salão vinculado à sua conta. Fale com o suporte.</span>
             </div>
@@ -103,7 +103,7 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
           <div className="space-y-4 py-2">
             {showCompanySelect && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Salão</Label>
+                <Label className="text-sm font-medium text-on-surface">Salão</Label>
                 <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
                   <SelectTrigger className="rounded-xl">
                     <SelectValue placeholder="Selecione o salão" />
@@ -118,7 +118,7 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
             )}
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Abertura</Label>
+              <Label className="text-sm font-medium text-on-surface">Abertura</Label>
               <Select value={openingTime} onValueChange={setOpeningTime}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />
@@ -132,7 +132,7 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Fechamento</Label>
+              <Label className="text-sm font-medium text-on-surface">Fechamento</Label>
               <Select value={closingTime} onValueChange={setClosingTime}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />

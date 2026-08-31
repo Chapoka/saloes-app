@@ -407,7 +407,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
                   <button
                     type="button"
                     onClick={() => setForm((prev) => ({ ...prev, branding_logo_url: "" }))}
-                    className="text-xs text-red-500 hover:underline"
+                    className="text-xs text-red-400 hover:underline"
                   >
                     Remover
                   </button>

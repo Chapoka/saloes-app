@@ -56,10 +56,10 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
-  { value: "corte", label: "Corte", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  { value: "barba", label: "Barba", color: "bg-amber-100 text-amber-700 border-amber-200" },
-  { value: "coloracao", label: "Coloração", color: "bg-purple-100 text-purple-700 border-purple-200" },
-  { value: "tratamento", label: "Tratamento", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  { value: "corte", label: "Corte", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
+  { value: "barba", label: "Barba", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
+  { value: "coloracao", label: "Coloração", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
+  { value: "tratamento", label: "Tratamento", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
   { value: "manicure", label: "Manicure/Pedicure", color: "bg-pink-100 text-pink-700 border-pink-200" },
   { value: "sobrancelha", label: "Sobrancelha", color: "bg-orange-100 text-orange-700 border-orange-200" },
   { value: "outro", label: "Outro", color: "bg-surface-container-low text-on-surface border-outline-variant" },
@@ -389,11 +389,11 @@ Novo Item
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Serviços Ativos", value: services.filter(s => getEffectiveActive(s)).length, icon: Scissors, color: "text-blue-600" },
+          { label: "Serviços Ativos", value: services.filter(s => getEffectiveActive(s)).length, icon: Scissors, color: "text-blue-400" },
           { label: "Inativos", value: services.filter(s => !getEffectiveActive(s)).length, icon: PowerOff, color: "text-muted-foreground" },
-          { label: "Preço Médio", value: `R$ ${avgPrice}`, icon: DollarSign, color: "text-emerald-600" },
-          { label: "Margem Média", value: avgMargin !== "-" ? `${avgMargin}%` : "-", icon: DollarSign, color: "text-blue-600" },
-          { label: "Vinculados a Planos", value: [...new Set(planServices.map(ps => ps.service_id))].length, icon: Package, color: "text-purple-600" },
+          { label: "Preço Médio", value: `R$ ${avgPrice}`, icon: DollarSign, color: "text-emerald-400" },
+          { label: "Margem Média", value: avgMargin !== "-" ? `${avgMargin}%` : "-", icon: DollarSign, color: "text-blue-400" },
+          { label: "Vinculados a Planos", value: [...new Set(planServices.map(ps => ps.service_id))].length, icon: Package, color: "text-purple-400" },
         ].map((stat, i) => (
           <div key={i} className="rounded-xl border p-4" style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
             <div className="flex items-center gap-2 mb-1">
@@ -502,13 +502,13 @@ Novo Item
                           )}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-on-surface text-sm">{svc.name} {!svc.company_id && <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 ml-1">Global</Badge>}</h3>
+                          <h3 className="font-semibold text-on-surface text-sm">{svc.name} {!svc.company_id && <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-300 border-amber-500/30 ml-1">Global</Badge>}</h3>
                           <div className="flex items-center gap-1 mt-0.5">
                             <Badge variant="outline" className={cn("text-[10px]", cat.color)}>
                               {cat.label}
                             </Badge>
                             {svc.service_type === "Pacote de serviço" && (
-                              <Badge variant="outline" className="text-[10px] bg-purple-100 text-purple-700 border-purple-200">
+                              <Badge variant="outline" className="text-[10px] bg-purple-500/20 text-purple-300 border-purple-500/30">
                                 Pacote
                               </Badge>
                             )}
@@ -536,7 +536,7 @@ Novo Item
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => setDeletingService(svc)}
-                            className="text-red-600"
+                            className="text-red-400"
                           >
                             <Trash2 className="w-4 h-4 mr-2" /> Excluir
                           </DropdownMenuItem>
@@ -562,7 +562,7 @@ Novo Item
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {linkedPlans.map(plan => (
-                              <span key={plan.id} className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full border border-purple-200">{plan.name}</span>
+                              <span key={plan.id} className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded-full border border-purple-500/30">{plan.name}</span>
                             ))}
                           </div>
                         </div>
@@ -586,7 +586,7 @@ Novo Item
                           R$ {Number(svc.price || 0).toFixed(2).replace(".", ",")}
                         </span>
                         {svc.comissao > 0 && (
-                          <span className="text-[10px] text-blue-600 block">
+                          <span className="text-[10px] text-blue-400 block">
                             Comissão: {svc.comissao}%
                           </span>
                         )}
@@ -594,7 +594,7 @@ Novo Item
                           <span className="text-[10px] text-muted-foreground block">
                             Custo: R$ {Number(svc.preco_custo).toFixed(2).replace(".", ",")}
                             {svc.price > 0 && (
-                              <span className={cn("ml-1 font-medium", ((svc.price - svc.preco_custo) / svc.price * 100) >= 50 ? "text-emerald-600" : "text-amber-600")}>
+                              <span className={cn("ml-1 font-medium", ((svc.price - svc.preco_custo) / svc.price * 100) >= 50 ? "text-emerald-400" : "text-amber-400")}>
                                 ({((svc.price - svc.preco_custo) / svc.price * 100).toFixed(0)}% margem)
                               </span>
                             )}
@@ -616,7 +616,7 @@ Novo Item
           <div className="flex justify-end">
             <Button
               onClick={() => { setEditingCombo(null); setComboForm(EMPTY_COMBO); setShowComboForm(true); }}
-              className="bg-purple-600 text-white hover:bg-purple-700"
+              className="bg-secondary text-white hover:bg-secondary/80"
             >
               <Plus className="w-4 h-4 mr-2" />
               Novo Combo
@@ -637,8 +637,8 @@ Novo Item
                 <div key={combo.id} className="rounded-xl border p-4 transition-all hover:shadow-md" style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                        <Package className="w-5 h-5 text-purple-600" />
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                        <Package className="w-5 h-5 text-purple-400" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-on-surface">{combo.name}</h3>
@@ -646,7 +646,7 @@ Novo Item
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-purple-600">
+                      <span className="text-lg font-bold text-purple-400">
                         R$ {Number(combo.combo_price || 0).toFixed(2).replace(".", ",")}
                       </span>
                       <DropdownMenu>
@@ -659,7 +659,7 @@ Novo Item
                           <DropdownMenuItem onClick={() => openEditCombo(combo)}>
                             <Edit className="w-4 h-4 mr-2" /> Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setDeletingCombo(combo)} className="text-red-600">
+                          <DropdownMenuItem onClick={() => setDeletingCombo(combo)} className="text-red-400">
                             <Trash2 className="w-4 h-4 mr-2" /> Excluir
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -890,7 +890,7 @@ Novo Item
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setShowComboForm(false)}>Cancelar</Button>
-              <Button onClick={handleSaveCombo} className="bg-purple-600 text-white hover:bg-purple-700">
+              <Button onClick={handleSaveCombo} className="bg-secondary text-white hover:bg-secondary/80">
                 {editingCombo ? "Salvar" : "Criar Combo"}
               </Button>
             </div>
@@ -911,7 +911,7 @@ Novo Item
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteService.mutate(deletingService.id)}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-error text-white hover:bg-error/80"
             >
               Excluir
             </AlertDialogAction>
@@ -932,7 +932,7 @@ Novo Item
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteCombo.mutate(deletingCombo.id)}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-error text-white hover:bg-error/80"
             >
               Excluir
             </AlertDialogAction>

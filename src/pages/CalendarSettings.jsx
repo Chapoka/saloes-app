@@ -144,7 +144,7 @@ export default function CalendarSettings() {
                 <CardTitle className="text-base">Google Calendar</CardTitle>
                 <CardDescription className="text-xs">
                   {isGoogleConnected ? (
-                    <span className="text-emerald-600 flex items-center gap-1">
+                    <span className="text-emerald-400 flex items-center gap-1">
                       <CheckCircle className="w-3 h-3" /> Conectado
                     </span>
                   ) : (
@@ -157,7 +157,7 @@ export default function CalendarSettings() {
           <CardContent>
             {isGoogleConnected ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 p-2 bg-emerald-50 rounded-lg text-xs text-emerald-700">
+                <div className="flex items-center gap-2 p-2 bg-emerald-500/10 rounded-lg text-xs text-emerald-300">
                   <CheckCircle className="w-4 h-4 flex-shrink-0" />
                   Sincronização automática ativa
                 </div>
@@ -165,7 +165,7 @@ export default function CalendarSettings() {
                   variant="outline"
                   size="sm"
                   onClick={() => disconnect("google")}
-                  className="w-full border-red-200 text-red-600 hover:bg-red-50"
+                  className="w-full border-red-500/30 text-red-400 hover:bg-red-500/100/10"
                 >
                   <Unlink className="w-4 h-4 mr-2" />
                   Desconectar
@@ -174,7 +174,7 @@ export default function CalendarSettings() {
             ) : (
               <div className="space-y-3">
                 {!GOOGLE_CLIENT_ID && (
-                  <div className="flex items-start gap-2 p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
+                  <div className="flex items-start gap-2 p-2 bg-amber-500/10 rounded-lg text-xs text-amber-300">
                     <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     Configure VITE_GOOGLE_CLIENT_ID no .env
                   </div>
@@ -211,7 +211,7 @@ export default function CalendarSettings() {
                 <CardTitle className="text-base">Microsoft Outlook</CardTitle>
                 <CardDescription className="text-xs">
                   {isMicrosoftConnected ? (
-                    <span className="text-emerald-600 flex items-center gap-1">
+                    <span className="text-emerald-400 flex items-center gap-1">
                       <CheckCircle className="w-3 h-3" /> Conectado
                     </span>
                   ) : (
@@ -224,7 +224,7 @@ export default function CalendarSettings() {
           <CardContent>
             {isMicrosoftConnected ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 p-2 bg-emerald-50 rounded-lg text-xs text-emerald-700">
+                <div className="flex items-center gap-2 p-2 bg-emerald-500/10 rounded-lg text-xs text-emerald-300">
                   <CheckCircle className="w-4 h-4 flex-shrink-0" />
                   Sincronização automática ativa
                 </div>
@@ -232,7 +232,7 @@ export default function CalendarSettings() {
                   variant="outline"
                   size="sm"
                   onClick={() => disconnect("microsoft")}
-                  className="w-full border-red-200 text-red-600 hover:bg-red-50"
+                  className="w-full border-red-500/30 text-red-400 hover:bg-red-500/100/10"
                 >
                   <Unlink className="w-4 h-4 mr-2" />
                   Desconectar
@@ -241,7 +241,7 @@ export default function CalendarSettings() {
             ) : (
               <div className="space-y-3">
                 {!MICROSOFT_CLIENT_ID && (
-                  <div className="flex items-start gap-2 p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
+                  <div className="flex items-start gap-2 p-2 bg-amber-500/10 rounded-lg text-xs text-amber-300">
                     <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     Configure VITE_MICROSOFT_CLIENT_ID no .env
                   </div>
@@ -318,8 +318,8 @@ export default function CalendarSettings() {
       <Card className="rounded-2xl">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-100">
-              <Shield className="w-5 h-5 text-amber-600" />
+            <div className="p-2 rounded-lg bg-amber-500/20">
+              <Shield className="w-5 h-5 text-amber-400" />
             </div>
             <div>
               <CardTitle className="text-lg">Como Funciona</CardTitle>
@@ -350,8 +350,8 @@ export default function CalendarSettings() {
       <Card className="rounded-2xl">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-100">
-              <Calendar className="w-5 h-5 text-emerald-600" />
+            <div className="p-2 rounded-lg bg-emerald-500/20">
+              <Calendar className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
               <CardTitle className="text-lg">Links Rápidos</CardTitle>

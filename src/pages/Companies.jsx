@@ -17,7 +17,7 @@ function CopyIdButton({ id }) {
       title="Copiar ID"
       className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-branding-primary transition-colors font-mono bg-background border border-outline-variant rounded px-1.5 py-0.5"
     >
-      {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+      {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
       {copied ? "Copiado!" : id.slice(0, 8) + "…"}
     </button>
   );
@@ -288,7 +288,7 @@ export default function Companies() {
                           <Edit className="w-4 h-4 mr-2" /> Editar
                         </DropdownMenuItem>
                         {isSuperAdmin && (
-                          <DropdownMenuItem onClick={() => setDeletingCompany(company)} className="text-red-600">
+                          <DropdownMenuItem onClick={() => setDeletingCompany(company)} className="text-red-400">
                             <Trash2 className="w-4 h-4 mr-2" /> Excluir
                           </DropdownMenuItem>
                         )}
@@ -304,7 +304,7 @@ export default function Companies() {
                 </div>
                 <div className="mt-3 pt-3 border-t border-outline-variant/30 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge className={company.active !== false ? "bg-emerald-100 text-emerald-700" : "bg-surface-container-low text-muted-foreground"}>
+                    <Badge className={company.active !== false ? "bg-emerald-500/20 text-emerald-300" : "bg-surface-container-low text-muted-foreground"}>
                       {company.active !== false ? "Ativa" : "Inativa"}
                     </Badge>
                     {company.estabelecimento_tipo && (
@@ -324,7 +324,7 @@ export default function Companies() {
                       </Badge>
                     )}
                     {company.has_branch && (
-                      <Badge className="bg-blue-100 text-blue-700 flex items-center gap-1">
+                      <Badge className="bg-blue-500/20 text-blue-300 flex items-center gap-1">
                         <GitBranch className="w-3 h-3" /> Possui Filial
                       </Badge>
                     )}
@@ -462,11 +462,11 @@ export default function Companies() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <Badge className={company.active !== false ? "bg-emerald-100 text-emerald-700" : "bg-surface-container-low text-muted-foreground"}>
+                          <Badge className={company.active !== false ? "bg-emerald-500/20 text-emerald-300" : "bg-surface-container-low text-muted-foreground"}>
                             {company.active !== false ? "Ativa" : "Inativa"}
                           </Badge>
                           {company.has_branch && (
-                            <Badge className="bg-blue-100 text-blue-700 flex items-center gap-1">
+                            <Badge className="bg-blue-500/20 text-blue-300 flex items-center gap-1">
                               <GitBranch className="w-3 h-3" />
                             </Badge>
                           )}
@@ -506,7 +506,7 @@ export default function Companies() {
                                 <Edit className="w-4 h-4 mr-2" /> Editar
                               </DropdownMenuItem>
                               {isSuperAdmin && (
-                                <DropdownMenuItem onClick={() => setDeletingCompany(company)} className="text-red-600">
+                                <DropdownMenuItem onClick={() => setDeletingCompany(company)} className="text-red-400">
                                   <Trash2 className="w-4 h-4 mr-2" /> Excluir
                                 </DropdownMenuItem>
                               )}
@@ -548,7 +548,7 @@ export default function Companies() {
             <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => { deleteMutation.mutate(deletingCompany?.id); setDeletingCompany(null); }}
-              className="bg-red-600 hover:bg-red-700 rounded-xl"
+              className="bg-error hover:bg-error/80 rounded-xl"
             >
               Excluir
             </AlertDialogAction>

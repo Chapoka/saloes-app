@@ -63,7 +63,7 @@ const modalityColors = {
   corte: "bg-branding-primary/10 text-branding-primary border-branding-primary/20",
   barba: "bg-branding-secondary/10 text-branding-secondary border-branding-secondary/20",
 };
-const getModalityColor = (m) => modalityColors[m] || "bg-purple-100 text-purple-700 border-purple-200";
+const getModalityColor = (m) => modalityColors[m] || "bg-purple-500/20 text-purple-300 border-purple-500/30";
 
 const EMPTY_FORM = {
   name: "",
@@ -325,8 +325,8 @@ export default function Plans() {
   const getCompanyName = (cid) => companies.find(c => c.id === cid)?.name || "—";
 
   const planCompanyLabel = (plan) => {
-    if (!plan.company_id) return { label: "Global (Admin)", color: "bg-purple-100 text-purple-700 border-purple-200" };
-    return { label: getCompanyName(plan.company_id), color: "bg-amber-100 text-amber-700 border-amber-200" };
+    if (!plan.company_id) return { label: "Global (Admin)", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" };
+    return { label: getCompanyName(plan.company_id), color: "bg-amber-500/20 text-amber-300 border-amber-500/30" };
   };
 
   return (
@@ -539,7 +539,7 @@ export default function Plans() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem onClick={() => handleEdit(plan)}><Edit className="w-4 h-4 mr-2" />Editar</DropdownMenuItem>
-                                  {canDeletePlan(plan) && <DropdownMenuItem onClick={() => setDeletingPlan(plan)} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Excluir</DropdownMenuItem>}
+                                  {canDeletePlan(plan) && <DropdownMenuItem onClick={() => setDeletingPlan(plan)} className="text-red-400"><Trash2 className="w-4 h-4 mr-2" />Excluir</DropdownMenuItem>}
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             )}
@@ -581,7 +581,7 @@ export default function Plans() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handleEdit(plan)}><Edit className="w-4 h-4 mr-2" />Editar</DropdownMenuItem>
-                                {canDeletePlan(plan) && <DropdownMenuItem onClick={() => setDeletingPlan(plan)} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Excluir</DropdownMenuItem>}
+                                {canDeletePlan(plan) && <DropdownMenuItem onClick={() => setDeletingPlan(plan)} className="text-red-400"><Trash2 className="w-4 h-4 mr-2" />Excluir</DropdownMenuItem>}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -687,8 +687,8 @@ export default function Plans() {
                       </div>
                       {plan.discount > 0 && (
                         <div className="flex items-center justify-between mt-1">
-                          <span className="text-xs text-green-600">Desconto</span>
-                          <span className="text-xs font-medium text-green-600">- R$ {plan.discount.toFixed(2)}</span>
+                          <span className="text-xs text-green-400">Desconto</span>
+                          <span className="text-xs font-medium text-green-400">- R$ {plan.discount.toFixed(2)}</span>
                         </div>
                       )}
                       {plan.professional && (
@@ -715,7 +715,7 @@ export default function Plans() {
                                 <p className="text-xs text-muted-foreground">Salões:</p>
                                 <div className="flex flex-wrap gap-1 mt-1">
                                   {companiesInPlan.map(cid => (
-                                    <span key={cid} className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full border border-amber-200">{getCompanyName(cid)}</span>
+                                    <span key={cid} className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-full border border-amber-500/30">{getCompanyName(cid)}</span>
                                   ))}
                                 </div>
                               </div>
@@ -762,9 +762,9 @@ export default function Plans() {
                   <p className="text-xs text-muted-foreground">Global = disponível para todos. Salão específico = visível apenas para ele.</p>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-200 bg-amber-50">
-                  <Building2 className="w-4 h-4 text-amber-600" />
-                  <span className="text-sm text-amber-700 font-medium">Plano exclusivo do seu salão</span>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10">
+                  <Building2 className="w-4 h-4 text-amber-400" />
+                  <span className="text-sm text-amber-300 font-medium">Plano exclusivo do seu salão</span>
                 </div>
               )}
 
@@ -873,7 +873,7 @@ export default function Plans() {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="h-9 w-9 text-red-400 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
+                              className="h-9 w-9 text-red-400 hover:text-red-400 hover:bg-red-500/100/10 flex-shrink-0"
                               onClick={() => setPlanItems(prev => prev.filter((_, i) => i !== idx))}
                             >
                               <Trash2 className="w-4 h-4" />
@@ -1123,10 +1123,10 @@ export default function Plans() {
 
               {/* Botões de Ação */}
               <div className="flex gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={resetForm} className="flex-1 rounded-xl border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700">
+                <Button type="button" variant="outline" onClick={resetForm} className="flex-1 rounded-xl border-red-500/50 text-red-400 hover:bg-red-500/100/10 hover:text-red-300">
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 rounded-xl bg-green-600 text-white hover:bg-green-700">
+                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 rounded-xl bg-green-500 text-white hover:bg-green-500/80">
                   {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar"}
                 </Button>
               </div>
@@ -1145,7 +1145,7 @@ export default function Plans() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={() => deleteMutation.mutate(deletingPlan?.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Excluir</AlertDialogAction>
+              <AlertDialogAction onClick={() => deleteMutation.mutate(deletingPlan?.id)} className="bg-error hover:bg-error/80 rounded-xl">Excluir</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

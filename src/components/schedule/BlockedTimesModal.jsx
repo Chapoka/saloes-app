@@ -125,14 +125,14 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
       <DialogContent className="sm:max-w-md rounded-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Ban className="w-5 h-5 text-red-500" />
+            <Ban className="w-5 h-5 text-red-400" />
             Adicionar horário bloqueado
           </DialogTitle>
         </DialogHeader>
 
         {noCompany ? (
           <div className="py-4">
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-700 flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-300 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span>Nenhum salão vinculado à sua conta. Fale com o suporte.</span>
             </div>
@@ -141,7 +141,7 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
           <div className="space-y-4 py-2">
             {showCompanySelect && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Salão</Label>
+                <Label className="text-sm font-medium text-on-surface">Salão</Label>
                 <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
                   <SelectTrigger className="rounded-xl">
                     <SelectValue placeholder="Selecione o salão" />
@@ -156,8 +156,8 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
             )}
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Data</Label>
-              <div className="rounded-xl border border-gray-200 p-2">
+              <Label className="text-sm font-medium text-on-surface">Data</Label>
+              <div className="rounded-xl border border-outline-variant/30 p-2">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -170,10 +170,10 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Horário de Início</Label>
+                <Label className="text-sm font-medium text-on-surface">Horário de Início</Label>
                 <Select value={startTime} onValueChange={setStartTime}>
                   <SelectTrigger className="rounded-xl">
-                    <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                    <Clock className="w-4 h-4 mr-2 text-on-surface-variant" />
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -185,10 +185,10 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700">Horário de Fim</Label>
+                <Label className="text-sm font-medium text-on-surface">Horário de Fim</Label>
                 <Select value={endTime} onValueChange={setEndTime}>
                   <SelectTrigger className="rounded-xl">
-                    <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                    <Clock className="w-4 h-4 mr-2 text-on-surface-variant" />
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -201,7 +201,7 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Descrição</Label>
+              <Label className="text-sm font-medium text-on-surface">Descrição</Label>
               <Input
                 placeholder="Ex: Horário de almoço"
                 value={description}
@@ -210,19 +210,19 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
               />
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-200">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/30">
               <Checkbox
                 id="blockAllBarbers"
                 checked={blockAllBarbers}
                 onCheckedChange={setBlockAllBarbers}
               />
-              <Label htmlFor="blockAllBarbers" className="text-sm font-medium text-gray-700 cursor-pointer">
+              <Label htmlFor="blockAllBarbers" className="text-sm font-medium text-on-surface cursor-pointer">
                 Bloquear este horário para TODOS OS BARBEIROS
               </Label>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">Opções</Label>
+              <Label className="text-sm font-medium text-on-surface">Opções</Label>
               
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
@@ -231,7 +231,7 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
                     checked={recurrenceType === "weekly"}
                     onCheckedChange={(checked) => setRecurrenceType(checked ? "weekly" : "none")}
                   />
-                  <Label htmlFor="weekly" className="text-sm text-gray-600 cursor-pointer">
+                  <Label htmlFor="weekly" className="text-sm text-on-surface-variant cursor-pointer">
                     Repetir este bloqueio de horário UM DIA DA SEMANA
                   </Label>
                 </div>
@@ -259,7 +259,7 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
                     checked={recurrenceType === "daily"}
                     onCheckedChange={(checked) => setRecurrenceType(checked ? "daily" : "none")}
                   />
-                  <Label htmlFor="daily" className="text-sm text-gray-600 cursor-pointer">
+                  <Label htmlFor="daily" className="text-sm text-on-surface-variant cursor-pointer">
                     Repetir este bloqueio de horário TODOS OS DIAS
                   </Label>
                 </div>
@@ -270,7 +270,7 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
                     checked={recurrenceType === "period"}
                     onCheckedChange={(checked) => setRecurrenceType(checked ? "period" : "none")}
                   />
-                  <Label htmlFor="period" className="text-sm text-gray-600 cursor-pointer">
+                  <Label htmlFor="period" className="text-sm text-on-surface-variant cursor-pointer">
                     Bloquear um PERÍODO ESPECÍFICO
                   </Label>
                 </div>
@@ -278,7 +278,7 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
                 {recurrenceType === "period" && (
                   <div className="ml-8 grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <Label className="text-xs text-gray-500">Data Início</Label>
+                      <Label className="text-xs text-on-surface-variant">Data Início</Label>
                       <Input
                         type="date"
                         value={periodStartDate}
@@ -287,7 +287,7 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs text-gray-500">Data Fim</Label>
+                      <Label className="text-xs text-on-surface-variant">Data Fim</Label>
                       <Input
                         type="date"
                         value={periodEndDate}

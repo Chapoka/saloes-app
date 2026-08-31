@@ -203,7 +203,7 @@ export default function WaitingList() {
                         {index + 1}
                       </div>
                       {item.priority === "urgent" && (
-                        <Badge className="mt-2 bg-red-100 text-red-700 text-xs">
+                        <Badge className="mt-2 bg-red-500/20 text-red-300 text-xs">
                           Urgente
                         </Badge>
                       )}

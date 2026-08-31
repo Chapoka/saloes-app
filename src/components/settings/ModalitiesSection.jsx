@@ -58,11 +58,11 @@ export default function ModalitiesSection() {
   };
 
   return (
-    <Card className="rounded-2xl shadow-sm border border-gray-100">
+    <Card className="rounded-2xl shadow-sm border border-outline-variant/10">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-purple-100">
-            <Layers className="w-5 h-5 text-purple-600" />
+          <div className="p-2 rounded-lg bg-purple-500/20">
+            <Layers className="w-5 h-5 text-purple-400" />
           </div>
           <div>
             <CardTitle className="text-lg">Tipos de Serviço</CardTitle>
@@ -83,7 +83,7 @@ export default function ModalitiesSection() {
           <Button
             onClick={handleCreate}
             disabled={createMutation.isPending || !newName.trim()}
-            className="rounded-xl bg-purple-600 hover:bg-purple-700 shrink-0"
+            className="rounded-xl bg-secondary hover:bg-secondary/80 shrink-0"
           >
             <Plus className="w-4 h-4 mr-1" />
             Adicionar
@@ -92,15 +92,15 @@ export default function ModalitiesSection() {
 
         {/* List */}
         {isLoading ? (
-          <p className="text-sm text-gray-500">Carregando...</p>
+          <p className="text-sm text-on-surface-variant">Carregando...</p>
         ) : modalities.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-4">Nenhum tipo de serviço cadastrado</p>
+          <p className="text-sm text-on-surface-variant text-center py-4">Nenhum tipo de serviço cadastrado</p>
         ) : (
           <div className="space-y-2">
             {modalities.map((m) => (
               <div
                 key={m.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
+                className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl"
               >
                 {editingId === m.id ? (
                   <div className="flex items-center gap-2 flex-1 mr-2">
@@ -111,17 +111,17 @@ export default function ModalitiesSection() {
                       onKeyDown={(e) => { if (e.key === "Enter") handleUpdate(); if (e.key === "Escape") setEditingId(null); }}
                       className="h-7 rounded-lg text-sm"
                     />
-                    <button onClick={handleUpdate} className="text-green-600 hover:text-green-700">
+                    <button onClick={handleUpdate} className="text-green-400 hover:text-green-300">
                       <Check className="w-4 h-4" />
                     </button>
-                    <button onClick={() => setEditingId(null)} className="text-gray-500 hover:text-gray-600">
+                    <button onClick={() => setEditingId(null)} className="text-on-surface-variant hover:text-on-surface-variant">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-3 flex-1">
-                    <span className="font-medium text-gray-900 text-sm">{m.name}</span>
-                    <Badge variant="outline" className="text-xs text-gray-500 font-mono">{m.id}</Badge>
+                    <span className="font-medium text-on-surface text-sm">{m.name}</span>
+                    <Badge variant="outline" className="text-xs text-on-surface-variant font-mono">{m.id}</Badge>
                   </div>
                 )}
                 {editingId !== m.id && (
@@ -129,7 +129,7 @@ export default function ModalitiesSection() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-gray-500 hover:text-purple-600"
+                      className="h-7 w-7 text-on-surface-variant hover:text-purple-400"
                       onClick={() => { setEditingId(m.id); setEditingName(m.name); }}
                     >
                       <Pencil className="w-3.5 h-3.5" />
@@ -137,7 +137,7 @@ export default function ModalitiesSection() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-gray-500 hover:text-red-600"
+                      className="h-7 w-7 text-on-surface-variant hover:text-red-400"
                       onClick={() => deleteMutation.mutate(m.id)}
                     >
                       <Trash2 className="w-3.5 h-3.5" />

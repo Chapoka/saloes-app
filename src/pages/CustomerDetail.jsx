@@ -81,7 +81,7 @@ export default function CustomerDetail() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-card to-branding-primary/5 flex items-center justify-center p-4">
         <div className="text-center">
-          <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
+          <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
           <p className="text-on-surface-variant">Cliente não encontrado</p>
           <Button variant="ghost" onClick={() => window.history.back()} className="mt-4">
             <ChevronLeft className="w-4 h-4 mr-2" /> Voltar
@@ -173,7 +173,7 @@ export default function CustomerDetail() {
                 <Badge variant="outline" className={cn(
                   customer.status === "active" ? "border-green-400 text-green-400" :
                   customer.status === "inactive" ? "border-outline text-muted-foreground" :
-                  "border-amber-400 text-on-surface-variant"
+                  "border-amber-500/70 text-on-surface-variant"
                 )}>
                   {customer.status === "active" ? "Ativo" : customer.status === "inactive" ? "Inativo" : "Pendente"}
                 </Badge>
@@ -278,7 +278,7 @@ export default function CustomerDetail() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg"
+                          className="h-7 w-7 text-muted-foreground hover:text-red-400 hover:bg-red-500/100/10 rounded-lg"
                           onClick={() => setCancelConfirm({ type: "single", appointment })}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -362,7 +362,7 @@ export default function CustomerDetail() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel className="rounded-xl" disabled={cancelling}>Voltar</AlertDialogCancel>
-              <AlertDialogAction onClick={(e) => { e.preventDefault(); executeCancel(); }} disabled={cancelling} className="bg-red-600 hover:bg-red-700 rounded-xl disabled:opacity-50">
+              <AlertDialogAction onClick={(e) => { e.preventDefault(); executeCancel(); }} disabled={cancelling} className="bg-error hover:bg-error/80 rounded-xl disabled:opacity-50">
                 {cancelling ? "Cancelando..." : "Sim, cancelar"}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -397,7 +397,7 @@ export default function CustomerDetail() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Faltas</span>
-                <span className="font-medium text-red-500">{totalAbsent}</span>
+                <span className="font-medium text-red-400">{totalAbsent}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Cancelamentos</span>
@@ -434,7 +434,7 @@ export default function CustomerDetail() {
             {pendingInvoice && (
               <div className="bg-surface-container-low border border-outline-variant rounded-2xl p-4">
                 <div className="flex items-center gap-3">
-                  <CreditCard className="w-5 h-5 text-amber-600" />
+                  <CreditCard className="w-5 h-5 text-amber-400" />
                   <div className="flex-1">
                     <p className="font-medium text-on-surface">Fatura Pendente</p>
                     <p className="text-sm text-on-surface-variant">
@@ -443,7 +443,7 @@ export default function CustomerDetail() {
                   </div>
                   {pendingInvoice.asaas_url && (
                     <a href={pendingInvoice.asaas_url} target="_blank" rel="noopener noreferrer"
-                      className="text-on-surface-variant hover:text-amber-800">
+                      className="text-on-surface-variant hover:text-amber-200">
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   )}
@@ -495,7 +495,7 @@ export default function CustomerDetail() {
                       <div className="flex items-center gap-2">
                         <Badge className={cn("text-xs",
                           inv.status === "received" ? "bg-green-500/20 text-green-400" :
-                          inv.status === "pending" ? "bg-amber-100 text-on-surface-variant" :
+                          inv.status === "pending" ? "bg-amber-500/20 text-on-surface-variant" :
                           inv.status === "overdue" ? "bg-error-container/20 text-error" :
                           "bg-surface-container-low text-muted-foreground"
                         )}>

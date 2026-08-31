@@ -15,10 +15,10 @@ for (let h = 0; h <= 23; h++) {
 const statusColors = {
   scheduled: "bg-branding-primary/20 border-branding-primary text-branding-primary",
   confirmed: "bg-branding-secondary/20 border-branding-secondary text-branding-secondary",
-  present: "bg-emerald-100 border-emerald-500 text-emerald-700",
-  absent: "bg-red-100 border-red-400 text-red-600",
-  cancelled: "bg-gray-100 border-gray-300 text-gray-500 line-through",
-  trial: "bg-amber-100 border-amber-500 text-amber-700",
+  present: "bg-emerald-500/20 border-emerald-500 text-emerald-300",
+  absent: "bg-red-500/20 border-red-500/70 text-red-400",
+  cancelled: "bg-surface-container border-outline-variant/50 text-on-surface-variant line-through",
+  trial: "bg-amber-500/20 border-amber-500 text-amber-300",
   makeup: "bg-pink-100 border-pink-500 text-pink-700",
 };
 
@@ -133,10 +133,10 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <div className="p-4 border-b border-outline-variant/10 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-on-surface">
           {format(weekStart, "MMMM yyyy", { locale: ptBR })}
         </h2>
         <div className="flex items-center gap-2">
@@ -169,14 +169,14 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
 
       {/* Business Hours Legend */}
       {openingTime && closingTime && (
-        <div className="px-4 py-2 border-b border-gray-100 flex items-center gap-4 text-xs text-gray-500">
-          <span className="font-medium text-gray-700">Horário: {openingTime} - {closingTime}</span>
+        <div className="px-4 py-2 border-b border-outline-variant/10 flex items-center gap-4 text-xs text-on-surface-variant">
+          <span className="font-medium text-on-surface">Horário: {openingTime} - {closingTime}</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-red-100 border border-red-200"></span>
+            <span className="w-3 h-3 rounded-sm bg-red-500/20 border border-red-500/30"></span>
             <span>Fora do expediente</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-white border border-gray-200"></span>
+            <span className="w-3 h-3 rounded-sm bg-surface-container-lowest border border-outline-variant/30"></span>
             <span>Dentro do expediente</span>
           </div>
         </div>
@@ -186,24 +186,24 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
       <div className="overflow-x-auto">
         <div className="min-w-[800px]">
           {/* Days Header */}
-          <div className="grid grid-cols-8 border-b border-gray-100">
-            <div className="p-3 text-center text-sm font-medium text-gray-500 border-r border-gray-100">
+          <div className="grid grid-cols-8 border-b border-outline-variant/10">
+            <div className="p-3 text-center text-sm font-medium text-on-surface-variant border-r border-outline-variant/10">
               Horário
             </div>
             {weekDays.map((day, i) => (
               <div 
                 key={i} 
                 className={cn(
-                  "p-3 text-center border-r border-gray-100 last:border-r-0",
+                  "p-3 text-center border-r border-outline-variant/10 last:border-r-0",
                   isSameDay(day, new Date()) && "bg-branding-primary/5"
                 )}
               >
-                <p className="text-xs font-medium text-gray-500 uppercase">
+                <p className="text-xs font-medium text-on-surface-variant uppercase">
                   {format(day, "EEE", { locale: ptBR })}
                 </p>
                 <p className={cn(
                   "text-lg font-semibold mt-1",
-                  isSameDay(day, new Date()) ? "text-branding-primary" : "text-gray-900"
+                  isSameDay(day, new Date()) ? "text-branding-primary" : "text-on-surface"
                 )}>
                   {format(day, "d")}
                 </p>
@@ -214,13 +214,13 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
           {/* Time Grid */}
           <div className="relative grid grid-cols-8" style={{ height: timeSlots.length * 48 }}>
             {/* Time Labels */}
-            <div className="border-r border-gray-100">
+            <div className="border-r border-outline-variant/10">
               {timeSlots.map((time, i) => (
                 <div 
                   key={time} 
                   className={cn(
                     "h-12 px-3 flex items-start justify-end pt-1 text-xs border-b border-gray-50",
-                    isSlotOutOfHours(time) ? "bg-red-50 text-red-400" : "text-gray-500"
+                    isSlotOutOfHours(time) ? "bg-red-500/10 text-red-400" : "text-on-surface-variant"
                   )}
                 >
                   {i % 2 === 0 && time}
@@ -236,7 +236,7 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                 <div 
                   key={dayIndex} 
                   className={cn(
-                    "relative border-r border-gray-100 last:border-r-0",
+                    "relative border-r border-outline-variant/10 last:border-r-0",
                     isSameDay(day, new Date()) && "bg-branding-primary/5"
                   )}
                 >
@@ -247,7 +247,7 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                       className={cn(
                         "h-12 border-b border-gray-50 cursor-pointer transition-colors",
                         isSlotOutOfHours(time)
-                          ? "bg-red-50 hover:bg-red-100"
+                          ? "bg-red-500/10 hover:bg-red-500/100/20"
                           : "hover:bg-branding-primary/5"
                       )}
                       onClick={(e) => {
@@ -282,7 +282,7 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                             </div>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               {appointment.isGroup && (
-                                <span className="bg-white/60 text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
+                                <span className="bg-surface-container-lowest/60 text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
                                   {appointment.groupCount}
                                 </span>
                               )}
@@ -296,19 +296,19 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                           </div>
                         </div>
                       </HoverCardTrigger>
-                      <HoverCardContent className="w-72 bg-white rounded-xl shadow-lg border border-gray-200">
+                      <HoverCardContent className="w-72 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/30">
                         <div className="space-y-3">
                           {appointment.isGroup ? (
                             <>
                               <div>
-                                <p className="font-semibold text-gray-900 text-sm mb-1">Atendimento em grupo ({appointment.groupCount} clientes)</p>
-                                <p className="text-xs text-gray-500">
+                                <p className="font-semibold text-on-surface text-sm mb-1">Atendimento em grupo ({appointment.groupCount} clientes)</p>
+                                <p className="text-xs text-on-surface-variant">
                                   {format(parseISO(appointment.date), "dd 'de' MMMM", { locale: ptBR })}
                                 </p>
                               </div>
-                              <div className="space-y-1.5 pt-2 border-t border-gray-100">
+                              <div className="space-y-1.5 pt-2 border-t border-outline-variant/10">
                                 {appointment.groupAppointments.map((gl, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
+                                  <div key={idx} className="flex items-center gap-2 text-sm text-on-surface">
                                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-branding-primary to-branding-secondary flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                                       {gl.customer_name?.charAt(0)?.toUpperCase()}
                                     </div>
@@ -324,8 +324,8 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                                   {appointment.customer_name?.charAt(0)?.toUpperCase()}
                                 </div>
                                 <div>
-                                  <p className="font-semibold text-gray-900">{appointment.customer_name}</p>
-                                  <p className="text-xs text-gray-500">
+                                  <p className="font-semibold text-on-surface">{appointment.customer_name}</p>
+                                  <p className="text-xs text-on-surface-variant">
                                     {format(parseISO(appointment.date), "dd 'de' MMMM", { locale: ptBR })}
                                   </p>
                                 </div>
@@ -333,39 +333,39 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                             </>
                           )}
 
-                          <div className="space-y-2 pt-2 border-t border-gray-100">
+                          <div className="space-y-2 pt-2 border-t border-outline-variant/10">
                             <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2 text-gray-600">
+                              <div className="flex items-center gap-2 text-on-surface-variant">
                                 <Droplets className="w-4 h-4 text-branding-primary" />
                                 <span>Tipo de Agendamento:</span>
                               </div>
-                              <span className="font-medium text-gray-900">
+                              <span className="font-medium text-on-surface">
                                 {serviceCategoryLabels[appointment.service_category] || appointment.service_category}
                               </span>
                             </div>
 
                             <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2 text-gray-600">
+                              <div className="flex items-center gap-2 text-on-surface-variant">
                                 <Clock className="w-4 h-4 text-branding-secondary" />
                                 <span>Horário:</span>
                               </div>
-                              <span className="font-medium text-gray-900">
+                              <span className="font-medium text-on-surface">
                                 {appointment.start_time} - {appointment.end_time}
                               </span>
                             </div>
 
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">Duração:</span>
-                              <span className="font-medium text-gray-900">
+                              <span className="text-on-surface-variant">Duração:</span>
+                              <span className="font-medium text-on-surface">
                                 {appointment.duration_mins} minutos
                               </span>
                             </div>
                           </div>
 
                           {appointment.notes && (
-                            <div className="pt-2 border-t border-gray-100">
-                              <p className="text-xs text-gray-500 mb-1">Observações:</p>
-                              <p className="text-sm text-gray-700">{appointment.notes}</p>
+                            <div className="pt-2 border-t border-outline-variant/10">
+                              <p className="text-xs text-on-surface-variant mb-1">Observações:</p>
+                              <p className="text-sm text-on-surface">{appointment.notes}</p>
                             </div>
                           )}
                         </div>

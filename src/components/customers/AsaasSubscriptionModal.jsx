@@ -170,34 +170,34 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+      <div className="bg-surface-container-lowest rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
 
         {result ? (
           <>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-emerald-100">
-                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              <div className="p-2 rounded-full bg-emerald-500/20">
+                <CheckCircle className="w-6 h-6 text-emerald-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-on-surface">
                 {result.type === "invoice" ? "Cobrança criada!" : "Assinatura criada!"}
               </h3>
             </div>
 
             {result.type === "invoice" ? (
-              <div className="space-y-2 p-4 bg-gray-50 rounded-xl text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Plano:</span><span className="font-medium">{planInfo?.name}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Valor:</span><span className="font-semibold text-emerald-700">R$ {result.value?.toFixed(2)}</span></div>
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+              <div className="space-y-2 p-4 bg-surface-container-low rounded-xl text-sm">
+                <div className="flex justify-between"><span className="text-on-surface-variant">Plano:</span><span className="font-medium">{planInfo?.name}</span></div>
+                <div className="flex justify-between"><span className="text-on-surface-variant">Valor:</span><span className="font-semibold text-emerald-300">R$ {result.value?.toFixed(2)}</span></div>
+                <div className="flex items-center gap-2 pt-2 border-t border-outline-variant/30">
                   <Calendar className="w-4 h-4 text-branding-primary" />
                   <span className="text-branding-primary font-medium">Vencimento: {new Date(result.dueDate + "T12:00:00").toLocaleDateString("pt-BR")}</span>
                 </div>
               </div>
             ) : (
-              <div className="space-y-2 p-4 bg-gray-50 rounded-xl text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Plano:</span><span className="font-medium">{result.plan_name}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Valor:</span><span className="font-semibold text-emerald-700">R$ {result.plan_value?.toFixed(2)}/mês</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Serviços:</span><span className="font-medium">{result.session_count}/mês</span></div>
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+              <div className="space-y-2 p-4 bg-surface-container-low rounded-xl text-sm">
+                <div className="flex justify-between"><span className="text-on-surface-variant">Plano:</span><span className="font-medium">{result.plan_name}</span></div>
+                <div className="flex justify-between"><span className="text-on-surface-variant">Valor:</span><span className="font-semibold text-emerald-300">R$ {result.plan_value?.toFixed(2)}/mês</span></div>
+                <div className="flex justify-between"><span className="text-on-surface-variant">Serviços:</span><span className="font-medium">{result.session_count}/mês</span></div>
+                <div className="flex items-center gap-2 pt-2 border-t border-outline-variant/30">
                   <Calendar className="w-4 h-4 text-branding-primary" />
                   <span className="text-branding-primary font-medium">Vencimento: dia 05 de cada mês</span>
                 </div>
@@ -213,7 +213,7 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
 
             <div className="space-y-1.5">
               {customer.whatsapp && (
-                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.whatsapp ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-500"}`}>
+                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.whatsapp ? "bg-emerald-500/10 text-emerald-300" : "bg-surface-container-low text-on-surface-variant"}`}>
                   <MessageSquare className="w-3.5 h-3.5" />
                   {notifications.whatsapp
                     ? `✓ WhatsApp enviado para ${customer.whatsapp}`
@@ -221,7 +221,7 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
                 </div>
               )}
               {customer.email && (
-                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.email ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-500"}`}>
+                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.email ? "bg-emerald-500/10 text-emerald-300" : "bg-surface-container-low text-on-surface-variant"}`}>
                   <Mail className="w-3.5 h-3.5" />
                   {notifications.email
                     ? `✓ E-mail enviado para ${customer.email}`
@@ -237,20 +237,20 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
         ) : (
           <>
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Gerar cobrança para {customer.name}?</h3>
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-600">
+              <h3 className="text-lg font-semibold text-on-surface">Gerar cobrança para {customer.name}?</h3>
+              <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface-variant">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* CPF Section */}
             {cpfRequired && (
-              <div className="space-y-2 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                <Label className="text-sm font-medium text-amber-800 flex items-center gap-1.5">
+              <div className="space-y-2 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                <Label className="text-sm font-medium text-amber-200 flex items-center gap-1.5">
                   <CreditCard className="w-4 h-4" />
                   CPF do cliente
                 </Label>
-                <p className="text-xs text-amber-600">Necessário para gerar cobranças</p>
+                <p className="text-xs text-amber-400">Necessário para gerar cobranças</p>
                 <div className="flex gap-2">
                   <Input
                     value={cpf}
@@ -262,7 +262,7 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
                   <Button
                     onClick={handleSaveCpf}
                     variant="outline"
-                    className="rounded-xl border-amber-300 text-amber-700 hover:bg-amber-100"
+                    className="rounded-xl border-amber-500/50 text-amber-300 hover:bg-amber-500/100/20"
                   >
                     Salvar
                   </Button>
@@ -272,12 +272,12 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
 
             {planInfo ? (
               <div className="p-4 bg-branding-primary/5 border border-branding-primary/20 rounded-xl space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Plano:</span><span className="font-medium">{planInfo.name}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Valor:</span><span className="font-semibold text-branding-primary">R$ {planInfo.value?.toFixed(2)}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Serviços/mês:</span><span className="font-medium">{planInfo.services}</span></div>
+                <div className="flex justify-between"><span className="text-on-surface-variant">Plano:</span><span className="font-medium">{planInfo.name}</span></div>
+                <div className="flex justify-between"><span className="text-on-surface-variant">Valor:</span><span className="font-semibold text-branding-primary">R$ {planInfo.value?.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span className="text-on-surface-variant">Serviços/mês:</span><span className="font-medium">{planInfo.services}</span></div>
               </div>
             ) : (
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-sm text-amber-700">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2 text-sm text-amber-300">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 Nenhum plano vinculado. Configure um plano para gerar cobrança.
               </div>
@@ -285,57 +285,57 @@ export default function AsaasSubscriptionModal({ customer, plans, companyId, onC
 
             <div className="flex gap-2">
               {customer.whatsapp && (
-                <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg">
+                <div className="flex items-center gap-1.5 text-xs text-emerald-300 bg-emerald-500/10 px-2.5 py-1.5 rounded-lg">
                   <MessageSquare className="w-3 h-3" /> WhatsApp
                 </div>
               )}
               {customer.email && (
-                <div className="flex items-center gap-1.5 text-xs text-blue-700 bg-blue-50 px-2.5 py-1.5 rounded-lg">
+                <div className="flex items-center gap-1.5 text-xs text-blue-300 bg-blue-500/10 px-2.5 py-1.5 rounded-lg">
                   <Mail className="w-3 h-3" /> E-mail
                 </div>
               )}
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2">
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-300 flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 {error}
               </div>
             )}
 
-            <p className="text-sm text-gray-500 text-center">Escolha como deseja gerar a cobrança:</p>
+            <p className="text-sm text-on-surface-variant text-center">Escolha como deseja gerar a cobrança:</p>
 
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => { setMode("invoice"); handleCreateInvoice(); }}
                 disabled={loading || !planInfo || cpfRequired}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 hover:border-branding-primary hover:bg-branding-primary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-outline-variant/30 hover:border-branding-primary hover:bg-branding-primary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  {loading && mode === "invoice" ? <Loader2 className="w-5 h-5 animate-spin text-branding-primary" /> : <FileText className="w-5 h-5 text-gray-600" />}
+                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+                  {loading && mode === "invoice" ? <Loader2 className="w-5 h-5 animate-spin text-branding-primary" /> : <FileText className="w-5 h-5 text-on-surface-variant" />}
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-sm text-gray-900">Cobrança Registrada</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Registro interno, sem Asaas</p>
+                  <p className="font-semibold text-sm text-on-surface">Cobrança Registrada</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Registro interno, sem Asaas</p>
                 </div>
               </button>
 
               <button
                 onClick={() => { setMode("subscription"); handleCreateSubscription(); }}
                 disabled={loading || !planInfo || cpfRequired}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 hover:border-branding-secondary hover:bg-branding-secondary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-outline-variant/30 hover:border-branding-secondary hover:bg-branding-secondary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  {loading && mode === "subscription" ? <Loader2 className="w-5 h-5 animate-spin text-branding-secondary" /> : <Repeat className="w-5 h-5 text-gray-600" />}
+                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+                  {loading && mode === "subscription" ? <Loader2 className="w-5 h-5 animate-spin text-branding-secondary" /> : <Repeat className="w-5 h-5 text-on-surface-variant" />}
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-sm text-gray-900">Cobrança Avulsa</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Via Asaas (PIX)</p>
+                  <p className="font-semibold text-sm text-on-surface">Cobrança Avulsa</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Via Asaas (PIX)</p>
                 </div>
               </button>
             </div>
 
-            <Button variant="ghost" onClick={onClose} disabled={loading} className="w-full text-gray-500 rounded-xl">
+            <Button variant="ghost" onClick={onClose} disabled={loading} className="w-full text-on-surface-variant rounded-xl">
               Pular por enquanto
             </Button>
           </>

@@ -75,7 +75,7 @@ export default function ExportDialog({ open, onClose }) {
         <div className="space-y-6 py-4">
           {/* Period Selection */}
           <div className="space-y-3">
-            <Label className="text-xs font-bold text-gray-500 uppercase">Período</Label>
+            <Label className="text-xs font-bold text-on-surface-variant uppercase">Período</Label>
             <div className="grid grid-cols-2 gap-3">
               <Select value={month} onValueChange={setMonth}>
                 <SelectTrigger className="rounded-xl">
@@ -102,8 +102,8 @@ export default function ExportDialog({ open, onClose }) {
 
           {/* Data Selection */}
           <div className="space-y-3">
-            <Label className="text-xs font-bold text-gray-500 uppercase">Dados para Exportar</Label>
-            <div className="space-y-3 bg-gray-50 rounded-xl p-4">
+            <Label className="text-xs font-bold text-on-surface-variant uppercase">Dados para Exportar</Label>
+            <div className="space-y-3 bg-surface-container-low rounded-xl p-4">
               <div className="flex items-center space-x-3">
                 <Checkbox 
                   checked={includeInvoices} 
@@ -114,7 +114,7 @@ export default function ExportDialog({ open, onClose }) {
                   <label htmlFor="invoices" className="text-sm font-medium cursor-pointer">
                     Faturas & Pagamentos
                   </label>
-                  <p className="text-xs text-gray-500">Extrato detalhado do Asaas</p>
+                  <p className="text-xs text-on-surface-variant">Extrato detalhado do Asaas</p>
                 </div>
               </div>
 
@@ -128,7 +128,7 @@ export default function ExportDialog({ open, onClose }) {
                   <label htmlFor="customers" className="text-sm font-medium cursor-pointer">
                     Cadastros de Clientes
                   </label>
-                  <p className="text-xs text-gray-500">Dados cadastrais</p>
+                  <p className="text-xs text-on-surface-variant">Dados cadastrais</p>
                 </div>
               </div>
 
@@ -142,7 +142,7 @@ export default function ExportDialog({ open, onClose }) {
                   <label htmlFor="docs" className="text-sm font-medium cursor-pointer">
                     Documentos Fiscais
                   </label>
-                  <p className="text-xs text-gray-500">Notas fiscais (NFSe)</p>
+                  <p className="text-xs text-on-surface-variant">Notas fiscais (NFSe)</p>
                 </div>
               </div>
             </div>
@@ -164,7 +164,7 @@ export default function ExportDialog({ open, onClose }) {
           <div className="space-y-3 pt-2">
             <Button
               onClick={handleExportExcel}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl h-12"
+              className="w-full bg-emerald-500 hover:bg-emerald-500/80 rounded-xl h-12"
             >
               <FileSpreadsheet className="w-5 h-5 mr-2" />
               Exportar como Excel (.xlsx)

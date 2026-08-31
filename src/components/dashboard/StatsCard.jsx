@@ -39,7 +39,7 @@ export default function StatsCard({ title, value, subtitle, icon: Icon, trend, t
       </div>
       {trend && (
         <div className="mt-3 pt-3 flex items-center gap-1.5" style={{ borderTop: `1px solid ${cardBorder}` }}>
-          <span className={cn("text-sm font-semibold tabular-nums", trendUp ? "text-emerald-600" : "text-red-500")}>
+          <span className={cn("text-sm font-semibold tabular-nums", trendUp ? "text-emerald-400" : "text-red-400")}>
             {trendUp ? "+" : ""}{trend}
           </span>
           <span className="text-xs" style={{ color: cardTextMuted }}>vs mês anterior</span>

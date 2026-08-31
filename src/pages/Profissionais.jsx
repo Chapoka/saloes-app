@@ -379,11 +379,11 @@ export default function Profissionais() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={cn("text-xs", prof.active !== false ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-surface-container-low text-muted-foreground border-outline-variant")}>
+                      <Badge variant="outline" className={cn("text-xs", prof.active !== false ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" : "bg-surface-container-low text-muted-foreground border-outline-variant")}>
                         {prof.active !== false ? "Ativo" : "Inativo"}
                       </Badge>
-                      {svcCount > 0 && <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">{svcCount} serviços</Badge>}
-                      {prodCount > 0 && <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">{prodCount} produtos</Badge>}
+                      {svcCount > 0 && <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-300 border-blue-500/30">{svcCount} serviços</Badge>}
+                      {prodCount > 0 && <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-300 border-purple-500/30">{prodCount} produtos</Badge>}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button onClick={e => e.stopPropagation()} className="p-1 rounded-lg hover:bg-surface-container transition-colors">
@@ -397,7 +397,7 @@ export default function Profissionais() {
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); toggleActive.mutate({ id: prof.id, active: prof.active === false }); }}>
                             {prof.active === false ? <><Power className="w-4 h-4 mr-2" /> Ativar</> : <><PowerOff className="w-4 h-4 mr-2" /> Desativar</>}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDeletingProf(prof); }} className="text-red-600">
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDeletingProf(prof); }} className="text-red-400">
                             <Trash2 className="w-4 h-4 mr-2" /> Excluir
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -416,7 +416,7 @@ export default function Profissionais() {
             <p className="text-sm text-muted-foreground">"{deletingProf?.full_name}" será removido permanentemente.</p>
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setDeletingProf(null)}>Cancelar</Button>
-              <Button onClick={() => deleteProf.mutate(deletingProf.id)} className="bg-red-600 text-white hover:bg-red-700">Excluir</Button>
+              <Button onClick={() => deleteProf.mutate(deletingProf.id)} className="bg-error text-white hover:bg-error/80">Excluir</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -489,7 +489,7 @@ export default function Profissionais() {
 
               {/* Nome */}
               <div>
-                <Label className="text-sm font-medium">Nome Completo <span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium">Nome Completo <span className="text-red-400">*</span></Label>
                 <Input value={profForm.name} onChange={e => setProfForm(f => ({ ...f, name: e.target.value }))} placeholder="Nome do profissional" className="mt-1" />
               </div>
 
@@ -540,7 +540,7 @@ export default function Profissionais() {
                           return svc ? (
                             <Badge key={sid} variant="outline" className="text-xs gap-1">
                               {svc.name}
-                              <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-outline hover:text-red-500 ml-1">&times;</button>
+                              <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-outline hover:text-red-400 ml-1">&times;</button>
                             </Badge>
                           ) : null;
                         })}
@@ -582,7 +582,7 @@ export default function Profissionais() {
                 <Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} />
               </div>
 
-              {!editingProf && <p className="text-sm text-amber-600">Senha padrão: <strong>123456</strong></p>}
+              {!editingProf && <p className="text-sm text-amber-400">Senha padrão: <strong>123456</strong></p>}
 
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setShowForm(false)} className="rounded-xl">Cancelar</Button>
@@ -641,7 +641,7 @@ export default function Profissionais() {
             <Button variant="outline" onClick={() => { const profServiceIds = allProServ.filter(ps => ps.professional_id === selectedProf.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id); setEditingProf(selectedProf); setProfForm({ name: selectedProf.full_name || "", email: selectedProf.email || "", phone: selectedProf.phone || "", active: selectedProf.active !== false, commission_pct: selectedProf.commission_pct || 0, photo_url: selectedProf.photo_url || "", work_days: selectedProf.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: profServiceIds }); setShowForm(true); }}>
               <Edit className="w-4 h-4 mr-2" /> Editar
             </Button>
-            <Button variant="outline" className="text-red-600 border-red-200 hover:bg-error-container/20" onClick={() => setDeletingProf(selectedProf)}>
+            <Button variant="outline" className="text-red-400 border-red-500/30 hover:bg-error-container/20" onClick={() => setDeletingProf(selectedProf)}>
               <Trash2 className="w-4 h-4 mr-2" /> Excluir
             </Button>
           </div>
@@ -714,7 +714,7 @@ export default function Profissionais() {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <button onClick={() => removeLink.mutate(ps.id)} className="p-1 rounded hover:bg-error-container/20 text-red-500">
+                          <button onClick={() => removeLink.mutate(ps.id)} className="p-1 rounded hover:bg-error-container/20 text-red-400">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </td>
@@ -796,7 +796,7 @@ export default function Profissionais() {
 
             {/* Nome */}
             <div>
-              <Label className="text-sm font-medium">Nome Completo <span className="text-red-500">*</span></Label>
+              <Label className="text-sm font-medium">Nome Completo <span className="text-red-400">*</span></Label>
               <Input value={profForm.name} onChange={e => setProfForm(f => ({ ...f, name: e.target.value }))} placeholder="Nome do profissional" className="mt-1" />
             </div>
 
@@ -847,7 +847,7 @@ export default function Profissionais() {
                         return svc ? (
                           <Badge key={sid} variant="outline" className="text-xs gap-1">
                             {svc.name}
-                            <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-outline hover:text-red-500 ml-1">&times;</button>
+                            <button type="button" onClick={() => setProfForm(f => ({ ...f, service_ids: f.service_ids.filter(id => id !== sid) }))} className="text-outline hover:text-red-400 ml-1">&times;</button>
                           </Badge>
                         ) : null;
                       })}
@@ -903,7 +903,7 @@ export default function Profissionais() {
           <p className="text-sm text-muted-foreground">"{deletingProf?.full_name}" será removido permanentemente.</p>
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setDeletingProf(null)}>Cancelar</Button>
-            <Button onClick={() => deleteProf.mutate(deletingProf.id)} className="bg-red-600 text-white hover:bg-red-700">Excluir</Button>
+            <Button onClick={() => deleteProf.mutate(deletingProf.id)} className="bg-error text-white hover:bg-error/80">Excluir</Button>
           </div>
         </DialogContent>
       </Dialog>

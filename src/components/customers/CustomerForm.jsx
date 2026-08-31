@@ -380,7 +380,7 @@ logger.info("Guardian created via mini-form", guardian);
       {isGuardian && (
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-outline-variant/30">
           <h3 className="text-lg font-semibold text-on-surface mb-4 flex items-center gap-2">
-            <Users className="w-5 h-5 text-purple-500" />
+            <Users className="w-5 h-5 text-purple-400" />
             Dependentes
           </h3>
           
@@ -395,13 +395,13 @@ logger.info("Guardian created via mini-form", guardian);
                   return (
                     <Badge
                       key={id}
-                      className="bg-purple-100 text-purple-700 border-purple-200 pl-3 pr-1.5 py-1.5 gap-1.5 text-sm"
+                      className="bg-purple-500/20 text-purple-300 border-purple-500/30 pl-3 pr-1.5 py-1.5 gap-1.5 text-sm"
                     >
                       {dep.name}
                       <button
                         type="button"
                         onClick={() => setDependentIds(prev => prev.filter(did => did !== id))}
-                        className="ml-1 hover:bg-purple-200 rounded-full p-0.5 transition-colors"
+                        className="ml-1 hover:bg-purple-500/30 rounded-full p-0.5 transition-colors"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -447,13 +447,13 @@ logger.info("Guardian created via mini-form", guardian);
                         setDependentIds(prev => [...prev, c.id]);
                         setDependentSearch("");
                       }}
-                      className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-purple-50 transition-colors text-left"
+                      className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-purple-500/100/10 transition-colors text-left"
                     >
                       <div>
                         <p className="text-sm font-medium text-on-surface">{c.name}</p>
                         {c.cpf && <p className="text-xs text-muted-foreground">CPF: {c.cpf}</p>}
                       </div>
-                      <Plus className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                      <Plus className="w-4 h-4 text-purple-400 flex-shrink-0" />
                     </button>
                   ))}
                 </div>
@@ -745,9 +745,9 @@ logger.info("Guardian created via mini-form", guardian);
 
         {/* Warning for dependents without guardian trying to add plan */}
         {isDependent && !formData.guardian_id && (
-          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
-            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-800">
+          <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-2">
+            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-200">
               <p className="font-medium">Atenção:</p>
               <p>Dependente precisa ter um responsável financeiro para poder ter um plano.</p>
               <p>Selecione um responsável acima ou cadastre um novo clicando em "Cadastrar Responsável Financeiro".</p>

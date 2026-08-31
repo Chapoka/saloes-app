@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 const statusConfig = {
   scheduled: { label: "Agendada", color: "text-branding-primary", bg: "bg-branding-primary/10" },
   confirmed: { label: "Confirmada", color: "text-branding-secondary", bg: "bg-branding-secondary/10" },
-  present: { label: "Presente", color: "text-emerald-600", bg: "bg-emerald-50" },
-  absent: { label: "Falta", color: "text-red-600", bg: "bg-red-50" },
-  cancelled: { label: "Cancelada", color: "text-gray-500", bg: "bg-gray-100" },
+  present: { label: "Presente", color: "text-emerald-400", bg: "bg-emerald-500/10" },
+  absent: { label: "Falta", color: "text-red-400", bg: "bg-red-500/10" },
+  cancelled: { label: "Cancelada", color: "text-on-surface-variant", bg: "bg-surface-container" },
 };
 
 export default function AppointmentModal({ appointment, open, onClose, onUpdateStatus, onDelete, onReschedule, customers = [] }) {
@@ -95,8 +95,8 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
 
           <div className="space-y-4 py-4">
             {isGrouped ? (
-              <div className="p-3 bg-gray-50 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+              <div className="p-3 bg-surface-container-low rounded-xl space-y-2">
+                <div className="flex items-center gap-2 text-sm text-on-surface-variant mb-1">
                   <Users className="w-4 h-4 text-branding-primary" />
                   <span>Atendimento em grupo ({groupAppointments.length} clientes)</span>
                 </div>
@@ -106,8 +106,8 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                       {gl.customer_name?.charAt(0)?.toUpperCase()}
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900 text-sm">{gl.customer_name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="font-medium text-on-surface text-sm">{gl.customer_name}</p>
+                      <p className="text-xs text-on-surface-variant">
                         {gl.service_category === "corte" ? "Corte" : "Barba"} • {gl.duration_mins} min
                       </p>
                     </div>
@@ -115,13 +115,13 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                 ))}
               </div>
             ) : (
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-branding-primary to-branding-secondary flex items-center justify-center text-white font-semibold">
                   {appointment.customer_name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{appointment.customer_name}</p>
-                  <p className="text-sm text-gray-500 capitalize">
+                  <p className="font-medium text-on-surface">{appointment.customer_name}</p>
+                  <p className="text-sm text-on-surface-variant capitalize">
                     {appointment.service_category === "corte" ? "Corte" : "Barba"}
                   </p>
                 </div>
@@ -129,20 +129,20 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center gap-2 p-3 bg-surface-container-low rounded-xl">
                 <Calendar className="w-5 h-5 text-branding-primary" />
                 <div>
-                  <p className="text-xs text-gray-500">Data</p>
-                  <p className="font-medium text-gray-900">
+                  <p className="text-xs text-on-surface-variant">Data</p>
+                  <p className="font-medium text-on-surface">
                     {format(parseISO(appointment.date), "dd/MM/yyyy")}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
+              <div className="flex items-center gap-2 p-3 bg-surface-container-low rounded-xl">
                 <Clock className="w-5 h-5 text-branding-secondary" />
                 <div>
-                  <p className="text-xs text-gray-500">Horário</p>
-                  <p className="font-medium text-gray-900">
+                  <p className="text-xs text-on-surface-variant">Horário</p>
+                  <p className="font-medium text-on-surface">
                     {appointment.start_time} - {appointment.end_time}
                   </p>
                 </div>
@@ -150,24 +150,24 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
             </div>
 
             {!isGrouped && (
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                <span className="text-gray-600">Duração</span>
-                <span className="font-semibold text-gray-900">{appointment.duration_mins} minutos</span>
+              <div className="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
+                <span className="text-on-surface-variant">Duração</span>
+                <span className="font-semibold text-on-surface">{appointment.duration_mins} minutos</span>
               </div>
             )}
 
             {showDependents && (
-              <div className="p-4 bg-purple-50 rounded-xl space-y-2 border border-purple-100">
-                <p className="text-sm font-medium text-purple-700 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-purple-500" />
+              <div className="p-4 bg-purple-500/10 rounded-xl space-y-2 border border-purple-500/20">
+                <p className="text-sm font-medium text-purple-300 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-purple-400" />
                   Dependentes vinculados: {dependentsOfGuardian.map(d => d.name).join(", ")}
                 </p>
-                <p className="text-xs text-purple-500">Os serviços destes dependentes aparecerão separadamente na agenda.</p>
+                <p className="text-xs text-purple-400">Os serviços destes dependentes aparecerão separadamente na agenda.</p>
               </div>
             )}
 
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
+              <label className="text-sm font-medium text-on-surface mb-2 block">
                 Observações
               </label>
               <Textarea
@@ -180,14 +180,14 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
             </div>
 
             {appointment.status !== "cancelled" && appointment.status !== "present" && (
-              <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl space-y-3">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-3">
                 <div className="flex items-center gap-2">
-                  <Banknote className="w-4 h-4 text-amber-600" />
-                  <span className="text-sm font-medium text-amber-800">Gorjeta (opcional)</span>
+                  <Banknote className="w-4 h-4 text-amber-400" />
+                  <span className="text-sm font-medium text-amber-200">Gorjeta (opcional)</span>
                 </div>
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">R$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-on-surface-variant">R$</span>
                     <Input
                       type="number"
                       min="0"
@@ -204,7 +204,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                         key={val}
                         size="sm"
                         variant="outline"
-                        className="h-9 px-2 text-xs border-amber-200 text-amber-700 hover:bg-amber-100"
+                        className="h-9 px-2 text-xs border-amber-500/30 text-amber-300 hover:bg-amber-500/100/20"
                         onClick={() => setTipAmount(val)}
                       >
                         R${val}
@@ -218,8 +218,8 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                     onClick={() => setTipPaymentMethod("cash")}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                       tipPaymentMethod === "cash"
-                        ? "border-emerald-400 bg-emerald-50 text-emerald-700"
-                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                        ? "border-emerald-500/70 bg-emerald-500/10 text-emerald-300"
+                        : "border-outline-variant/30 text-on-surface-variant hover:border-outline-variant/50"
                     }`}
                   >
                     <Banknote className="w-3.5 h-3.5" />
@@ -230,8 +230,8 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                     onClick={() => setTipPaymentMethod("pix")}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                       tipPaymentMethod === "pix"
-                        ? "border-blue-400 bg-blue-50 text-blue-700"
-                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                        ? "border-blue-500/70 bg-blue-500/10 text-blue-300"
+                        : "border-outline-variant/30 text-on-surface-variant hover:border-outline-variant/50"
                     }`}
                   >
                     <CreditCard className="w-3.5 h-3.5" />
@@ -242,8 +242,8 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                     onClick={() => setTipPaymentMethod("card")}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                       tipPaymentMethod === "card"
-                        ? "border-purple-400 bg-purple-50 text-purple-700"
-                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                        ? "border-purple-500/70 bg-purple-500/10 text-purple-300"
+                        : "border-outline-variant/30 text-on-surface-variant hover:border-outline-variant/50"
                     }`}
                   >
                     <CreditCard className="w-3.5 h-3.5" />
@@ -254,12 +254,12 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
             )}
 
             {appointment.status === "present" && appointment.tip_amount > 0 && (
-              <div className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+              <div className="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                 <div className="flex items-center gap-2">
-                  <Banknote className="w-4 h-4 text-emerald-600" />
-                  <span className="text-sm text-emerald-700">Gorjeta registrada</span>
+                  <Banknote className="w-4 h-4 text-emerald-400" />
+                  <span className="text-sm text-emerald-300">Gorjeta registrada</span>
                 </div>
-                <span className="font-semibold text-emerald-800">
+                <span className="font-semibold text-emerald-200">
                   R$ {Number(appointment.tip_amount).toFixed(2).replace(".", ",")}
                 </span>
               </div>
@@ -275,7 +275,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-7 text-xs border-gray-200"
+                    className="h-7 text-xs border-outline-variant/30"
                     onClick={() => downloadICS(appointment, null, null)}
                   >
                     <Download className="w-3 h-3 mr-1" />
@@ -286,7 +286,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button size="sm" variant="outline" className="h-7 text-xs border-gray-200" type="button">
+                    <Button size="sm" variant="outline" className="h-7 text-xs border-outline-variant/30" type="button">
                       <ExternalLink className="w-3 h-3 mr-1" />
                       Google
                     </Button>
@@ -296,7 +296,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button size="sm" variant="outline" className="h-7 text-xs border-gray-200" type="button">
+                    <Button size="sm" variant="outline" className="h-7 text-xs border-outline-variant/30" type="button">
                       <ExternalLink className="w-3 h-3 mr-1" />
                       Outlook
                     </Button>
@@ -309,13 +309,13 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
               isGrouped ? (
                 <div className="space-y-2 pt-2">
                   {groupAppointments.map((gl, idx) => (
-                    <div key={idx} className="p-3 bg-gray-50 rounded-xl">
+                    <div key={idx} className="p-3 bg-surface-container-low rounded-xl">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">{gl.customer_name}</span>
+                        <span className="text-sm font-medium text-on-surface">{gl.customer_name}</span>
                         <span className={cn(
                           "text-xs px-2 py-0.5 rounded-full",
-                          statusConfig[gl.status]?.bg || "bg-gray-100",
-                          statusConfig[gl.status]?.color || "text-gray-500"
+                          statusConfig[gl.status]?.bg || "bg-surface-container",
+                          statusConfig[gl.status]?.color || "text-on-surface-variant"
                         )}>
                           {statusConfig[gl.status]?.label || "Agendada"}
                         </span>
@@ -326,7 +326,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                             size="sm"
                             onClick={() => handleStatusUpdate("present", gl)}
                             disabled={isUpdating}
-                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-xs h-8"
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-500/80 rounded-lg text-xs h-8"
                           >
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Presença
@@ -338,7 +338,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                             onClick={() => handleStatusUpdate("absent", gl)}
                             disabled={isUpdating}
                             variant="outline"
-                            className="flex-1 border-red-300 text-red-600 hover:bg-red-50 rounded-lg text-xs h-8"
+                            className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/100/10 rounded-lg text-xs h-8"
                           >
                             <XCircle className="w-3 h-3 mr-1" />
                             Falta
@@ -350,14 +350,14 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                             onClick={() => handleStatusUpdate("cancelled", gl)}
                             disabled={isUpdating}
                             variant="ghost"
-                            className="w-full border border-red-200 text-red-500 hover:bg-red-50 rounded-lg text-xs h-7 mt-1"
+                            className="w-full border border-red-500/30 text-red-400 hover:bg-red-500/100/10 rounded-lg text-xs h-7 mt-1"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
                             Cancelar serviço de {gl.customer_name?.split(" ")[0]}
                           </Button>
                         )}
                         {gl.status === "cancelled" && (
-                          <p className="text-xs text-gray-500 italic w-full text-center">Serviço cancelado</p>
+                          <p className="text-xs text-on-surface-variant italic w-full text-center">Serviço cancelado</p>
                         )}
                       </div>
                     </div>
@@ -369,7 +369,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                     <Button
                       onClick={() => handleStatusUpdate("present")}
                       disabled={isUpdating}
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 rounded-xl"
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-500/80 rounded-xl"
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Marcar Presença
@@ -380,7 +380,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                       onClick={() => handleStatusUpdate("absent")}
                       disabled={isUpdating}
                       variant="outline"
-                      className="flex-1 border-red-300 text-red-600 hover:bg-red-50 rounded-xl"
+                      className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/100/10 rounded-xl"
                     >
                       <XCircle className="w-4 h-4 mr-2" />
                       Marcar Falta
@@ -395,22 +395,22 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                 {!showRescheduleForm ? (
                   <Button
                     variant="outline"
-                    className="w-full border-amber-300 text-amber-700 hover:bg-amber-50 rounded-xl"
+                    className="w-full border-amber-500/50 text-amber-300 hover:bg-amber-500/100/10 rounded-xl"
                     onClick={() => setShowRescheduleForm(true)}
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Reagendar este serviço
                   </Button>
                 ) : (
-                  <div className="space-y-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                    <p className="text-sm font-medium text-amber-800">Reagendar serviço para:</p>
+                  <div className="space-y-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                    <p className="text-sm font-medium text-amber-200">Reagendar serviço para:</p>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Data</label>
+                        <label className="text-xs text-on-surface-variant mb-1 block">Data</label>
                         <Input type="date" value={rescheduleDate} onChange={e => setRescheduleDate(e.target.value)} className="rounded-xl text-sm" />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Horário</label>
+                        <label className="text-xs text-on-surface-variant mb-1 block">Horário</label>
                         <Input type="time" value={rescheduleTime} onChange={e => setRescheduleTime(e.target.value)} className="rounded-xl text-sm" />
                       </div>
                     </div>
@@ -419,7 +419,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
                       <Button
                         onClick={handleReschedule}
                         disabled={isUpdating || !rescheduleDate || !rescheduleTime}
-                        className="flex-1 bg-amber-500 hover:bg-amber-600 rounded-xl text-sm"
+                        className="flex-1 bg-amber-500/100 hover:bg-amber-600 rounded-xl text-sm"
                       >
                         {isUpdating ? "Salvando..." : "Confirmar"}
                       </Button>
@@ -430,26 +430,26 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
             )}
 
             {appointment.status === "absent" && appointment.rescheduled && (
-              <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
+              <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-sm text-emerald-300">
                 <RefreshCw className="w-4 h-4" />
                 Esta falta foi reagendada
               </div>
             )}
 
             {appointment.cancellation_reason && (
-              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-amber-800">Motivo do cancelamento</p>
-                  <p className="text-sm text-amber-700 mt-1">{appointment.cancellation_reason}</p>
+                  <p className="text-sm font-medium text-amber-200">Motivo do cancelamento</p>
+                  <p className="text-sm text-amber-300 mt-1">{appointment.cancellation_reason}</p>
                 </div>
               </div>
             )}
 
-            <div className="pt-4 border-t border-gray-100">
+            <div className="pt-4 border-t border-outline-variant/10">
               <Button
                 variant="outline"
-                className="w-full text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 rounded-xl"
+                className="w-full text-red-400 hover:bg-red-500/100/10 hover:text-red-300 border-red-500/30 rounded-xl"
                 onClick={() => setShowDeleteDialog(true)}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
@@ -473,7 +473,7 @@ export default function AppointmentModal({ appointment, open, onClose, onUpdateS
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-error hover:bg-error/80"
             >
               Excluir
             </AlertDialogAction>

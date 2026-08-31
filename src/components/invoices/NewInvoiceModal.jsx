@@ -239,15 +239,15 @@ export default function NewInvoiceModal({ open, onClose, customers, plans, onCre
                 <div className="grid grid-cols-2 gap-2">
                   <button type="button"
                     onClick={() => handleChargeTypeChange("plan")}
-                    className={`p-3 rounded-xl border-2 text-left transition-all ${form.charge_type === "plan" ? "border-branding-primary bg-branding-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
-                    <p className="font-medium text-sm text-gray-900">Por Plano</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Usa plano existente</p>
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${form.charge_type === "plan" ? "border-branding-primary bg-branding-primary/5" : "border-outline-variant/30 hover:border-outline-variant/50"}`}>
+                    <p className="font-medium text-sm text-on-surface">Por Plano</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">Usa plano existente</p>
                   </button>
                   <button type="button"
                     onClick={() => handleChargeTypeChange("custom")}
-                    className={`p-3 rounded-xl border-2 text-left transition-all ${form.charge_type === "custom" ? "border-branding-primary bg-branding-primary/5" : "border-gray-200 hover:border-gray-300"}`}>
-                    <p className="font-medium text-sm text-gray-900">Avulsa</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Valor e desc. livres</p>
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${form.charge_type === "custom" ? "border-branding-primary bg-branding-primary/5" : "border-outline-variant/30 hover:border-outline-variant/50"}`}>
+                    <p className="font-medium text-sm text-on-surface">Avulsa</p>
+                    <p className="text-xs text-on-surface-variant mt-0.5">Valor e desc. livres</p>
                   </button>
                 </div>
               </div>
@@ -258,8 +258,8 @@ export default function NewInvoiceModal({ open, onClose, customers, plans, onCre
               <div className="space-y-1.5">
                 <Label>Plano *</Label>
                 {selectedCustomer?.custom_plan ? (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-purple-200 bg-purple-50">
-                    <span className="text-sm text-purple-700 font-medium">Plano Personalizado</span>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-purple-500/30 bg-purple-500/10">
+                    <span className="text-sm text-purple-300 font-medium">Plano Personalizado</span>
                   </div>
                 ) : (
                   <Select value={form.plan_id} onValueChange={handlePlanChange}>
@@ -322,47 +322,47 @@ export default function NewInvoiceModal({ open, onClose, customers, plans, onCre
         {step === "choose_type" && (
           <div className="space-y-4 pt-2">
             {/* Summary */}
-            <div className="p-3 bg-gray-50 rounded-xl text-sm space-y-1">
-              <div className="flex justify-between"><span className="text-gray-500">Cliente:</span><span className="font-medium">{selectedCustomer?.name}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Valor:</span><span className="font-semibold text-branding-primary">R$ {parseFloat(form.value).toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Vencimento:</span><span className="font-medium">{new Date(form.due_date + "T12:00:00").toLocaleDateString("pt-BR")}</span></div>
-              {form.charge_type === "custom" && <div className="flex justify-between"><span className="text-gray-500">Descrição:</span><span className="font-medium">{form.description}</span></div>}
-              {form.charge_type === "plan" && <div className="flex justify-between"><span className="text-gray-500">Plano:</span><span className="font-medium">{selectedCustomer?.custom_plan ? "Plano Personalizado" : selectedPlan?.name}</span></div>}
+            <div className="p-3 bg-surface-container-low rounded-xl text-sm space-y-1">
+              <div className="flex justify-between"><span className="text-on-surface-variant">Cliente:</span><span className="font-medium">{selectedCustomer?.name}</span></div>
+              <div className="flex justify-between"><span className="text-on-surface-variant">Valor:</span><span className="font-semibold text-branding-primary">R$ {parseFloat(form.value).toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-on-surface-variant">Vencimento:</span><span className="font-medium">{new Date(form.due_date + "T12:00:00").toLocaleDateString("pt-BR")}</span></div>
+              {form.charge_type === "custom" && <div className="flex justify-between"><span className="text-on-surface-variant">Descrição:</span><span className="font-medium">{form.description}</span></div>}
+              {form.charge_type === "plan" && <div className="flex justify-between"><span className="text-on-surface-variant">Plano:</span><span className="font-medium">{selectedCustomer?.custom_plan ? "Plano Personalizado" : selectedPlan?.name}</span></div>}
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2">
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-300 flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />{error}
               </div>
             )}
 
-            <p className="text-sm text-gray-500 text-center">Como deseja registrar essa cobrança?</p>
+            <p className="text-sm text-on-surface-variant text-center">Como deseja registrar essa cobrança?</p>
 
             <div className="grid grid-cols-2 gap-3">
               <button onClick={handleSimple} disabled={loading}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 hover:border-branding-primary hover:bg-branding-primary/5 transition-all disabled:opacity-50">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  {loading && mode !== "asaas" ? <Loader2 className="w-5 h-5 animate-spin text-branding-primary" /> : <FileText className="w-5 h-5 text-gray-600" />}
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-outline-variant/30 hover:border-branding-primary hover:bg-branding-primary/5 transition-all disabled:opacity-50">
+                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+                  {loading && mode !== "asaas" ? <Loader2 className="w-5 h-5 animate-spin text-branding-primary" /> : <FileText className="w-5 h-5 text-on-surface-variant" />}
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-sm text-gray-900">Cobrança Simples</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Registro interno apenas</p>
+                  <p className="font-semibold text-sm text-on-surface">Cobrança Simples</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Registro interno apenas</p>
                 </div>
               </button>
 
               <button onClick={() => { setMode("asaas"); handleAsaas(); }} disabled={loading}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-200 hover:border-branding-secondary hover:bg-branding-secondary/5 transition-all disabled:opacity-50">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  {loading && mode === "asaas" ? <Loader2 className="w-5 h-5 animate-spin text-branding-secondary" /> : <CreditCard className="w-5 h-5 text-gray-600" />}
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-outline-variant/30 hover:border-branding-secondary hover:bg-branding-secondary/5 transition-all disabled:opacity-50">
+                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+                  {loading && mode === "asaas" ? <Loader2 className="w-5 h-5 animate-spin text-branding-secondary" /> : <CreditCard className="w-5 h-5 text-on-surface-variant" />}
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-sm text-gray-900">Registrar no Asaas</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Gera link de pagamento</p>
+                  <p className="font-semibold text-sm text-on-surface">Registrar no Asaas</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Gera link de pagamento</p>
                 </div>
               </button>
             </div>
 
-            <Button variant="ghost" onClick={() => setStep("form")} disabled={loading} className="w-full text-gray-500 rounded-xl">
+            <Button variant="ghost" onClick={() => setStep("form")} disabled={loading} className="w-full text-on-surface-variant rounded-xl">
               ← Voltar
             </Button>
           </div>
@@ -372,17 +372,17 @@ export default function NewInvoiceModal({ open, onClose, customers, plans, onCre
         {step === "result" && result && (
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-emerald-100">
-                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              <div className="p-2 rounded-full bg-emerald-500/20">
+                <CheckCircle className="w-6 h-6 text-emerald-400" />
               </div>
-              <h3 className="text-base font-semibold text-gray-900">Cobrança criada com sucesso!</h3>
+              <h3 className="text-base font-semibold text-on-surface">Cobrança criada com sucesso!</h3>
             </div>
 
-            <div className="p-4 bg-gray-50 rounded-xl text-sm space-y-2">
-              <div className="flex justify-between"><span className="text-gray-500">Cliente:</span><span className="font-medium">{selectedCustomer?.name}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Descrição:</span><span className="font-medium">{result.description}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Valor:</span><span className="font-semibold text-emerald-700">R$ {result.value?.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Vencimento:</span><span className="font-medium">{new Date(result.due_date + "T12:00:00").toLocaleDateString("pt-BR")}</span></div>
+            <div className="p-4 bg-surface-container-low rounded-xl text-sm space-y-2">
+              <div className="flex justify-between"><span className="text-on-surface-variant">Cliente:</span><span className="font-medium">{selectedCustomer?.name}</span></div>
+              <div className="flex justify-between"><span className="text-on-surface-variant">Descrição:</span><span className="font-medium">{result.description}</span></div>
+              <div className="flex justify-between"><span className="text-on-surface-variant">Valor:</span><span className="font-semibold text-emerald-300">R$ {result.value?.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-on-surface-variant">Vencimento:</span><span className="font-medium">{new Date(result.due_date + "T12:00:00").toLocaleDateString("pt-BR")}</span></div>
             </div>
 
             {result.payment_url && (
@@ -394,13 +394,13 @@ export default function NewInvoiceModal({ open, onClose, customers, plans, onCre
 
             <div className="space-y-1.5">
               {selectedCustomer?.whatsapp && (
-                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.whatsapp ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-500"}`}>
+                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.whatsapp ? "bg-emerald-500/10 text-emerald-300" : "bg-surface-container-low text-on-surface-variant"}`}>
                   <MessageSquare className="w-3.5 h-3.5" />
                   {notifications.whatsapp ? `✓ WhatsApp enviado` : `WhatsApp não enviado`}
                 </div>
               )}
               {selectedCustomer?.email && (
-                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.email ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-500"}`}>
+                <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-lg ${notifications.email ? "bg-emerald-500/10 text-emerald-300" : "bg-surface-container-low text-on-surface-variant"}`}>
                   <Mail className="w-3.5 h-3.5" />
                   {notifications.email ? `✓ E-mail enviado` : `E-mail não enviado`}
                 </div>

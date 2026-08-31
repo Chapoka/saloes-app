@@ -279,21 +279,21 @@ export default function Templates() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-on-surface flex items-center gap-3">
             <div className="p-2 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E]">
               <MessageSquare className="w-6 h-6 text-white" />
             </div>
             Templates WhatsApp
           </h1>
-          <p className="text-gray-500 mt-1">Personalize mensagens automáticas</p>
+          <p className="text-on-surface-variant mt-1">Personalize mensagens automáticas</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Editor Panel */}
           <div className="space-y-6">
             {/* Trigger Selection */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 p-6">
+              <Label className="text-sm font-medium text-on-surface mb-3 block">
                 Gatilho de Automação
               </Label>
               <div className="grid grid-cols-2 gap-3">
@@ -309,16 +309,16 @@ export default function Templates() {
                         "p-4 rounded-xl border-2 transition-all text-left",
                         isActive 
                           ? "border-branding-primary bg-branding-primary/10" 
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-outline-variant/30 hover:border-outline-variant/50"
                       )}
                     >
                       <Icon className={cn(
                         "w-5 h-5 mb-2",
-                        isActive ? "text-branding-primary" : "text-gray-500"
+                        isActive ? "text-branding-primary" : "text-on-surface-variant"
                       )} />
                       <p className={cn(
                         "text-sm font-medium",
-                        isActive ? "text-branding-primary" : "text-gray-700"
+                        isActive ? "text-branding-primary" : "text-on-surface"
                       )}>
                         {trigger.label}
                       </p>
@@ -329,11 +329,11 @@ export default function Templates() {
             </div>
 
             {/* Automation Settings */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Ativar Automação</Label>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <Label className="text-sm font-medium text-on-surface">Ativar Automação</Label>
+                  <p className="text-xs text-on-surface-variant mt-1">
                     Enviar automaticamente quando o gatilho for ativado
                   </p>
                 </div>
@@ -342,7 +342,7 @@ export default function Templates() {
 
               {selectedTrigger === "service_confirmation" && (
                 <div className="mt-4">
-                  <Label className="text-sm font-medium text-gray-700">Enviar antes do serviço</Label>
+                  <Label className="text-sm font-medium text-on-surface">Enviar antes do serviço</Label>
                   <div className="flex items-center gap-2 mt-2">
                     <Input
                       type="number"
@@ -351,15 +351,15 @@ export default function Templates() {
                       className="w-20 rounded-xl"
                       min="1"
                     />
-                    <span className="text-sm text-gray-600">horas antes</span>
+                    <span className="text-sm text-on-surface-variant">horas antes</span>
                   </div>
                 </div>
               )}
             </div>
 
             {/* Variables */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 p-6">
+              <Label className="text-sm font-medium text-on-surface mb-3 block">
                 Variáveis Dinâmicas
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -374,14 +374,14 @@ export default function Templates() {
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-3">
+              <p className="text-xs text-on-surface-variant mt-3">
                 Clique para inserir variáveis na mensagem
               </p>
             </div>
 
             {/* Message Editor */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 p-6">
+              <Label className="text-sm font-medium text-on-surface mb-3 block">
                 Texto da Mensagem
               </Label>
               <Textarea
@@ -392,21 +392,21 @@ export default function Templates() {
                 placeholder="Digite sua mensagem..."
               />
               <div className="flex justify-between items-center mt-2">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-on-surface-variant">
                   {messageText.length} / 1024 caracteres
                 </span>
               </div>
             </div>
 
             {/* Test Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <Label className="text-sm font-medium text-gray-700 mb-3 block">
+            <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 p-6">
+              <Label className="text-sm font-medium text-on-surface mb-3 block">
                 Enviar Teste
               </Label>
               <div className="space-y-3">
                 {!isProfissional && companies.length > 0 && (
                   <div>
-                    <Label className="text-xs text-gray-500 mb-1 block">Salão (WhatsApp do salão)</Label>
+                    <Label className="text-xs text-on-surface-variant mb-1 block">Salão (WhatsApp do salão)</Label>
                     <Select value={testCompanyId || ""} onValueChange={setTestCompanyId}>
                       <SelectTrigger className="rounded-xl">
                         <SelectValue placeholder="Selecione o salão" />
@@ -437,7 +437,7 @@ export default function Templates() {
                     {isSendingTest ? "Enviando..." : "Enviar"}
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500">Número com DDI+DDD, ex: 5511999999999</p>
+                <p className="text-xs text-on-surface-variant">Número com DDI+DDD, ex: 5511999999999</p>
               </div>
             </div>
 
@@ -456,16 +456,16 @@ export default function Templates() {
 
           {/* Preview Panel */}
           <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Smartphone className="w-5 h-5 text-branding-primary" />
-                <Label className="text-sm font-medium text-gray-700">
+                <Label className="text-sm font-medium text-on-surface">
                   Pré-visualização WhatsApp
                 </Label>
               </div>
 
               {/* Phone Mockup */}
-              <div className="relative w-full max-w-[320px] mx-auto aspect-[9/16] rounded-[2.5rem] border-8 border-gray-800 bg-[#0b141a] overflow-hidden shadow-2xl">
+              <div className="relative w-full max-w-[320px] mx-auto aspect-[9/16] rounded-[2.5rem] border-8 border-on-surface bg-[#0b141a] overflow-hidden shadow-2xl">
                 {/* Status Bar */}
                 <div className="h-6 flex justify-between items-center px-6 pt-2 text-[10px] text-white/80">
                   <span>14:30</span>

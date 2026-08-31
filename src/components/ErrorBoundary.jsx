@@ -27,7 +27,7 @@ class ErrorBoundary extends Component {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
           <div className="max-w-md w-full bg-card rounded-2xl shadow-lg p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 text-red-500">
+            <div className="w-16 h-16 mx-auto mb-4 text-red-400">
               <AlertCircle className="w-full h-full" />
             </div>
             <h2 className="text-2xl font-bold text-on-surface mb-2">Erro na Aplicação</h2>
@@ -35,7 +35,7 @@ class ErrorBoundary extends Component {
               Ocorreu um erro inesperado. Verifique o console do navegador (F12) para mais detalhes.
             </p>
             {this.state.error && (
-              <details className="text-left mb-4 p-4 bg-red-50 rounded-lg text-sm text-red-700">
+              <details className="text-left mb-4 p-4 bg-red-500/10 rounded-lg text-sm text-red-300">
                 <summary className="font-semibold cursor-pointer mb-2">Detalhes do erro</summary>
                 <pre className="whitespace-pre-wrap overflow-auto max-h-60">
                   {this.state.error?.message || this.state.error}

@@ -832,7 +832,7 @@ export default function Settings() {
                         {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Administrador" : user.role === "profissional" ? "Profissional" : "Cliente"}
                        </span>
                       {customerEmailSet.has(user.email) && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-400 font-semibold">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-emerald-500/100/20 text-emerald-400 font-semibold">
                           <User className="w-3 h-3" />
                           Também cliente
                         </span>
@@ -857,7 +857,7 @@ export default function Settings() {
                         size="icon"
                         onClick={() => handleDeleteUser(user.id)}
                         disabled={user.is_master && !isSuperAdmin}
-                        className={user.is_master && !isSuperAdmin ? "text-outline cursor-not-allowed" : "text-on-surface-variant hover:text-red-600"}
+                        className={user.is_master && !isSuperAdmin ? "text-outline cursor-not-allowed" : "text-on-surface-variant hover:text-red-400"}
                         title={user.is_master && !isSuperAdmin ? "Somente Super Admin pode excluir o Master" : "Excluir"}
                       >
                         <Trash2 className="w-4 h-4" />

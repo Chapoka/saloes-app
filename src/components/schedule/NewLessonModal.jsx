@@ -17,8 +17,8 @@ for (let h = 6; h <= 21; h++) {
 
 const APPOINTMENT_TYPES = [
   { value: "plan", label: "Serviço do Plano", icon: BookOpen, color: "border-branding-primary bg-branding-primary/5 text-branding-primary" },
-  { value: "trial", label: "Experimental", icon: Star, color: "border-amber-400 bg-amber-50 text-amber-600" },
-  { value: "makeup", label: "Reposição", icon: RotateCcw, color: "border-purple-400 bg-purple-50 text-purple-600" },
+  { value: "trial", label: "Experimental", icon: Star, color: "border-amber-500/70 bg-amber-500/10 text-amber-400" },
+  { value: "makeup", label: "Reposição", icon: RotateCcw, color: "border-purple-500/70 bg-purple-500/10 text-purple-400" },
 ];
 
 export default function NewAppointmentModal({ open, onClose, customers, plans = [], appointments = [], selectedDate, selectedTime, onSubmit, isLoading }) {
@@ -215,7 +215,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium text-on-surface flex items-center gap-1.5">
-                  <User className="w-4 h-4 text-purple-500" />
+                  <User className="w-4 h-4 text-purple-400" />
                   Mesmo responsável
                 </Label>
                 <button
@@ -227,12 +227,12 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                       setExtraCustomerIds(prev => [...new Set([...prev, ...guardianIds])]);
                     }
                   }}
-                  className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                  className="text-xs text-purple-400 hover:text-purple-200 font-medium"
                 >
                   {allSelected ? "Desmarcar todos" : "Selecionar todos"}
                 </button>
               </div>
-              <div className="space-y-1.5 max-h-32 overflow-y-auto border border-purple-200 rounded-xl p-2">
+              <div className="space-y-1.5 max-h-32 overflow-y-auto border border-purple-500/30 rounded-xl p-2">
                 {sameGuardianCustomers.map(s => (
                   <button
                     key={s.id}
@@ -241,7 +241,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                     className={cn(
                       "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors",
                       extraCustomerIds.includes(s.id)
-                        ? "bg-purple-100 text-purple-700 font-medium"
+                        ? "bg-purple-500/20 text-purple-300 font-medium"
                         : "text-on-surface-variant hover:bg-surface-container-low"
                     )}
                   >
@@ -249,7 +249,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
                       <div className={cn(
                         "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                         extraCustomerIds.includes(s.id)
-                          ? "bg-purple-500 border-purple-500"
+                          ? "bg-purple-500/100 border-purple-500"
                           : "border-outline"
                       )}>
                         {extraCustomerIds.includes(s.id) && <Check className="w-3 h-3 text-white" />}
@@ -410,7 +410,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
 
           {appointmentType !== "plan" && (
             <div className={cn("p-3 rounded-xl text-sm flex items-center gap-2",
-              appointmentType === "trial" ? "bg-amber-50 border border-amber-200 text-amber-700" : "bg-purple-50 border border-purple-200 text-purple-700"
+              appointmentType === "trial" ? "bg-amber-500/10 border border-amber-500/30 text-amber-300" : "bg-purple-500/10 border border-purple-500/30 text-purple-300"
             )}>
               {appointmentType === "trial" ? "⭐" : "🔄"}
               {appointmentType === "trial" ? "Serviços experimentais não consomem créditos" : "Reposições não consomem créditos"}

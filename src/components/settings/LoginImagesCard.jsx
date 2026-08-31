@@ -83,7 +83,7 @@ export default function LoginImagesCard() {
   };
 
   return (
-    <Card className="rounded-2xl shadow-sm border border-gray-100">
+    <Card className="rounded-2xl shadow-sm border border-outline-variant/10">
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-pink-100">
@@ -104,30 +104,30 @@ export default function LoginImagesCard() {
               {uploading ? "Enviando..." : "Adicionar Fotos"}
             </span>
           </label>
-          <p className="text-xs text-gray-500">Formatos: JPG, PNG. Você pode selecionar várias de uma vez.</p>
+          <p className="text-xs text-on-surface-variant">Formatos: JPG, PNG. Você pode selecionar várias de uma vez.</p>
         </div>
 
         {images.length === 0 && (
-          <div className="text-center py-8 text-gray-500 text-sm border-2 border-dashed border-gray-200 rounded-xl">
+          <div className="text-center py-8 text-on-surface-variant text-sm border-2 border-dashed border-outline-variant/30 rounded-xl">
             Nenhuma foto cadastrada. A tela de login usará as imagens padrão.
           </div>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {images.map((img, idx) => (
-            <div key={idx} className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
-              <div className="relative h-32 bg-gray-200">
+            <div key={idx} className="border border-outline-variant/30 rounded-xl overflow-hidden bg-surface-container-low">
+              <div className="relative h-32 bg-surface-container-high">
                 <img src={img.image} alt="" className="w-full h-full object-cover" />
                 <button
                   onClick={() => handleRemove(idx)}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/100 text-white flex items-center justify-center hover:bg-error transition-colors shadow-lg"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
               <div className="p-3 space-y-2">
                 <div>
-                  <Label className="text-xs text-gray-500">Título</Label>
+                  <Label className="text-xs text-on-surface-variant">Título</Label>
                   <Input
                     value={img.title || ""}
                     onChange={e => handleChange(idx, "title", e.target.value)}
@@ -136,7 +136,7 @@ export default function LoginImagesCard() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">Subtítulo</Label>
+                  <Label className="text-xs text-on-surface-variant">Subtítulo</Label>
                   <Input
                     value={img.subtitle || ""}
                     onChange={e => handleChange(idx, "subtitle", e.target.value)}

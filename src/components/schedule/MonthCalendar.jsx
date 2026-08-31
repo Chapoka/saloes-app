@@ -159,19 +159,19 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
   const statusColors = {
     scheduled: "bg-branding-primary/10 text-branding-primary border-branding-primary/20",
     confirmed: "bg-branding-secondary/10 text-branding-secondary border-branding-secondary/20",
-    present: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    absent: "bg-red-100 text-red-700 border-red-200",
-    cancelled: "bg-gray-100 text-gray-600 border-gray-200",
-    trial: "bg-amber-100 text-amber-700 border-amber-200",
+    present: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    absent: "bg-red-500/20 text-red-300 border-red-500/30",
+    cancelled: "bg-surface-container text-on-surface-variant border-outline-variant/30",
+    trial: "bg-amber-500/20 text-amber-300 border-amber-500/30",
     makeup: "bg-pink-100 text-pink-700 border-pink-200",
   };
 
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 capitalize">
+      <div className="p-4 border-b border-outline-variant/10 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-on-surface capitalize">
           {format(currentDate, "MMMM yyyy", { locale: ptBR })}
         </h2>
         <div className="flex items-center gap-2">
@@ -207,7 +207,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
         {/* Weekday Headers */}
         <div className="grid grid-cols-7 mb-2">
           {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+            <div key={day} className="text-center text-sm font-medium text-on-surface-variant py-2">
               {day}
             </div>
           ))}
@@ -229,13 +229,13 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                     onClick={() => handleDayClick(day, dayAppointments)}
                     className={cn(
                       "min-h-[70px] sm:min-h-[100px] p-1.5 sm:p-2 rounded-lg border cursor-pointer transition-all hover:shadow-md",
-                      isCurrentMonth ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100",
+                      isCurrentMonth ? "bg-surface-container-lowest border-outline-variant/30" : "bg-surface-container-low border-outline-variant/10",
                       isToday && "ring-2 ring-branding-primary border-branding-primary"
                     )}
                   >
                     <div className={cn(
                       "text-xs sm:text-sm font-medium mb-0.5 sm:mb-1",
-                      isToday ? "text-branding-primary" : isCurrentMonth ? "text-gray-900" : "text-gray-500"
+                      isToday ? "text-branding-primary" : isCurrentMonth ? "text-on-surface" : "text-on-surface-variant"
                     )}>
                       {format(day, "d")}
                     </div>
@@ -245,13 +245,13 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                         {/* Mobile: compact dot indicators */}
                         <div className="flex flex-wrap gap-0.5 sm:hidden">
                           {stats.present > 0 && (
-                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-[9px] text-white font-bold">{stats.present}</span>
+                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/100 text-[9px] text-white font-bold">{stats.present}</span>
                           )}
                           {stats.absent > 0 && (
-                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500 text-[9px] text-white font-bold">{stats.absent}</span>
+                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500/100 text-[9px] text-white font-bold">{stats.absent}</span>
                           )}
                           {stats.trial > 0 && (
-                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 text-[9px] text-white font-bold">{stats.trial}</span>
+                            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500/100 text-[9px] text-white font-bold">{stats.trial}</span>
                           )}
                           {stats.makeup > 0 && (
                             <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-pink-500 text-[9px] text-white font-bold">{stats.makeup}</span>
@@ -263,17 +263,17 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                         {/* Desktop: full badges */}
                         <div className="hidden sm:block space-y-1">
                           {stats.present > 0 && (
-                            <Badge className="w-full bg-emerald-100 text-emerald-700 border-emerald-200 text-xs justify-center">
+                            <Badge className="w-full bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs justify-center">
                               ✓ {stats.present}
                             </Badge>
                           )}
                           {stats.absent > 0 && (
-                            <Badge className="w-full bg-red-100 text-red-700 border-red-200 text-xs justify-center">
+                            <Badge className="w-full bg-red-500/20 text-red-300 border-red-500/30 text-xs justify-center">
                               ✗ {stats.absent}
                             </Badge>
                           )}
                           {stats.trial > 0 && (
-                            <Badge className="w-full bg-amber-100 text-amber-700 border-amber-200 text-xs justify-center">
+                            <Badge className="w-full bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs justify-center">
                               ⭐ {stats.trial}
                             </Badge>
                           )}
@@ -312,7 +312,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                 variant={selectionMode ? "default" : "outline"}
                 size="sm"
                 onClick={() => { setSelectionMode(!selectionMode); setSelectedIds(new Set()); }}
-                className={cn("rounded-lg text-xs", selectionMode && "bg-red-500 hover:bg-red-600")}
+                className={cn("rounded-lg text-xs", selectionMode && "bg-red-500/100 hover:bg-error")}
               >
                 <Trash2 className="w-3.5 h-3.5 mr-1.5" />
                 {selectionMode ? "Cancelar" : "Excluir"}
@@ -354,8 +354,8 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                   className="absolute top-3 left-3 z-10"
                 >
                   {isSelected
-                    ? <CheckSquare className="w-5 h-5 text-red-500" />
-                    : <Square className="w-5 h-5 text-gray-500" />
+                    ? <CheckSquare className="w-5 h-5 text-red-400" />
+                    : <Square className="w-5 h-5 text-on-surface-variant" />
                   }
                 </button>
               )}
@@ -373,10 +373,10 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                     className={cn(
                       "p-4 rounded-xl border-2 transition-all cursor-pointer",
                       selectionMode && isSelected
-                        ? "border-red-300 bg-red-50"
+                        ? "border-red-500/50 bg-red-500/10"
                         : selectionMode
-                          ? "border-gray-200 hover:border-gray-300"
-                          : "border-gray-100 hover:border-branding-primary hover:shadow-md",
+                          ? "border-outline-variant/30 hover:border-outline-variant/50"
+                          : "border-outline-variant/10 hover:border-branding-primary hover:shadow-md",
                       selectionMode && "pl-12"
                     )}
                   >
@@ -386,7 +386,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                           <User className="w-5 h-5 text-branding-primary" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-on-surface">
                             {appointment.customer_name}
                             {appointment.isGroup && (
                               <span className="ml-2 text-xs bg-branding-primary/10 text-branding-primary px-1.5 py-0.5 rounded-full font-medium">
@@ -394,7 +394,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                               </span>
                             )}
                           </h3>
-                          <p className="text-sm text-gray-500 capitalize">
+                          <p className="text-sm text-on-surface-variant capitalize">
                             {appointment.service_category === "corte" ? "Corte" : "Barba"}
                           </p>
                         </div>
@@ -404,34 +404,34 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                       </Badge>
                     </div>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-on-surface-variant">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-branding-secondary" />
                         <span>{appointment.start_time} - {appointment.end_time}</span>
                       </div>
-                      <span className="text-gray-500">•</span>
+                      <span className="text-on-surface-variant">•</span>
                       <span>{appointment.duration_mins} minutos</span>
                     </div>
 
                     {appointment.notes && (
-                      <p className="mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                      <p className="mt-3 text-sm text-on-surface-variant bg-surface-container-low p-3 rounded-lg">
                         {appointment.notes}
                       </p>
                     )}
                   </div>
                 </HoverCardTrigger>
                 {!selectionMode && (
-                <HoverCardContent className="w-72 bg-white rounded-xl shadow-lg border border-gray-200">
+                <HoverCardContent className="w-72 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/30">
                   <div className="space-y-3">
                     {appointment.isGroup ? (
                       <>
                         <div>
-                          <p className="font-semibold text-gray-900 text-sm mb-1">Atendimento em grupo ({appointment.groupCount} clientes)</p>
-                          <p className="text-xs text-gray-500">{format(parseISO(appointment.date), "dd 'de' MMMM", { locale: ptBR })}</p>
+                          <p className="font-semibold text-on-surface text-sm mb-1">Atendimento em grupo ({appointment.groupCount} clientes)</p>
+                          <p className="text-xs text-on-surface-variant">{format(parseISO(appointment.date), "dd 'de' MMMM", { locale: ptBR })}</p>
                         </div>
-                        <div className="space-y-1.5 pt-2 border-t border-gray-100">
+                        <div className="space-y-1.5 pt-2 border-t border-outline-variant/10">
                           {appointment.groupAppointments.map((gl, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
+                            <div key={idx} className="flex items-center gap-2 text-sm text-on-surface">
                               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-branding-primary to-branding-secondary flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                                 {gl.customer_name?.charAt(0)?.toUpperCase()}
                               </div>
@@ -447,46 +447,46 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
                             {appointment.customer_name?.charAt(0)?.toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900">{appointment.customer_name}</p>
-                            <p className="text-xs text-gray-500">{format(parseISO(appointment.date), "dd 'de' MMMM", { locale: ptBR })}</p>
+                            <p className="font-semibold text-on-surface">{appointment.customer_name}</p>
+                            <p className="text-xs text-on-surface-variant">{format(parseISO(appointment.date), "dd 'de' MMMM", { locale: ptBR })}</p>
                           </div>
                         </div>
                       </>
                     )}
 
-                    <div className="space-y-2 pt-2 border-t border-gray-100">
+                    <div className="space-y-2 pt-2 border-t border-outline-variant/10">
                       <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 text-gray-600">
+                        <div className="flex items-center gap-2 text-on-surface-variant">
                           <Droplets className="w-4 h-4 text-branding-primary" />
                           <span>Tipo de Agendamento:</span>
                         </div>
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-on-surface">
                           {appointment.service_category === "corte" ? "Corte" : "Barba"}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 text-gray-600">
+                        <div className="flex items-center gap-2 text-on-surface-variant">
                           <Clock className="w-4 h-4 text-branding-secondary" />
                           <span>Horário:</span>
                         </div>
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-on-surface">
                           {appointment.start_time} - {appointment.end_time}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Duração:</span>
-                        <span className="font-medium text-gray-900">
+                        <span className="text-on-surface-variant">Duração:</span>
+                        <span className="font-medium text-on-surface">
                           {appointment.duration_mins} minutos
                         </span>
                       </div>
                     </div>
 
                     {appointment.notes && (
-                      <div className="pt-2 border-t border-gray-100">
-                        <p className="text-xs text-gray-500 mb-1">Observações:</p>
-                        <p className="text-sm text-gray-700">{appointment.notes}</p>
+                      <div className="pt-2 border-t border-outline-variant/10">
+                        <p className="text-xs text-on-surface-variant mb-1">Observações:</p>
+                        <p className="text-sm text-on-surface">{appointment.notes}</p>
                       </div>
                     )}
                   </div>
@@ -557,7 +557,7 @@ export default function MonthCalendar({ appointments, customers = [], onAppointm
               setSelectionMode(false);
               setSelectedIds(new Set());
             }}
-            className="rounded-xl bg-red-500 hover:bg-red-600"
+            className="rounded-xl bg-red-500/100 hover:bg-error"
           >
             Excluir
           </AlertDialogAction>

@@ -100,7 +100,7 @@ export default function DependentsTab({ guardian, plans, companies }) {
         >
           ← Voltar para Dependentes
         </Button>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        <h3 className="text-lg font-semibold text-on-surface mb-4">
           {editingDependent ? "Editar Dependente" : "Novo Dependente"}
         </h3>
         <CustomerForm
@@ -121,7 +121,7 @@ export default function DependentsTab({ guardian, plans, companies }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-on-surface-variant">
           Dependentes vinculados a <strong>{guardian.name}</strong>
         </p>
         <Button
@@ -137,37 +137,37 @@ export default function DependentsTab({ guardian, plans, companies }) {
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2].map((i) => (
-            <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
+            <div key={i} className="h-16 bg-surface-container rounded-xl animate-pulse" />
           ))}
         </div>
       ) : dependents.length === 0 ? (
-        <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-          <Users className="w-10 h-10 text-gray-500 mx-auto mb-3" />
-          <p className="text-gray-500 font-medium">Nenhum dependente cadastrado</p>
-          <p className="text-sm text-gray-500 mt-1">Clique em "Adicionar Dependente" para vincular</p>
+        <div className="text-center py-10 bg-surface-container-low rounded-2xl border border-dashed border-outline-variant/30">
+          <Users className="w-10 h-10 text-on-surface-variant mx-auto mb-3" />
+          <p className="text-on-surface-variant font-medium">Nenhum dependente cadastrado</p>
+          <p className="text-sm text-on-surface-variant mt-1">Clique em "Adicionar Dependente" para vincular</p>
         </div>
       ) : (
         <div className="space-y-3">
           {dependents.map((dep) => (
             <div
               key={dep.id}
-              className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all"
+              className="bg-surface-container-lowest border border-outline-variant/10 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-semibold">
                   {dep.name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{dep.name}</p>
+                  <p className="font-semibold text-on-surface">{dep.name}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-gray-500">{getPlanName(dep)}</span>
-                    <span className="text-xs text-gray-500">•</span>
+                    <span className="text-xs text-on-surface-variant">{getPlanName(dep)}</span>
+                    <span className="text-xs text-on-surface-variant">•</span>
                     <Badge
                       className={cn(
                         "text-xs",
                         dep.billing_mode === "consolidated"
-                          ? "bg-purple-100 text-purple-700"
-                          : "bg-blue-100 text-blue-700"
+                          ? "bg-purple-500/20 text-purple-300"
+                          : "bg-blue-500/20 text-blue-300"
                       )}
                     >
                       {dep.billing_mode === "consolidated" ? "💳 Cobrança no responsável" : "💳 Cobrança individual"}
@@ -177,8 +177,8 @@ export default function DependentsTab({ guardian, plans, companies }) {
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1 text-sm">
-                  <CreditCard className="w-3.5 h-3.5 text-gray-500" />
-                  <span className={cn("font-medium", (dep.current_credits || 0) <= 1 ? "text-red-600" : "text-emerald-600")}>
+                  <CreditCard className="w-3.5 h-3.5 text-on-surface-variant" />
+                  <span className={cn("font-medium", (dep.current_credits || 0) <= 1 ? "text-red-400" : "text-emerald-400")}>
                     {dep.current_credits || 0} serviço(s)
                   </span>
                 </div>
@@ -193,7 +193,7 @@ export default function DependentsTab({ guardian, plans, companies }) {
                   className="h-8 w-8"
                   onClick={() => { setEditingDependent(dep); setShowForm(true); }}
                 >
-                  <Edit className="w-4 h-4 text-gray-500" />
+                  <Edit className="w-4 h-4 text-on-surface-variant" />
                 </Button>
                 <Button
                   variant="ghost"

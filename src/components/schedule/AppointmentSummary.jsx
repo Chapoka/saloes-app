@@ -55,19 +55,19 @@ export default function AppointmentSummary({
   const originalPrice = Number(service?.preco) || 0;
 
   return (
-    <div className="rounded-2xl border border-gray-200 p-5 space-y-4">
-      <h3 className="font-semibold text-gray-900">Resumo do Agendamento</h3>
+    <div className="rounded-2xl border border-outline-variant/30 p-5 space-y-4">
+      <h3 className="font-semibold text-on-surface">Resumo do Agendamento</h3>
 
       {/* Serviço */}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">{service?.nome}</span>
+        <span className="text-sm text-on-surface-variant">{service?.nome}</span>
         <div className="flex items-center gap-2">
           {hasDiscount && (
-            <span className="text-sm text-gray-500 line-through">
+            <span className="text-sm text-on-surface-variant line-through">
               R$ {originalPrice.toFixed(2).replace(".", ",")}
             </span>
           )}
-          <span className="text-lg font-bold text-gray-900">
+          <span className="text-lg font-bold text-on-surface">
             R$ {finalPrice.toFixed(2).replace(".", ",")}
           </span>
         </div>
@@ -77,12 +77,12 @@ export default function AppointmentSummary({
       {tag && (
         <div className="flex items-center gap-2">
           {discountMethod === "plan" ? (
-            <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200">
+            <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               <CheckCircle className="w-3 h-3 mr-1" />
               {tag} — {planName}
             </Badge>
           ) : (
-            <Badge className="bg-blue-100 text-blue-700 border border-blue-200">
+            <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30">
               <CreditCard className="w-3 h-3 mr-1" />
               {tag} — {comboName}
             </Badge>

@@ -31,15 +31,15 @@ const actionIcons = {
 };
 
 const actionColors = {
-  create: "text-emerald-600 bg-emerald-50",
+  create: "text-emerald-400 bg-emerald-500/10",
   update: "text-branding-primary bg-branding-primary/10",
-  delete: "text-red-600 bg-red-50",
+  delete: "text-red-400 bg-red-500/10",
 };
 
 const categoryColors = {
-  financial: "bg-emerald-100 text-emerald-700",
+  financial: "bg-emerald-500/20 text-emerald-300",
   schedule: "bg-branding-primary/20 text-branding-primary",
-  customers: "bg-purple-100 text-purple-700",
+  customers: "bg-purple-500/20 text-purple-300",
   system: "bg-surface-container-low text-on-surface",
 };
 

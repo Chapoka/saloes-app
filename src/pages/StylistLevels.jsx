@@ -182,8 +182,8 @@ export default function StylistLevels() {
       <div className="bg-gradient-to-r from-branding-primary/5 to-branding-secondary/5 rounded-xl border border-branding-primary/10 p-4">
         <div className="flex items-start gap-3">
           <Award className="w-5 h-5 text-branding-primary mt-0.5" />
-          <div className="text-sm text-gray-600">
-            <p className="font-medium text-gray-800 mb-1">Como funciona os níveis</p>
+          <div className="text-sm text-on-surface-variant">
+            <p className="font-medium text-on-surface mb-1">Como funciona os níveis</p>
             <p>Cada profissional pode ser vinculado a um nível. O multiplicador do nível é aplicado sobre o preço base do serviço.
             Por exemplo, se um corte custa R$ 50 e o profissional é "Sênior" (1.5x), o cliente paga R$ 75.</p>
           </div>
@@ -201,14 +201,14 @@ export default function StylistLevels() {
         </div>
         <div className="rounded-xl border p-4" style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
           <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="w-4 h-4 text-emerald-600" />
+            <DollarSign className="w-4 h-4 text-emerald-400" />
             <span className="text-xs" style={{ color: theme.mutedText }}>Maior Multiplicador</span>
           </div>
           <span className="text-xl font-bold" style={{ color: theme.cardText }}>{maxMultiplier.toFixed(1)}x</span>
         </div>
         <div className="rounded-xl border p-4" style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 text-blue-600" />
+            <Users className="w-4 h-4 text-blue-400" />
             <span className="text-xs" style={{ color: theme.mutedText }}>Profissionais</span>
           </div>
           <span className="text-xl font-bold" style={{ color: theme.cardText }}>
@@ -219,12 +219,12 @@ export default function StylistLevels() {
 
       {/* Level Cards */}
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Carregando...</div>
+        <div className="text-center py-12 text-on-surface-variant">Carregando...</div>
       ) : companyLevels.length === 0 ? (
         <div className="text-center py-12">
-          <Award className="w-12 h-12 mx-auto text-gray-500 mb-3" />
-          <p className="text-gray-600">Nenhum nível configurado</p>
-          <p className="text-xs text-gray-500 mt-1">Crie níveis para diferenciar preços por profissional</p>
+          <Award className="w-12 h-12 mx-auto text-on-surface-variant mb-3" />
+          <p className="text-on-surface-variant">Nenhum nível configurado</p>
+          <p className="text-xs text-on-surface-variant mt-1">Crie níveis para diferenciar preços por profissional</p>
           <Button
             onClick={() => { setEditingLevel(null); setLevelForm(EMPTY_LEVEL); setShowForm(true); }}
             className="mt-4 bg-branding-primary text-white"
@@ -255,8 +255,8 @@ export default function StylistLevels() {
                       {level.multiplier ? `${Number(level.multiplier).toFixed(1)}x` : "1.0x"}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{level.name}</h3>
-                      <p className="text-xs text-gray-500">
+                      <h3 className="font-semibold text-on-surface">{level.name}</h3>
+                      <p className="text-xs text-on-surface-variant">
                         Multiplicador: <span className="font-medium">{Number(level.multiplier || 1).toFixed(2)}x</span>
                         {userCount > 0 && (
                           <span className="ml-2 text-branding-primary">
@@ -269,10 +269,10 @@ export default function StylistLevels() {
 
                   <div className="flex items-center gap-2">
                     {/* Price preview */}
-                    <div className="hidden sm:flex items-center gap-1 text-xs text-gray-500 mr-2">
+                    <div className="hidden sm:flex items-center gap-1 text-xs text-on-surface-variant mr-2">
                       <span>R$ 50</span>
                       <span>→</span>
-                      <span className="font-semibold text-gray-700">
+                      <span className="font-semibold text-on-surface">
                         R$ {(50 * Number(level.multiplier || 1)).toFixed(2).replace(".", ",")}
                       </span>
                     </div>
@@ -284,15 +284,15 @@ export default function StylistLevels() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                          <MoreVertical className="w-4 h-4 text-gray-500" />
+                        <button className="p-2 rounded-lg hover:bg-surface-container transition-colors">
+                          <MoreVertical className="w-4 h-4 text-on-surface-variant" />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => openEdit(level)}>
                           <Edit className="w-4 h-4 mr-2" /> Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setDeletingLevel(level)} className="text-red-600">
+                        <DropdownMenuItem onClick={() => setDeletingLevel(level)} className="text-red-400">
                           <Trash2 className="w-4 h-4 mr-2" /> Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -315,13 +315,13 @@ export default function StylistLevels() {
             {/* Presets */}
             {!editingLevel && (
               <div>
-                <Label className="text-xs text-gray-500 mb-2 block">Predefinições rápidas</Label>
+                <Label className="text-xs text-on-surface-variant mb-2 block">Predefinições rápidas</Label>
                 <div className="flex flex-wrap gap-2">
                   {LEVEL_PRESETS.map(preset => (
                     <button
                       key={preset.slug}
                       onClick={() => applyPreset(preset)}
-                      className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium hover:border-gray-300 transition-colors"
+                      className="px-3 py-1.5 rounded-lg border border-outline-variant/30 text-xs font-medium hover:border-outline-variant/50 transition-colors"
                       style={{ borderLeftColor: preset.color, borderLeftWidth: 3 }}
                     >
                       {preset.name} ({preset.multiplier}x)
@@ -351,7 +351,7 @@ export default function StylistLevels() {
                   value={levelForm.multiplier}
                   onChange={e => setLevelForm(f => ({ ...f, multiplier: parseFloat(e.target.value) || 1 }))}
                 />
-                <p className="text-[10px] text-gray-500 mt-1">
+                <p className="text-[10px] text-on-surface-variant mt-1">
                   {levelForm.multiplier >= 1
                     ? `+${((levelForm.multiplier - 1) * 100).toFixed(0)}% sobre o preço base`
                     : `${((1 - levelForm.multiplier) * 100).toFixed(0)}% de desconto`
@@ -377,9 +377,9 @@ export default function StylistLevels() {
             </div>
 
             {/* Price preview */}
-            <div className="bg-gray-50 rounded-lg p-3 text-sm">
-              <p className="text-gray-500 mb-1">Preview de preço (serviço de R$ 50,00):</p>
-              <p className="text-xl font-bold text-gray-900">
+            <div className="bg-surface-container-low rounded-lg p-3 text-sm">
+              <p className="text-on-surface-variant mb-1">Preview de preço (serviço de R$ 50,00):</p>
+              <p className="text-xl font-bold text-on-surface">
                 R$ {(50 * Number(levelForm.multiplier || 1)).toFixed(2).replace(".", ",")}
               </p>
             </div>
@@ -402,7 +402,7 @@ export default function StylistLevels() {
             <AlertDialogDescription>
               O nível "{deletingLevel?.name}" será removido.
               {usersByLevel[deletingLevel?.id] > 0 && (
-                <span className="block mt-1 text-amber-600 font-medium">
+                <span className="block mt-1 text-amber-400 font-medium">
                   {usersByLevel[deletingLevel.id]} profissional(is) vinculados perderão o nível.
                 </span>
               )}
@@ -412,7 +412,7 @@ export default function StylistLevels() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteLevel.mutate(deletingLevel.id)}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-error text-white hover:bg-error/80"
             >
               Excluir
             </AlertDialogAction>

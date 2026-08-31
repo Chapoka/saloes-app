@@ -507,20 +507,20 @@ export default function Schedule() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-branding-primary to-branding-secondary">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               Agenda
             </h1>
-            <p className="text-gray-500 mt-1">Gerencie os agendamentos e atendimentos</p>
+            <p className="text-on-surface-variant mt-1">Gerencie os agendamentos e atendimentos</p>
           </div>
           
           <div className="flex items-center gap-2 flex-wrap">
             {isSuperAdmin && companies.length > 0 && (
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-                <SelectTrigger className="w-36 sm:w-48 rounded-xl border-gray-200">
-                  <Building2 className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" />
+                <SelectTrigger className="w-36 sm:w-48 rounded-xl border-outline-variant/30">
+                  <Building2 className="w-4 h-4 mr-2 text-on-surface-variant flex-shrink-0" />
                   <SelectValue placeholder="Salões" />
                 </SelectTrigger>
                 <SelectContent>
@@ -532,8 +532,8 @@ export default function Schedule() {
               </Select>
             )}
             <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
-              <SelectTrigger className="w-36 sm:w-48 rounded-xl border-gray-200">
-                <Users className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" />
+              <SelectTrigger className="w-36 sm:w-48 rounded-xl border-outline-variant/30">
+                <Users className="w-4 h-4 mr-2 text-on-surface-variant flex-shrink-0" />
                 <SelectValue placeholder="Clientes" />
               </SelectTrigger>
               <SelectContent>
@@ -547,7 +547,7 @@ export default function Schedule() {
               <Button
                 variant="outline"
                 onClick={() => setShowBusinessHours(true)}
-                className="rounded-xl border-gray-200"
+                className="rounded-xl border-outline-variant/30"
               >
                 <Clock className="w-4 h-4 mr-2" />
                 Horário
@@ -557,7 +557,7 @@ export default function Schedule() {
               <Button
                 variant="outline"
                 onClick={() => setShowBlockedTimes(true)}
-                className="rounded-xl border-gray-200"
+                className="rounded-xl border-outline-variant/30"
               >
                 <Ban className="w-4 h-4 mr-2" />
                 Bloquear Horário
@@ -721,15 +721,15 @@ export default function Schedule() {
         <Dialog open={!!outOfHoursSlot} onOpenChange={() => setOutOfHoursSlot(null)}>
           <DialogContent className="sm:max-w-sm rounded-2xl">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-amber-600">
+              <DialogTitle className="flex items-center gap-2 text-amber-400">
                 <AlertTriangle className="w-5 h-5" />
                 Fora do Horário de Funcionamento
               </DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-on-surface-variant">
               O horário <strong>{outOfHoursSlot?.time}</strong> está fora do horário de funcionamento do salão ({currentCompany?.opening_time || "08:00"} - {currentCompany?.closing_time || "18:00"}).
             </p>
-            <p className="text-sm text-gray-600">Deseja agendar mesmo assim?</p>
+            <p className="text-sm text-on-surface-variant">Deseja agendar mesmo assim?</p>
             <div className="flex gap-3 pt-2">
               <Button variant="outline" onClick={() => setOutOfHoursSlot(null)} className="flex-1 rounded-xl">
                 Cancelar

@@ -243,14 +243,14 @@ export default function PunchCards() {
         </div>
         <div className="rounded-xl border p-4" style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle className="w-4 h-4 text-emerald-600" />
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
             <span className="text-xs" style={{ color: theme.mutedText }}>Serviços Restantes</span>
           </div>
           <span className="text-xl font-bold" style={{ color: theme.cardText }}>{totalRemaining}</span>
         </div>
         <div className="rounded-xl border p-4" style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
           <div className="flex items-center gap-2 mb-1">
-            <Clock className="w-4 h-4 text-amber-600" />
+            <Clock className="w-4 h-4 text-amber-400" />
             <span className="text-xs" style={{ color: theme.mutedText }}>Total Vendidos</span>
           </div>
           <span className="text-xl font-bold" style={{ color: theme.cardText }}>
@@ -262,7 +262,7 @@ export default function PunchCards() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
           <Input
             placeholder="Buscar por nome ou cliente..."
             value={search}
@@ -285,11 +285,11 @@ export default function PunchCards() {
 
       {/* Cards */}
       {isLoading ? (
-        <div className="text-center py-12 text-gray-500">Carregando...</div>
+        <div className="text-center py-12 text-on-surface-variant">Carregando...</div>
       ) : filteredCards.length === 0 ? (
         <div className="text-center py-12">
-          <CreditCard className="w-12 h-12 mx-auto text-gray-500 mb-3" />
-          <p className="text-gray-500">Nenhum punch card encontrado</p>
+          <CreditCard className="w-12 h-12 mx-auto text-on-surface-variant mb-3" />
+          <p className="text-on-surface-variant">Nenhum punch card encontrado</p>
           <Button
             onClick={() => { setEditingCard(null); setForm(EMPTY_FORM); setShowForm(true); }}
             className="mt-4 bg-branding-primary text-white"
@@ -320,16 +320,16 @@ export default function PunchCards() {
                     <div className={cn(
                       "w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold",
                       isActive ? "bg-branding-primary/10 text-branding-primary" :
-                      isUsed ? "bg-emerald-100 text-emerald-600" :
-                      "bg-amber-100 text-amber-600"
+                      isUsed ? "bg-emerald-500/20 text-emerald-400" :
+                      "bg-amber-500/20 text-amber-400"
                     )}>
                       {isUsed ? <CheckCircle className="w-5 h-5" /> :
                        isExpired ? <AlertTriangle className="w-5 h-5" /> :
                        <CreditCard className="w-5 h-5" />}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 text-sm">{card.name}</h3>
-                      <p className="text-xs text-gray-500">
+                      <h3 className="font-semibold text-on-surface text-sm">{card.name}</h3>
+                      <p className="text-xs text-on-surface-variant">
                         {card.customer_name || getCustomerName(card.customer_id)}
                         {card.service_id && ` • ${getServiceName(card.service_id)}`}
                       </p>
@@ -337,15 +337,15 @@ export default function PunchCards() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="p-2 rounded-lg hover:bg-gray-100">
-                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                      <button className="p-2 rounded-lg hover:bg-surface-container">
+                        <MoreVertical className="w-4 h-4 text-on-surface-variant" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openEdit(card)}>
                         <Edit className="w-4 h-4 mr-2" /> Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setDeletingCard(card)} className="text-red-600">
+                      <DropdownMenuItem onClick={() => setDeletingCard(card)} className="text-red-400">
                         <Trash2 className="w-4 h-4 mr-2" /> Excluir
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -354,16 +354,16 @@ export default function PunchCards() {
 
                 {/* Progress bar */}
                 <div className="mb-3">
-                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <div className="flex justify-between text-xs text-on-surface-variant mb-1">
                     <span>{card.used_services} usado(s) de {card.total_services}</span>
                     <span>{remaining} restante(s)</span>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-surface-container rounded-full overflow-hidden">
                     <div
                       className={cn(
                         "h-full rounded-full transition-all",
-                        isUsed ? "bg-emerald-500" :
-                        isExpired ? "bg-amber-500" :
+                        isUsed ? "bg-emerald-500/100" :
+                        isExpired ? "bg-amber-500/100" :
                         "bg-branding-primary"
                       )}
                       style={{ width: `${Math.min(progress, 100)}%` }}
@@ -372,11 +372,11 @@ export default function PunchCards() {
                 </div>
 
                 {/* Details */}
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center justify-between text-xs text-on-surface-variant">
                   <div className="flex items-center gap-3">
                     <span>R$ {Number(card.price_paid || 0).toFixed(2).replace(".", ",")}</span>
                     {card.total_services > 0 && (
-                      <span className="text-gray-500">
+                      <span className="text-on-surface-variant">
                         (R$ {(Number(card.price_paid || 0) / card.total_services).toFixed(2).replace(".", ",")}/serviço)
                       </span>
                     )}
@@ -384,7 +384,7 @@ export default function PunchCards() {
                   {card.expires_at && (
                     <span className={cn(
                       "flex items-center gap-1",
-                      isExpired ? "text-amber-600 font-medium" : ""
+                      isExpired ? "text-amber-400 font-medium" : ""
                     )}>
                       <Calendar className="w-3 h-3" />
                       {format(parseISO(card.expires_at), "dd/MM/yyyy")}
@@ -502,7 +502,7 @@ export default function PunchCards() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteCard.mutate(deletingCard.id)}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-error text-white hover:bg-error/80"
             >
               Excluir
             </AlertDialogAction>

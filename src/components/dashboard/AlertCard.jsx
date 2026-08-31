@@ -8,8 +8,8 @@ const alertIcons = {
 };
 
 const alertColors = {
-  warning: "border-amber-200 bg-amber-50",
-  danger: "border-red-200 bg-red-50",
+  warning: "border-amber-500/30 bg-amber-500/10",
+  danger: "border-red-500/30 bg-red-500/10",
   info: "border-branding-primary/20 bg-branding-primary/5",
 };
 
@@ -23,11 +23,11 @@ export default function AlertCard({ type = "warning", alertType = "credits", tit
     )}>
       <Icon className={cn(
         "w-5 h-5 mt-0.5 flex-shrink-0",
-        type === "warning" ? "text-amber-600" : type === "danger" ? "text-red-600" : "text-branding-primary"
+        type === "warning" ? "text-amber-400" : type === "danger" ? "text-red-400" : "text-branding-primary"
       )} />
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-gray-900 text-sm">{title}</p>
-        <p className="text-sm text-gray-600 mt-0.5">{message}</p>
+        <p className="font-medium text-on-surface text-sm">{title}</p>
+        <p className="text-sm text-on-surface-variant mt-0.5">{message}</p>
         {action && (
           <button 
             onClick={onAction}

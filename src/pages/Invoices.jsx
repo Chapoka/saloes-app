@@ -56,9 +56,9 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const statusConfig = {
-  pending: { label: "Pendente", icon: Clock, color: "bg-amber-100 text-amber-700 border-amber-200" },
-  received: { label: "Pago", icon: CheckCircle, color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  overdue: { label: "Vencida", icon: AlertCircle, color: "bg-red-100 text-red-700 border-red-200" },
+  pending: { label: "Pendente", icon: Clock, color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
+  received: { label: "Pago", icon: CheckCircle, color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
+  overdue: { label: "Vencida", icon: AlertCircle, color: "bg-red-500/20 text-red-300 border-red-500/30" },
   cancelled: { label: "Cancelada", icon: XCircle, color: "bg-surface-container-low text-muted-foreground border-outline-variant" },
 };
 
@@ -503,7 +503,7 @@ export default function Invoices() {
                               if (st?.guardian_id) {
                                 const guardian = customers.find(s => s.id === st.guardian_id);
                                 if (guardian) return (
-                                  <p className="text-xs text-purple-600">👤 Resp: {guardian.name}</p>
+                                  <p className="text-xs text-purple-400">👤 Resp: {guardian.name}</p>
                                 );
                               }
                               return null;
@@ -515,7 +515,7 @@ export default function Invoices() {
                         <div className="flex items-center gap-1.5">
                           <span>{invoice.plan_name || (customers.find(s => s.id === invoice.customer_id)?.custom_plan ? "Plano Personalizado" : "-")}</span>
                           {(invoice.plan_name === "Plano Personalizado" || (!invoice.plan_name && customers.find(s => s.id === invoice.customer_id)?.custom_plan)) && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">Personalizado</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">Personalizado</span>
                           )}
                         </div>
                       </TableCell>
@@ -524,9 +524,9 @@ export default function Invoices() {
                           {(() => {
                             const st = customers.find(s => s.id === invoice.customer_id);
                             const cid = invoice.company_id || st?.company_id || (st?.company_ids || [])[0];
-                            if (!cid) return <span className="text-purple-600 font-medium">Global</span>;
+                            if (!cid) return <span className="text-purple-400 font-medium">Global</span>;
                             const co = companies.find(c => c.id === cid);
-                            return <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200">{co?.name || cid}</span>;
+                            return <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">{co?.name || cid}</span>;
                           })()}
                         </TableCell>
                       )}
@@ -536,10 +536,10 @@ export default function Invoices() {
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button size="sm" variant="outline" onClick={() => setDetailInvoice(invoice)} className="rounded-lg text-xs"><FileText className="w-3 h-3 mr-1" />Detalhes</Button>
-                          {invoice.status === "pending" && (<Button size="sm" onClick={() => handleMarkAsPaid(invoice)} className="bg-emerald-600 hover:bg-emerald-700 rounded-lg text-xs"><CheckCircle className="w-3 h-3 mr-1" />Confirmar</Button>)}
+                          {invoice.status === "pending" && (<Button size="sm" onClick={() => handleMarkAsPaid(invoice)} className="bg-emerald-500 hover:bg-emerald-500/80 rounded-lg text-xs"><CheckCircle className="w-3 h-3 mr-1" />Confirmar</Button>)}
                           {invoice.status === "pending" && (<Button size="sm" variant="outline" onClick={() => handleSendInvoice(invoice)} disabled={sendingInvoice === invoice.id} className="rounded-lg text-xs border-[#25D366] text-[#128C7E] hover:bg-[#25D366]/10"><Send className="w-3 h-3 mr-1" />{sendingInvoice === invoice.id ? "..." : "Enviar"}</Button>)}
                           {invoice.asaas_url && (<Button size="sm" variant="outline" asChild className="rounded-lg text-xs"><a href={invoice.asaas_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3 h-3 mr-1" />Link</a></Button>)}
-                          {invoice.status !== "received" && (<Button size="sm" variant="outline" onClick={() => setDeletingInvoice(invoice)} className="rounded-lg text-xs text-red-600 border-red-200 hover:bg-red-50"><Trash2 className="w-3 h-3 mr-1" />Excluir</Button>)}
+                          {invoice.status !== "received" && (<Button size="sm" variant="outline" onClick={() => setDeletingInvoice(invoice)} className="rounded-lg text-xs text-red-400 border-red-500/30 hover:bg-red-500/100/10"><Trash2 className="w-3 h-3 mr-1" />Excluir</Button>)}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -573,13 +573,13 @@ export default function Invoices() {
                         <p className="font-semibold text-on-surface text-sm leading-tight truncate">{invoice.customer_name}</p>
                         <div className="flex items-center gap-1 mt-0.5">
                           <p className="text-xs text-muted-foreground truncate">{planName}</p>
-                          {isCustom && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium flex-shrink-0">Custom</span>}
+                          {isCustom && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium flex-shrink-0">Custom</span>}
                         </div>
                         {(() => {
                           const st = customers.find(s => s.id === invoice.customer_id);
                           if (st?.guardian_id) {
                             const guardian = customers.find(s => s.id === st.guardian_id);
-                            if (guardian) return <p className="text-xs text-purple-600 truncate">👤 {guardian.name}</p>;
+                            if (guardian) return <p className="text-xs text-purple-400 truncate">👤 {guardian.name}</p>;
                           }
                           return null;
                         })()}
@@ -604,7 +604,7 @@ export default function Invoices() {
                       <FileText className="w-3 h-3 mr-1" />Detalhes
                     </Button>
                     {invoice.status === "pending" && (
-                      <Button size="sm" onClick={() => handleMarkAsPaid(invoice)} className="bg-emerald-600 hover:bg-emerald-700 rounded-lg text-xs">
+                      <Button size="sm" onClick={() => handleMarkAsPaid(invoice)} className="bg-emerald-500 hover:bg-emerald-500/80 rounded-lg text-xs">
                         <CheckCircle className="w-3 h-3 mr-1" />Confirmar
                       </Button>
                     )}
@@ -619,7 +619,7 @@ export default function Invoices() {
                       </Button>
                     )}
                     {invoice.status !== "received" && (
-                      <Button size="sm" variant="outline" onClick={() => setDeletingInvoice(invoice)} className="rounded-lg text-xs text-red-600 border-red-200 hover:bg-red-50">
+                      <Button size="sm" variant="outline" onClick={() => setDeletingInvoice(invoice)} className="rounded-lg text-xs text-red-400 border-red-500/30 hover:bg-red-500/100/10">
                         <Trash2 className="w-3 h-3 mr-1" />Excluir
                       </Button>
                     )}
@@ -665,7 +665,7 @@ export default function Invoices() {
               <AlertDialogAction
                 onClick={handleDeleteInvoice}
                 disabled={deletingLoading}
-                className="bg-red-600 hover:bg-red-700 rounded-xl"
+                className="bg-error hover:bg-error/80 rounded-xl"
               >
                 {deletingLoading ? "Removendo..." : "Remover assinatura"}
               </AlertDialogAction>

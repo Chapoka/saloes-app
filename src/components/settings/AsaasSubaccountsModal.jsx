@@ -77,13 +77,13 @@ export default function AsaasSubaccountsModal({ company, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-surface-container-lowest rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h3 className="text-xl font-bold text-on-surface flex items-center gap-2">
             <Building2 className="w-5 h-5 text-branding-primary" />
             Subcontas Asaas — {company.name}
           </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-600">
+          <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface-variant">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -100,14 +100,14 @@ export default function AsaasSubaccountsModal({ company, onClose }) {
         </div>
 
         {fetchError && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4 text-sm text-red-700">
+          <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl mb-4 text-sm text-red-300">
             <AlertCircle className="w-4 h-4" />{fetchError}
           </div>
         )}
 
         {showCreate && (
-          <div className="bg-gray-50 rounded-2xl p-4 mb-5 space-y-3 border border-gray-200">
-            <p className="font-semibold text-gray-700 mb-2">Nova Subconta</p>
+          <div className="bg-surface-container-low rounded-2xl p-4 mb-5 space-y-3 border border-outline-variant/30">
+            <p className="font-semibold text-on-surface mb-2">Nova Subconta</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { key: "name", label: "Nome completo *" },
@@ -156,15 +156,15 @@ export default function AsaasSubaccountsModal({ company, onClose }) {
         {subaccounts !== null && (
           <div className="space-y-3">
             {subaccounts.length === 0 ? (
-              <p className="text-center text-gray-500 py-6">Nenhuma subconta encontrada</p>
+              <p className="text-center text-on-surface-variant py-6">Nenhuma subconta encontrada</p>
             ) : subaccounts.map(acc => (
-              <div key={acc.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50">
+              <div key={acc.id} className="flex items-center justify-between p-4 border border-outline-variant/10 rounded-xl hover:bg-surface-container-low">
                 <div>
-                  <p className="font-medium text-gray-900">{acc.name}</p>
-                  <p className="text-sm text-gray-500">{acc.email} · CPF/CNPJ: {acc.cpfCnpj}</p>
-                  <p className="text-xs text-gray-500">ID: {acc.id} · {acc.accountStatus === "ACTIVE" ? "✅ Ativo" : acc.accountStatus}</p>
+                  <p className="font-medium text-on-surface">{acc.name}</p>
+                  <p className="text-sm text-on-surface-variant">{acc.email} · CPF/CNPJ: {acc.cpfCnpj}</p>
+                  <p className="text-xs text-on-surface-variant">ID: {acc.id} · {acc.accountStatus === "ACTIVE" ? "✅ Ativo" : acc.accountStatus}</p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(acc.id)} className="text-red-500 hover:text-red-700">
+                <Button variant="ghost" size="icon" onClick={() => handleDelete(acc.id)} className="text-red-400 hover:text-red-300">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
