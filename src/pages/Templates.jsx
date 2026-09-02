@@ -275,7 +275,7 @@ export default function Templates() {
   const TriggerIcon = selectedTriggerData?.icon || MessageSquare;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-branding-primary/5">
+    <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">

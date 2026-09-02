@@ -24,7 +24,7 @@ function CopyIdButton({ id }) {
 }
 import { db } from "@/api/dbClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Building2, Plus, Edit, Trash2, MoreVertical, GitBranch, Copy, Check, LayoutGrid, List, MessageCircle, PaintBucket } from "lucide-react";
+import { Building2, Plus, Edit, Trash2, MoreVertical, GitBranch, Copy, Check, LayoutGrid, List, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -55,7 +55,6 @@ export default function Companies() {
     natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
     logradouro: "", numero: "", complemento: "", phone: "", email: "",
     owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
-    branding_primary_color: "", branding_secondary_color: "",
   });
 
   useEffect(() => {
@@ -124,11 +123,6 @@ export default function Companies() {
         owner_name: company.owner_name || "", owner_phone: company.owner_phone || "",
         owner_cpf: company.owner_cpf || "",
         active: company.active !== false, has_branch: company.has_branch || false,
-        branding_primary_color: company.branding_primary_color || "",
-        branding_secondary_color: company.branding_secondary_color || "",
-        branding_accent_color: company.branding_accent_color || "",
-        branding_background_color: company.branding_background_color || "",
-        branding_palette: company.branding_palette || "barbearia_amber",
       });
     } else {
       setEditing(null);
@@ -138,7 +132,6 @@ export default function Companies() {
         natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
         logradouro: "", numero: "", complemento: "", phone: "", email: "",
         owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
-    branding_primary_color: "", branding_secondary_color: "", branding_accent_color: "", branding_background_color: "", branding_palette: "barbearia_amber",
       });
     }
     setShowModal(true);
@@ -164,8 +157,7 @@ export default function Companies() {
       "cep", "uf", "cidade", "bairro", "logradouro", "numero", "complemento",
       "phone", "email", "owner_email", "owner_name", "owner_phone", "owner_cpf",
       "active", "has_branch",
-      "branding_app_name", "branding_logo_url", "branding_primary_color", "branding_secondary_color",
-      "branding_accent_color", "branding_background_color", "branding_palette",
+      "branding_app_name", "branding_logo_url",
     ];
     const sanitize = (raw) => {
       const out = {};
@@ -186,11 +178,9 @@ export default function Companies() {
         out.capital_social = null;
       }
       // Empty strings -> undefined (avoid constraint errors)
-      ["data_abertura", "email", "owner_email", "tipo", "estabelecimento_tipo",
-       "branding_primary_color", "branding_secondary_color", "branding_accent_color",
-       "branding_background_color", "branding_palette",
-       "branding_app_name", "branding_logo_url",
-      ].forEach(key => {
+       ["data_abertura", "email", "owner_email", "tipo", "estabelecimento_tipo",
+        "branding_app_name", "branding_logo_url",
+       ].forEach(key => {
         if (out[key] === "") out[key] = null;
       });
       return out;
@@ -201,7 +191,7 @@ export default function Companies() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-branding-primary/5">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
@@ -266,7 +256,7 @@ export default function Companies() {
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-semibold"
                       style={{
-                        background: `linear-gradient(135deg, ${company.branding_primary_color || "#0077b6"}, ${company.branding_secondary_color || "#2a9d8f"})`,
+                        background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
                       }}
                     >
                       {company.name?.charAt(0)?.toUpperCase()}
@@ -309,16 +299,10 @@ export default function Companies() {
                     </Badge>
                     {company.estabelecimento_tipo && (
                       <Badge
-                        className="flex items-center gap-1"
-                        style={{
-                          background: `${company.branding_primary_color || "#6366f1"}20`,
-                          color: company.branding_primary_color || "#4f46e5",
-                          borderColor: company.branding_primary_color || "#6366f1",
-                        }}
+                        className="flex items-center gap-1 bg-primary/10 text-primary border-primary/20"
                       >
                         <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ background: company.branding_primary_color || "#6366f1" }}
+                          className="w-2 h-2 rounded-full bg-primary"
                         />
                         {getEstabelecimentoLabel(company.estabelecimento_tipo)}
                       </Badge>
@@ -330,32 +314,6 @@ export default function Companies() {
                     )}
                   </div>
                   <div className="flex items-center gap-3 pt-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-muted-foreground">Cores:</span>
-                      <div className="flex items-center gap-0.5">
-                        {["branding_primary_color", "branding_secondary_color", "branding_accent_color", "branding_background_color"].map((field) => (
-                          <label key={field} className="relative cursor-pointer group">
-                            <input
-                              type="color"
-                              value={company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc")}
-                              onChange={async (e) => {
-                                try {
-                                  await updateMutation.mutateAsync({ id: company.id, data: { [field]: e.target.value } });
-                                } catch {}
-                              }}
-                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                              title={`Alterar cor ${field === "branding_primary_color" ? "primária" : field === "branding_secondary_color" ? "secundária" : field === "branding_accent_color" ? "destaque" : "fundo"}`}
-                            />
-                            <span
-                              className="w-5 h-5 rounded-full border-2 border-white shadow-sm block ring-1 ring-primary group-hover:ring-2 group-hover:ring-branding-primary transition-all"
-                              style={{ background: company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc") }}
-                            />
-                          </label>
-                        ))}
-                      </div>
-                      <PaintBucket className="w-3 h-3 text-muted-foreground" />
-                    </div>
-                    <span className="text-xs text-muted-foreground">|</span>
                     <span className="text-xs text-muted-foreground">ID:</span>
                     <CopyIdButton id={company.id} />
                   </div>
@@ -376,7 +334,6 @@ export default function Companies() {
                     <th className="px-4 py-3 font-medium hidden lg:table-cell">Responsável</th>
                     <th className="px-4 py-3 font-medium hidden md:table-cell">Cidade</th>
                     <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium hidden xl:table-cell">Cores</th>
                     <th className="px-4 py-3 font-medium text-right">Ações</th>
                   </tr>
                 </thead>
@@ -388,7 +345,7 @@ export default function Companies() {
                           <div
                             className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
                             style={{
-                              background: `linear-gradient(135deg, ${company.branding_primary_color || "#0077b6"}, ${company.branding_secondary_color || "#2a9d8f"})`,
+                              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
                             }}
                           >
                             {company.name?.charAt(0)?.toUpperCase()}
@@ -396,40 +353,16 @@ export default function Companies() {
                           <div className="min-w-0">
                             <p className="font-medium text-on-surface truncate">{company.name}</p>
                             <span className="text-xs text-muted-foreground md:hidden">{company.cnpj || "—"}</span>
-                            <div className="flex items-center gap-0.5 mt-1 md:hidden">
-                              {["branding_primary_color", "branding_secondary_color", "branding_accent_color", "branding_background_color"].map((field) => (
-                                <label key={field} className="relative cursor-pointer">
-                                  <input
-                                    type="color"
-                                    value={company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc")}
-                                    onChange={async (e) => {
-                                      try { await updateMutation.mutateAsync({ id: company.id, data: { [field]: e.target.value } }); } catch {}
-                                    }}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                  />
-                                  <span
-                                    className="w-3.5 h-3.5 rounded-full border border-white shadow-sm block ring-1 ring-primary"
-                                    style={{ background: company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc") }}
-                                  />
-                                </label>
-                              ))}
-                            </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         {company.estabelecimento_tipo ? (
                           <Badge
-                            className="flex items-center gap-1"
-                            style={{
-                              background: `${company.branding_primary_color || "#6366f1"}20`,
-                              color: company.branding_primary_color || "#4f46e5",
-                              borderColor: company.branding_primary_color || "#6366f1",
-                            }}
+                            className="flex items-center gap-1 bg-primary/10 text-primary border-primary/20"
                           >
                             <span
-                              className="w-2 h-2 rounded-full"
-                              style={{ background: company.branding_primary_color || "#6366f1" }}
+                              className="w-2 h-2 rounded-full bg-primary"
                             />
                             {getEstabelecimentoLabel(company.estabelecimento_tipo)}
                           </Badge>
@@ -470,27 +403,6 @@ export default function Companies() {
                               <GitBranch className="w-3 h-3" />
                             </Badge>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 hidden xl:table-cell">
-                        <div className="flex items-center gap-1.5">
-                          {["branding_primary_color", "branding_secondary_color", "branding_accent_color", "branding_background_color"].map((field) => (
-                            <label key={field} className="relative cursor-pointer group">
-                              <input
-                                type="color"
-                                value={company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc")}
-                                onChange={async (e) => {
-                                  try { await updateMutation.mutateAsync({ id: company.id, data: { [field]: e.target.value } }); } catch {}
-                                }}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                title={`Alterar cor ${field === "branding_primary_color" ? "prim\u00e1ria" : field === "branding_secondary_color" ? "secund\u00e1ria" : field === "branding_accent_color" ? "destaque" : "fundo"}`}
-                              />
-                              <span
-                                className="w-5 h-5 rounded-full border-2 border-white shadow-sm block ring-1 ring-primary group-hover:ring-2 group-hover:ring-branding-primary transition-all"
-                                style={{ background: company[field] || (field === "branding_primary_color" ? "#0077b6" : field === "branding_secondary_color" ? "#2a9d8f" : field === "branding_accent_color" ? "#1e293b" : "#f8fafc") }}
-                              />
-                            </label>
-                          ))}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">

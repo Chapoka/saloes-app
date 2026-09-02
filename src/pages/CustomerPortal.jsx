@@ -88,7 +88,7 @@ export default function CustomerPortal() {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const customers = await db.entities.Customer.filter({ email: session.user.email });
-          const found = customers.find(s => s.portal_enabled === true);
+          const found = customers.find(s => s.portal_enabled === true || s.portalEnabled === true);
           if (found) {
             sessionStorage.setItem("portal_customer_id", found.id);
             await loadForCustomer(found);
@@ -112,7 +112,7 @@ export default function CustomerPortal() {
       setLoggingIn(false);
       return;
     }
-    const found = customers.find(s => s.portal_enabled === true);
+    const found = customers.find(s => s.portal_enabled === true || s.portalEnabled === true);
     if (!found) {
       setLoginError("Acesso ao portal não está liberado. Fale com seu profissional.");
       setLoggingIn(false);

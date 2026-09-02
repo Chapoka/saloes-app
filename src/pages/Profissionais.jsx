@@ -582,7 +582,7 @@ export default function Profissionais() {
                 <Switch checked={profForm.active} onCheckedChange={v => setProfForm(f => ({ ...f, active: v }))} />
               </div>
 
-              {!editingProf && <p className="text-sm text-amber-400">Senha padrão: <strong>123456</strong></p>}
+              {!editingProf && <p className="text-sm text-branding-primary">Senha padrão: <strong>123456</strong></p>}
 
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setShowForm(false)} className="rounded-xl">Cancelar</Button>

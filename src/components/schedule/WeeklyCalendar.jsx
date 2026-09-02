@@ -172,7 +172,7 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
         <div className="px-4 py-2 border-b border-outline-variant/10 flex items-center gap-4 text-xs text-on-surface-variant">
           <span className="font-medium text-on-surface">Horário: {openingTime} - {closingTime}</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-red-500/20 border border-red-500/30"></span>
+            <span className="w-3 h-3 rounded-sm bg-error/10 border border-error/20"></span>
             <span>Fora do expediente</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -219,8 +219,8 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                 <div 
                   key={time} 
                   className={cn(
-                    "h-12 px-3 flex items-start justify-end pt-1 text-xs border-b border-gray-50",
-                    isSlotOutOfHours(time) ? "bg-red-500/10 text-red-400" : "text-on-surface-variant"
+                    "h-12 px-3 flex items-start justify-end pt-1 text-xs border-b border-outline-variant/10",
+                    isSlotOutOfHours(time) ? "bg-error/5 text-error" : "text-on-surface-variant"
                   )}
                 >
                   {i % 2 === 0 && time}
@@ -245,9 +245,9 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                     <div
                       key={i}
                       className={cn(
-                        "h-12 border-b border-gray-50 cursor-pointer transition-colors",
+                        "h-12 border-b border-outline-variant/10 cursor-pointer transition-colors",
                         isSlotOutOfHours(time)
-                          ? "bg-red-500/10 hover:bg-red-500/100/20"
+                          ? "bg-error/5 hover:bg-error/10"
                           : "hover:bg-branding-primary/5"
                       )}
                       onClick={(e) => {

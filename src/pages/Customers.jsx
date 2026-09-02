@@ -391,6 +391,33 @@ export default function Customers() {
         queryClient.invalidateQueries({ queryKey: ["customers"] });
         setEditingCustomer(null);
         setShowForm(false);
+
+        // Envia WhatsApp com dados do portal se foi habilitado agora
+        const portalJustEnabled = (finalData.portal_enabled === true || finalData.portalEnabled === true)
+          && !(editingCustomer.portal_enabled === true || editingCustomer.portalEnabled === true);
+        if (portalJustEnabled && updatedCustomer.whatsapp && companyId) {
+          const portalUrl = `${window.location.origin}/CustomerPortal`;
+          const msg = [
+            `Olá ${updatedCustomer.name}!`,
+            ``,
+            `Seu acesso ao Portal do Cliente foi liberado!`,
+            ``,
+            `E-mail: ${updatedCustomer.email || finalData.email}`,
+            `Senha: 123456`,
+            ``,
+            `Acesse: ${portalUrl}`,
+            ``,
+            `No portal você pode acompanhar seus agendamentos, histórico de serviços e pagamentos.`,
+          ].join("\n");
+          try {
+            await db.functions.invoke("whatsappSend", {
+              company_id: companyId,
+              phone: updatedCustomer.whatsapp,
+              message: msg,
+            });
+          } catch (_) {}
+        }
+
         if ((updatedCustomer.plan_id || updatedCustomer.custom_plan) && !updatedCustomer.asaas_subscription_id) {
           setSubscriptionCustomer(updatedCustomer);
         } else {
@@ -410,6 +437,32 @@ export default function Customers() {
         }
         queryClient.invalidateQueries({ queryKey: ["customers"] });
         setShowForm(false);
+
+        // Envia WhatsApp com dados do portal se habilitado
+        const portalEnabled = finalData.portal_enabled === true || finalData.portalEnabled === true;
+        if (portalEnabled && created.whatsapp && companyId) {
+          const portalUrl = `${window.location.origin}/CustomerPortal`;
+          const msg = [
+            `Olá ${created.name}!`,
+            ``,
+            `Seu acesso ao Portal do Cliente foi liberado!`,
+            ``,
+            `E-mail: ${created.email || finalData.email}`,
+            `Senha: 123456`,
+            ``,
+            `Acesse: ${portalUrl}`,
+            ``,
+            `No portal você pode acompanhar seus agendamentos, histórico de serviços e pagamentos.`,
+          ].join("\n");
+          try {
+            await db.functions.invoke("whatsappSend", {
+              company_id: companyId,
+              phone: created.whatsapp,
+              message: msg,
+            });
+          } catch (_) {}
+        }
+
         if (created.plan_id || created.custom_plan) {
           setSubscriptionCustomer(created);
         } else {

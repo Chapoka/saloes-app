@@ -32,6 +32,7 @@ export default function NavigationTracker() {
         }
 
         if (isAuthenticated && pageName) {
+            localStorage.setItem('lastValidPath', location.pathname);
             db.appLogs.logUserInApp(pageName).catch(() => {
                 // Silently fail - logging shouldn't break the app
             });

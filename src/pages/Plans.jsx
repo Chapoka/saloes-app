@@ -1117,16 +1117,16 @@ export default function Plans() {
                   onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                   placeholder="Descreva os detalhes do plano..."
                   rows={3}
-                  className="w-full rounded-xl border border-outline-variant px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-branding-primary/50 resize-none"
+                  className="w-full rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-branding-primary/50 resize-none"
                 />
               </div>
 
               {/* Botões de Ação */}
               <div className="flex gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={resetForm} className="flex-1 rounded-xl border-red-500/50 text-red-400 hover:bg-red-500/100/10 hover:text-red-300">
+                <Button type="button" variant="outline" onClick={resetForm} className="flex-1 rounded-xl border-error/50 text-error hover:bg-error/10 hover:text-error/80">
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 rounded-xl bg-green-500 text-white hover:bg-green-500/80">
+                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="flex-1 rounded-xl btn-branding">
                   {createMutation.isPending || updateMutation.isPending ? "Salvando..." : "Salvar"}
                 </Button>
               </div>

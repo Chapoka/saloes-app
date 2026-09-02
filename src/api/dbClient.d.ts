@@ -14,7 +14,7 @@ export interface Company {
   name: string;
   cnpj?: string;
   tipo?: "MATRIZ" | "FILIAL";
-  estabelecimento_tipo?: "barbearia" | "salao_beleza";
+  estabelecimento_tipo?: "barbearia" | "clinica_estetica" | "salao_beleza" | "studio_manicure";
   razao_social?: string;
   situacao_cadastral?: string;
   data_abertura?: string;
@@ -42,7 +42,6 @@ export interface Company {
   branding_secondary_color?: string;
   branding_accent_color?: string;
   branding_background_color?: string;
-  branding_palette?: string;
   created_at?: string;
   updated_at?: string;
 }

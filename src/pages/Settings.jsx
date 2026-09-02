@@ -17,7 +17,6 @@ import {
   Building2,
   List,
   Layers,
-  PaintBucket,
   Crown,
   UserCog,
   Phone,
@@ -26,7 +25,6 @@ import {
 import { formatPhone, formatCPF, formatRG } from "@/utils/formatters";
 import CompanyIntegrationCard from "@/components/settings/CompanyIntegrationCard";
 import ModalitiesSection from "@/components/settings/ModalitiesSection";
-import CompanyBrandingCard from "@/components/settings/CompanyBrandingCard";
 import AsaasSubaccountsModal from "@/components/settings/AsaasSubaccountsModal";
 import CompanyMultiSelect from "@/components/settings/CompanyMultiSelect";
 import LoginImagesCard from "@/components/settings/LoginImagesCard";
@@ -744,28 +742,6 @@ export default function Settings() {
             <LoginImagesCard />
           )}
 
-          {/* Branding por Empresa */}
-          {(isSuperAdmin || isAdmin) && companies.length > 0 && (
-            <Card className="rounded-2xl shadow-sm border border-outline-variant/30">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-secondary/10">
-                    <PaintBucket className="w-5 h-5 text-secondary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Marca por Salão</CardTitle>
-                    <CardDescription>Personalize cores, logo e nome do app para cada salão</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {(isSuperAdmin ? companies : companies.filter(c => currentUserCompanyIds.includes(c.id))).map(company => (
-                  <CompanyBrandingCard key={company.id} company={company} />
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
           {/* Users Management */}
           {(isSuperAdmin || isAdmin) && (
           <Card className="rounded-2xl shadow-sm border border-outline-variant/30">
@@ -832,7 +808,7 @@ export default function Settings() {
                         {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Administrador" : user.role === "profissional" ? "Profissional" : "Cliente"}
                        </span>
                       {customerEmailSet.has(user.email) && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-emerald-500/100/20 text-emerald-400 font-semibold">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-emerald-500/20 text-emerald-400 font-semibold">
                           <User className="w-3 h-3" />
                           Também cliente
                         </span>

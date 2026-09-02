@@ -42,7 +42,6 @@
  * @property {string} [branding_secondary_color]
  * @property {string} [branding_accent_color]
  * @property {string} [branding_background_color]
- * @property {string} [branding_palette]
  * @property {string} [opening_time]
  * @property {string} [closing_time]
  * @property {string} [created_at]

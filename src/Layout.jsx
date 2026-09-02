@@ -19,12 +19,14 @@ import {
   Award,
   Link2,
   UserCog,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClient";
 import { db } from "@/api/dbClient";
-import { useThemeMode } from "@/hooks/useThemeMode";
+import { useThemeMode, useToggleTheme } from "@/hooks/useThemeMode";
 import { useQuery } from "@tanstack/react-query";
 
 const allNavItems = [
@@ -78,9 +80,8 @@ export default function Layout({ children, currentPageName }) {
   // Compute branding from company or defaults
   const defaultBranding = useMemo(() => ({
     appName: "Salon Management", logoUrl: null,
-    primaryColor: "#0077b6", secondaryColor: "#2a9d8f",
-    accentColor: "#1e293b", backgroundColor: "#f8fafc",
-    palette: "barbearia_amber",
+    primaryColor: "#b7005e", secondaryColor: "#db2777",
+    accentColor: "#1a1c1c", backgroundColor: "#f9f9f9",
   }), []);
 
   const branding = userCompany
@@ -91,11 +92,11 @@ export default function Layout({ children, currentPageName }) {
         secondaryColor: userCompany.branding_secondary_color || "#2a9d8f",
         accentColor: userCompany.branding_accent_color || "#1e293b",
         backgroundColor: userCompany.branding_background_color || "#f8fafc",
-        palette: userCompany.branding_palette || "barbearia_amber",
       }
     : defaultBranding;
 
-  const theme = useThemeMode(branding.palette);
+  const theme = useThemeMode();
+  const toggleTheme = useToggleTheme();
   const loading = userLoading || (userCompanyId && companyLoading);
 
   useEffect(() => {
@@ -171,7 +172,7 @@ export default function Layout({ children, currentPageName }) {
     : role === "super_admin"
       ? { background: "rgba(168,85,247,0.1)", color: "#7c3aed", border: "1px solid rgba(168,85,247,0.2)" }
       : role === "admin"
-      ? { background: "rgba(245,158,11,0.1)", color: "#d97706", border: "1px solid rgba(245,158,11,0.2)" }
+      ? { background: "rgba(183,0,94,0.1)", color: "#b7005e", border: "1px solid rgba(183,0,94,0.2)" }
       : { background: `${branding.primaryColor}15`, color: branding.primaryColor, border: `1px solid ${branding.primaryColor}30` };
 
   return (
@@ -203,13 +204,22 @@ export default function Layout({ children, currentPageName }) {
             </div>
             <span className="font-bold" style={{ color: theme.cardText }}>{branding.appName}</span>
           </Link>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-xl transition-colors"
-            style={{ color: theme.sidebarText, background: theme.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }}
-          >
-            {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl transition-colors"
+              style={{ color: theme.sidebarText }}
+            >
+              {theme.isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-xl transition-colors"
+              style={{ color: theme.sidebarText, background: theme.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }}
+            >
+              {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -314,6 +324,22 @@ export default function Layout({ children, currentPageName }) {
               <p className="text-xs truncate" style={{ color: theme.sidebarText }}>{currentUser.email}</p>
             </div>
           </div>
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl transition-all text-sm font-medium mb-1"
+            style={{ color: theme.sidebarText }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = theme.sidebarHover;
+              e.currentTarget.style.color = theme.sidebarTextActive;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = theme.sidebarText;
+            }}
+          >
+            {theme.isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {theme.isDark ? "Tema Claro" : "Tema Escuro"}
+          </button>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-3.5 py-2.5 rounded-xl transition-all text-sm font-medium"

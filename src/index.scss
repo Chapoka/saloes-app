@@ -1,91 +1,6 @@
-/* Branding colors MUST be outside @layer so Tailwind gradient utilities can resolve them */
-:root {
-  --branding-primary: 192 193 255;
-  --branding-secondary: 87 27 193;
-  --branding-accent: 255 185 95;
-  --branding-background: 11 19 38;
-  --branding-primary-hex: #c0c1ff;
-  --branding-secondary-hex: #571bc1;
-  --branding-accent-hex: #ffb95f;
-  --branding-background-hex: #0b1326;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 248 245 240;
-    --foreground: 30 27 24;
-    --card: 255 248 243;
-    --card-foreground: 30 27 24;
-    --popover: 255 248 243;
-    --popover-foreground: 30 27 24;
-    --primary: 115 90 54;
-    --primary-foreground: 255 255 255;
-    --secondary: 95 94 94;
-    --secondary-foreground: 255 255 255;
-    --muted: 244 236 231;
-    --muted-foreground: 78 69 59;
-    --accent: 115 90 54;
-    --accent-foreground: 255 255 255;
-    --destructive: 186 26 26;
-    --destructive-foreground: 255 255 255;
-    --border: 209 197 183;
-    --input: 226 225 226;
-    --ring: 115 90 54;
-    --radius: 0.75rem;
-    --chart-1: 115 90 54;
-    --chart-2: 16 185 129;
-    --chart-3: 239 68 68;
-    --chart-4: 80 95 119;
-    --chart-5: 200 169 126;
-    --sidebar-background: 30 27 24;
-    --sidebar-foreground: 255 248 243;
-    --sidebar-primary: 115 90 54;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 244 236 231;
-    --sidebar-accent-foreground: 30 27 24;
-    --sidebar-border: 209 197 183;
-    --sidebar-ring: 115 90 54;
-  }
-
-  .dark {
-    --background: 11 19 38;
-    --foreground: 218 226 253;
-    --card: 23 31 51;
-    --card-foreground: 218 226 253;
-    --popover: 23 31 51;
-    --popover-foreground: 218 226 253;
-    --primary: 192 193 255;
-    --primary-foreground: 16 0 169;
-    --secondary: 208 188 255;
-    --secondary-foreground: 60 0 145;
-    --muted: 23 31 51;
-    --muted-foreground: 199 196 215;
-    --accent: 255 185 95;
-    --accent-foreground: 71 42 0;
-    --destructive: 255 180 171;
-    --destructive-foreground: 105 0 5;
-    --border: 70 69 84;
-    --input: 45 52 73;
-    --ring: 192 193 255;
-    --chart-1: 192 193 255;
-    --chart-2: 16 185 129;
-    --chart-3: 255 185 95;
-    --chart-4: 128 131 255;
-    --chart-5: 255 180 171;
-    --sidebar-background: 19 27 46;
-    --sidebar-foreground: 199 196 215;
-    --sidebar-primary: 192 193 255;
-    --sidebar-primary-foreground: 16 0 169;
-    --sidebar-accent: 23 31 51;
-    --sidebar-accent-foreground: 199 196 215;
-    --sidebar-border: 34 42 61;
-    --sidebar-ring: 192 193 255;
-  }
-}
 
 @layer base {
   * {
@@ -131,7 +46,7 @@
 
 /* Focus ring */
 *:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--salon-primary-hex, #F59E0B);
   outline-offset: 2px;
   border-radius: var(--radius);
 }
@@ -161,14 +76,6 @@
 .glass {
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(to right, rgb(192 193 255), rgb(255 185 95));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 /* Subtle shadow for cards */
@@ -228,38 +135,13 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Branding gradient - guaranteed visible in both light and dark */
+/* Branding button - uses salon tokens */
 @layer components {
   .btn-branding {
-    background-color: rgb(var(--branding-primary));
-    background-image: linear-gradient(to right, rgb(var(--branding-primary)), rgb(var(--branding-secondary)));
+    background: linear-gradient(135deg, rgb(var(--salon-primary)), rgb(var(--salon-primary-hover)));
     color: white;
   }
   .btn-branding:hover {
     opacity: 0.9;
   }
-}
-
-/* Force light mode variables inside login page */
-.login-light {
-  --background: 248 245 240;
-  --foreground: 30 27 24;
-  --card: 255 255 255;
-  --card-foreground: 30 27 24;
-  --popover: 255 255 255;
-  --popover-foreground: 30 27 24;
-  --primary: 115 90 54;
-  --primary-foreground: 255 255 255;
-  --secondary: 95 94 94;
-  --secondary-foreground: 255 255 255;
-  --muted: 244 236 231;
-  --muted-foreground: 78 69 59;
-  --accent: 115 90 54;
-  --accent-foreground: 255 255 255;
-  --destructive: 186 26 26;
-  --destructive-foreground: 255 255 255;
-  --border: 209 197 183;
-  --input: 226 225 226;
-  --ring: 115 90 54;
-  color-scheme: light;
 }

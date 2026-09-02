@@ -3,10 +3,9 @@ import { db } from "@/api/dbClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, Loader2, Building2, MapPin, Phone, User, MessageCircle, PaintBucket, Image, Palette } from "lucide-react";
+import { Search, Loader2, Building2, MapPin, Phone, User, MessageCircle, Image } from "lucide-react";
 import { toast } from "sonner";
-import { PALETTE_LIST, COLOR_PALETTES } from "@/lib/colorPalettes";
-import { formatPhone, formatCPF, formatCNPJ, formatCEP } from "@/utils/formatters";
+import { formatPhone, formatCPF, formatCNPJ } from "@/utils/formatters";
 
 const emptyForm = {
   name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
@@ -14,21 +13,13 @@ const emptyForm = {
   natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
   logradouro: "", numero: "", complemento: "", phone: "", email: "",
   owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
-  branding_primary_color: "", branding_secondary_color: "", branding_accent_color: "", branding_background_color: "", branding_palette: "barbearia_amber",
 };
 
-const ESTABLISHMENT_THEMES = {
-  barbearia: { primary: COLOR_PALETTES.barbearia_amber.colors.primary, secondary: COLOR_PALETTES.barbearia_amber.colors.secondary, label: "Barbearia" },
-  clinica_estetica: { primary: COLOR_PALETTES.clinica.colors.primary, secondary: COLOR_PALETTES.clinica.colors.secondary, label: "Clínica / Estética" },
-  salao_beleza: { primary: COLOR_PALETTES.salao.colors.primary, secondary: COLOR_PALETTES.salao.colors.secondary, label: "Salão de Beleza" },
-  studio_manicure: { primary: COLOR_PALETTES.studio.colors.primary, secondary: COLOR_PALETTES.studio.colors.secondary, label: "Studio / Manicure" },
-};
-
-const TYPE_PALETTE_MAP = {
-  barbearia: ["barbearia_amber", "barbearia_cyber", "barbearia_kinetic"],
-  salao_beleza: ["salao"],
-  clinica_estetica: ["clinica"],
-  studio_manicure: ["studio"],
+const ESTABLISHMENT_TYPES = {
+  barbearia: "Barbearia",
+  clinica_estetica: "Clínica / Estética",
+  salao_beleza: "Salão de Beleza",
+  studio_manicure: "Studio / Manicure",
 };
 
 function validateCpf(cpf) {
@@ -213,152 +204,14 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
               <Label>Tipo de Estabelecimento *</Label>
               <select
                 value={form.estabelecimento_tipo}
-                onChange={(e) => {
-                  const key = e.target.value;
-                  const theme = ESTABLISHMENT_THEMES[key];
-                  setForm((prev) => ({
-                    ...prev,
-                    estabelecimento_tipo: key,
-                    branding_primary_color: theme?.primary || prev.branding_primary_color,
-                    branding_secondary_color: theme?.secondary || prev.branding_secondary_color,
-                  }));
-                }}
+                onChange={(e) => setForm((prev) => ({ ...prev, estabelecimento_tipo: e.target.value }))}
                 className="rounded-xl border border-input bg-transparent px-3 h-9 text-sm w-full"
               >
                 <option value="">Selecione o tipo</option>
-                {Object.entries(ESTABLISHMENT_THEMES).map(([key, theme]) => (
-                  <option key={key} value={key}>{theme.label}</option>
+                {Object.entries(ESTABLISHMENT_TYPES).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
                 ))}
               </select>
-              {form.estabelecimento_tipo && (
-                <p className="text-xs text-muted-foreground">
-                  Cores aplicadas: primária <strong style={{ color: form.branding_primary_color }}>{form.branding_primary_color}</strong> e secundária <strong style={{ color: form.branding_secondary_color }}>{form.branding_secondary_color}</strong>
-                </p>
-              )}
-            </div>
-
-            {/* Palette presets */}
-            <div className="space-y-1 col-span-2">
-              <Label className="flex items-center gap-1.5"><Palette className="w-4 h-4" /> Paleta de Cores</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {(form.estabelecimento_tipo
-                  ? PALETTE_LIST.filter(p => (TYPE_PALETTE_MAP[form.estabelecimento_tipo] || []).includes(p.id))
-                  : PALETTE_LIST
-                ).map((palette) => (
-                  <button
-                    key={palette.id}
-                    type="button"
-                    onClick={() => setForm((prev) => ({
-                      ...prev,
-                      branding_palette: palette.id,
-                      branding_primary_color: palette.colors.primary,
-                      branding_secondary_color: palette.colors.secondary,
-                      branding_accent_color: palette.colors.accent,
-                      branding_background_color: palette.colors.background,
-                    }))}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
-                      form.branding_palette === palette.id
-                        ? "border-branding-primary bg-branding-primary/5 text-on-surface shadow-sm"
-                        : "border-outline-variant text-muted-foreground hover:border-outline"
-                    }`}
-                  >
-                    <span className="flex -space-x-1">
-                      {Object.values(palette.colors).map((color, i) => (
-                        <span
-                          key={i}
-                          className="w-4 h-4 rounded-full border-2 border-surface shadow-sm"
-                          style={{ background: color }}
-                        />
-                      ))}
-                    </span>
-                    {palette.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Branding colors */}
-            <div className="space-y-1 col-span-2">
-              <Label className="flex items-center gap-1.5"><PaintBucket className="w-4 h-4" /> Cores da Marca</Label>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Primária</Label>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <input
-                      type="color"
-                      value={form.branding_primary_color || "#0077b6"}
-                      onChange={(e) => setForm((prev) => ({ ...prev, branding_primary_color: e.target.value }))}
-                      className="w-9 h-9 rounded-lg border border-outline-variant cursor-pointer"
-                    />
-                    <Input
-                      value={form.branding_primary_color || ""}
-                      onChange={(e) => setForm((prev) => ({ ...prev, branding_primary_color: e.target.value }))}
-                      placeholder="#0077b6"
-                      className="rounded-xl bg-card text-sm font-mono h-9"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Secundária</Label>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <input
-                      type="color"
-                      value={form.branding_secondary_color || "#2a9d8f"}
-                      onChange={(e) => setForm((prev) => ({ ...prev, branding_secondary_color: e.target.value }))}
-                      className="w-9 h-9 rounded-lg border border-outline-variant cursor-pointer"
-                    />
-                    <Input
-                      value={form.branding_secondary_color || ""}
-                      onChange={(e) => setForm((prev) => ({ ...prev, branding_secondary_color: e.target.value }))}
-                      placeholder="#2a9d8f"
-                      className="rounded-xl bg-card text-sm font-mono h-9"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Destaque</Label>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <input
-                      type="color"
-                      value={form.branding_accent_color || "#1e293b"}
-                      onChange={(e) => setForm((prev) => ({ ...prev, branding_accent_color: e.target.value }))}
-                      className="w-9 h-9 rounded-lg border border-outline-variant cursor-pointer"
-                    />
-                    <Input
-                      value={form.branding_accent_color || ""}
-                      onChange={(e) => setForm((prev) => ({ ...prev, branding_accent_color: e.target.value }))}
-                      placeholder="#1e293b"
-                      className="rounded-xl bg-card text-sm font-mono h-9"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Fundo</Label>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <input
-                      type="color"
-                      value={form.branding_background_color || "#f8fafc"}
-                      onChange={(e) => setForm((prev) => ({ ...prev, branding_background_color: e.target.value }))}
-                      className="w-9 h-9 rounded-lg border border-outline-variant cursor-pointer"
-                    />
-                    <Input
-                      value={form.branding_background_color || ""}
-                      onChange={(e) => setForm((prev) => ({ ...prev, branding_background_color: e.target.value }))}
-                      placeholder="#f8fafc"
-                      className="rounded-xl bg-card text-sm font-mono h-9"
-                    />
-                  </div>
-                </div>
-              </div>
-              {form.branding_primary_color && form.branding_secondary_color && (
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_primary_color }} />
-                  <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_secondary_color }} />
-                  <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_accent_color || "#1e293b" }} />
-                  <span className="w-4 h-4 rounded-full border" style={{ background: form.branding_background_color || "#f8fafc" }} />
-                  <span className="text-xs text-muted-foreground">Pré-visualização</span>
-                </div>
-              )}
             </div>
 
             {/* Logo upload */}

@@ -1,24 +1,13 @@
 import { useState } from "react";
 import { db } from "@/api/dbClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, PaintBucket, Image, Type, ChevronDown, ChevronUp, Building2, Palette, Upload } from "lucide-react";
+import { Save, PaintBucket, Image, Type, ChevronDown, ChevronUp, Building2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { COLOR_PALETTES, PALETTE_LIST } from "@/lib/colorPalettes";
-
-const TYPE_PALETTE_MAP = {
-  barbearia: ["barbearia_amber", "barbearia_cyber", "barbearia_kinetic"],
-  salao_beleza: ["salao"],
-  clinica_estetica: ["clinica"],
-  studio_manicure: ["studio"],
-};
 
 export default function CompanyBrandingCard({ company }) {
-  const companyType = company.estabelecimento_tipo || "barbearia";
-  const allowedPaletteIds = TYPE_PALETTE_MAP[companyType] || [];
-  const availablePalettes = PALETTE_LIST.filter(p => allowedPaletteIds.includes(p.id));
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(true);
   const [form, setForm] = useState({
@@ -28,7 +17,6 @@ export default function CompanyBrandingCard({ company }) {
     branding_secondary_color: company.branding_secondary_color || "#2a9d8f",
     branding_accent_color: company.branding_accent_color || "#1e293b",
     branding_background_color: company.branding_background_color || "#f8fafc",
-    branding_palette: company.branding_palette || "barbearia_amber",
   });
 
   const saveMutation = useMutation({
@@ -44,19 +32,6 @@ export default function CompanyBrandingCard({ company }) {
   });
 
   const setField = (key, value) => setForm(f => ({ ...f, [key]: value }));
-
-  const handlePaletteSelect = (paletteId) => {
-    const palette = COLOR_PALETTES[paletteId];
-    if (!palette) return;
-    setForm(f => ({
-      ...f,
-      branding_palette: paletteId,
-      branding_primary_color: palette.colors.primary,
-      branding_secondary_color: palette.colors.secondary,
-      branding_accent_color: palette.colors.accent,
-      branding_background_color: palette.colors.background,
-    }));
-  };
 
   const primary = form.branding_primary_color || "#0077b6";
   const secondary = form.branding_secondary_color || "#2a9d8f";
@@ -157,40 +132,8 @@ export default function CompanyBrandingCard({ company }) {
 
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Palette className="w-4 h-4 text-on-surface-variant" />
-              <p className="font-semibold text-on-surface">Paleta de Cores</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <select
-                value={form.branding_palette || ""}
-                onChange={e => handlePaletteSelect(e.target.value)}
-                className="flex-1 h-9 rounded-lg border border-outline-variant/30 bg-surface-container-lowest text-on-surface px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                {availablePalettes.map((palette) => (
-                  <option key={palette.id} value={palette.id}>{palette.name}</option>
-                ))}
-              </select>
-              {availablePalettes.find(p => p.id === form.branding_palette) && (
-                <div className="flex -space-x-1.5">
-                  {Object.values(availablePalettes.find(p => p.id === form.branding_palette).colors).map((color, i) => (
-                    <div
-                      key={i}
-                      className="w-5 h-5 rounded-full border-2 border-surface-container-low shadow-sm"
-                      style={{ background: color }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-            {availablePalettes.find(p => p.id === form.branding_palette) && (
-              <p className="text-xs text-on-surface-variant mt-2">{availablePalettes.find(p => p.id === form.branding_palette).description}</p>
-            )}
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2 mb-3">
               <PaintBucket className="w-4 h-4 text-on-surface-variant" />
-              <p className="font-semibold text-on-surface">Cores Individuais</p>
+              <p className="font-semibold text-on-surface">Cores da Marca</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>

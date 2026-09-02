@@ -4,7 +4,6 @@ import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { ProtectedRoute, ProtectedRoute as ProtectedRouteDefault } from '@/components/ProtectedRoute';
@@ -106,7 +105,7 @@ const AuthenticatedApp = () => {
             />
           );
         })}
-        <Route path="*" element={<PageNotFound />} />
+        <Route path="*" element={<Navigate to={localStorage.getItem('lastValidPath') || `/${mainPageKey}`} replace />} />
       </Route>
     </Routes>
     </ErrorBoundary>
