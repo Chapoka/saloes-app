@@ -86,8 +86,8 @@ export default function LoginImagesCard() {
     <Card className="rounded-2xl shadow-sm border border-outline-variant/10">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-pink-100">
-            <ImageIcon className="w-5 h-5 text-pink-600" />
+          <div className="p-2 rounded-lg bg-branding-primary/10">
+            <ImageIcon className="w-5 h-5 text-branding-primary" />
           </div>
           <div>
             <CardTitle className="text-lg">Fotos da Tela de Entrada</CardTitle>
@@ -99,7 +99,7 @@ export default function LoginImagesCard() {
         <div className="flex items-center gap-3">
           <label className="cursor-pointer">
             <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-600 text-white text-sm font-medium hover:bg-pink-700 transition-colors">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl btn-branding text-white text-sm font-medium transition-colors">
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
               {uploading ? "Enviando..." : "Adicionar Fotos"}
             </span>
@@ -120,7 +120,7 @@ export default function LoginImagesCard() {
                 <img src={img.image} alt="" className="w-full h-full object-cover" />
                 <button
                   onClick={() => handleRemove(idx)}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/100 text-white flex items-center justify-center hover:bg-error transition-colors shadow-lg"
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-error text-white flex items-center justify-center hover:bg-error/80 transition-colors shadow-lg"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -151,7 +151,7 @@ export default function LoginImagesCard() {
 
         {images.length > 0 && (
           <div className="flex justify-end">
-            <Button onClick={handleSaveTexts} disabled={saveMutation.isPending} className="rounded-xl bg-pink-600 hover:bg-pink-700">
+            <Button onClick={handleSaveTexts} disabled={saveMutation.isPending} className="rounded-xl btn-branding">
               <Save className="w-4 h-4 mr-2" />
               {saveMutation.isPending ? "Salvando..." : "Salvar Textos"}
             </Button>
