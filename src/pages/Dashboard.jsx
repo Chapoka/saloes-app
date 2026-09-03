@@ -395,7 +395,7 @@ function SuperAdminDashboard({ currentUser }) {
                     <div
                       key={customer.id}
                       className="flex items-start gap-3 p-3 bg-salon-warning/5 border border-salon-warning/20 rounded-lg cursor-pointer hover:border-salon-warning/50 transition-colors"
-                      onClick={() => navigate(createPageUrl(`Customers?id=${customer.id}`))}
+                      onClick={() => navigate(createPageUrl(`Clientes?id=${customer.id}`))}
                     >
                       <span className="material-symbols-outlined text-salon-warning">warning</span>
                       <div>
@@ -410,7 +410,7 @@ function SuperAdminDashboard({ currentUser }) {
                     <div
                       key={customer.id}
                       className="flex items-start gap-3 p-3 bg-salon-info/5 border border-salon-info/20 rounded-lg cursor-pointer hover:border-salon-info/50 transition-colors"
-                      onClick={() => navigate(createPageUrl(`Customers?id=${customer.id}`))}
+                      onClick={() => navigate(createPageUrl(`Clientes?id=${customer.id}`))}
                     >
                       <span className="material-symbols-outlined text-salon-info">cake</span>
                       <div>
@@ -800,7 +800,7 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
                     <div
                       key={customer.id}
                       className="flex items-start gap-3 p-3 bg-salon-warning/5 border border-salon-warning/20 rounded-lg cursor-pointer hover:border-salon-warning/50 transition-colors"
-                      onClick={() => navigate(createPageUrl(`Customers?id=${customer.id}`))}
+                      onClick={() => navigate(createPageUrl(`Clientes?id=${customer.id}`))}
                     >
                       <span className="material-symbols-outlined text-salon-warning">warning</span>
                       <div>
@@ -815,7 +815,7 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
                     <div
                       key={customer.id}
                       className="flex items-start gap-3 p-3 bg-salon-info/5 border border-salon-info/20 rounded-lg cursor-pointer hover:border-salon-info/50 transition-colors"
-                      onClick={() => navigate(createPageUrl(`Customers?id=${customer.id}`))}
+                      onClick={() => navigate(createPageUrl(`Clientes?id=${customer.id}`))}
                     >
                       <span className="material-symbols-outlined text-salon-info">cake</span>
                       <div>
@@ -841,7 +841,7 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
                 Novo Agendamento
               </button>
               <button
-                onClick={() => navigate(createPageUrl("Customers"), { state: { openNew: true } })}
+                onClick={() => navigate(createPageUrl("Clientes"), { state: { openNew: true } })}
                 className="bg-transparent border border-border hover:border-branding hover:text-branding text-text-main py-3 px-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-colors"
               >
                 <span className="material-symbols-outlined">person_add</span>
