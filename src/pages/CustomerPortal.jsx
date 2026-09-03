@@ -305,7 +305,7 @@ export default function CustomerPortal() {
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  className="pl-9 rounded-xl h-11"
+                  className="pl-9 rounded-xl h-11 text-gray-900 placeholder:text-gray-400 border-gray-200 focus:border-branding-primary focus:ring-branding-primary/20"
                 />
               </div>
             </div>
@@ -319,7 +319,7 @@ export default function CustomerPortal() {
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  className="pl-9 rounded-xl h-11"
+                  className="pl-9 rounded-xl h-11 text-gray-900 placeholder:text-gray-400 border-gray-200 focus:border-branding-primary focus:ring-branding-primary/20"
                 />
               </div>
             </div>
