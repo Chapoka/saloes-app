@@ -17,13 +17,10 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Mail,
-  Lock,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +28,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -80,6 +76,7 @@ export default function CustomerPortal() {
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Auto-login: busca cliente pelo email do usuário autenticado
   useEffect(() => {
@@ -284,63 +281,126 @@ export default function CustomerPortal() {
   // Login screen
   if (!customer) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-branding-primary/5 via-white to-branding-secondary/5 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-branding-primary to-branding-secondary flex items-center justify-center mx-auto mb-4 shadow-xl shadow-branding-primary/25">
-              <Droplets className="w-10 h-10 text-white" />
+      <div className="min-h-screen bg-background text-on-background font-body-md overflow-x-hidden flex items-center justify-center relative">
+        {/* Subtle background glow */}
+        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-primary-container/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div className="w-full max-w-md space-y-8 z-10 px-6">
+          {/* Brand & Header */}
+          <div className="text-center space-y-3 fade-in-up">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-surface border border-outline-variant/30 shadow-lg mb-4">
+              <span
+                className="material-symbols-outlined text-4xl text-primary"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                spa
+              </span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Portal do Cliente</h1>
-            <p className="text-gray-500 text-sm mt-1">Acesse seus serviços, histórico e pagamentos</p>
+            <h1 className="font-headline-lg-mobile lg:font-headline-lg text-headline-lg-mobile lg:text-headline-lg gradient-text">
+              Portal do Cliente
+            </h1>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Acesse seus serviços, histórico e pagamentos
+            </p>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-lg shadow-gray-100 p-6 space-y-4">
-            <div className="space-y-2">
-              <Label className="text-gray-700">E-mail</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <Input
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  className="pl-9 rounded-xl h-11 text-gray-900 placeholder:text-gray-400 border-gray-200 focus:border-branding-primary focus:ring-branding-primary/20"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-gray-700">Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <Input
-                  type="password"
-                  placeholder="••••••"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                  className="pl-9 rounded-xl h-11 text-gray-900 placeholder:text-gray-400 border-gray-200 focus:border-branding-primary focus:ring-branding-primary/20"
-                />
-              </div>
-            </div>
-
+          {/* Form Card */}
+          <div className="bg-surface p-6 sm:p-8 rounded-xl shadow-lg border border-outline-variant/20 fade-in-up delay-100">
             {loginError && (
-              <div className="bg-red-50 border border-red-100 rounded-xl p-3 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                <p className="text-sm text-red-600">{loginError}</p>
+              <div className="mb-4 p-3 rounded-lg bg-error-container/20 text-error text-sm border border-error-container/30 flex items-center gap-2">
+                <span className="text-error text-xs font-bold">!</span>
+                {loginError}
               </div>
             )}
 
-            <button
-              onClick={handleLogin}
-              disabled={loggingIn}
-              className="w-full py-3 rounded-2xl btn-branding text-white font-semibold text-base shadow-lg shadow-branding-primary/30 hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {loggingIn && <Loader2 className="w-4 h-4 animate-spin" />}
-              Entrar
-            </button>
+            <div className="space-y-5">
+              {/* Email Input */}
+              <div className="space-y-1">
+                <label className="block font-label-md text-label-md text-on-surface">E-mail</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+                    <span className="material-symbols-outlined text-lg">mail</span>
+                  </span>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="voce@exemplo.com"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                    className="block w-full pl-10 pr-3 py-3 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline focus:ring-2 focus:ring-primary focus:border-primary transition-all sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-1">
+                <label className="block font-label-md text-label-md text-on-surface">Senha</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+                    <span className="material-symbols-outlined text-lg">lock</span>
+                  </span>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                    className="block w-full pl-10 pr-10 py-3 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline focus:ring-2 focus:ring-primary focus:border-primary transition-all sm:text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-2">
+                <button
+                  onClick={handleLogin}
+                  disabled={loggingIn}
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg font-label-md text-label-md text-white gradient-btn shadow-lg disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center gap-2"
+                >
+                  {loggingIn && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {loggingIn ? "Entrando..." : "Entrar"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
+        <style>{`
+          .fade-in-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          .delay-100 { animation-delay: 100ms; }
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .gradient-text {
+            background: linear-gradient(to right, rgb(var(--salon-primary)), rgb(var(--salon-primary-hover)));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          }
+          .gradient-btn {
+            background: linear-gradient(135deg, rgb(var(--salon-primary)) 0%, rgb(var(--salon-primary-hover)) 100%);
+            transition: all 0.2s ease-in-out;
+          }
+          .gradient-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgb(var(--salon-primary) / 0.5);
+          }
+        `}</style>
       </div>
     );
   }
