@@ -4,11 +4,16 @@ export const THEMES = {
     salon: {
       bg: "#f9f9f9",
       surface: "#f3f3f3",
+      "surface-hover": "#ebebeb",
       primary: "#b7005e",
       "primary-hover": "#db2777",
       "text-main": "#1a1c1c",
       "text-muted": "#594047",
       border: "#e1bec6",
+      warning: "#F59E0B",
+      error: "#EF4444",
+      success: "#10B981",
+      info: "#3B82F6",
     },
     m3: {
       "surface": "#f9f9f9",
@@ -65,11 +70,16 @@ export const THEMES = {
     salon: {
       bg: "#121212",
       surface: "#1E1E1E",
+      "surface-hover": "#2A2A2A",
       primary: "#F59E0B",
       "primary-hover": "#D97706",
       "text-main": "#FFFFFF",
       "text-muted": "#9CA3AF",
       border: "#2D2D2D",
+      warning: "#FBBF24",
+      error: "#F87171",
+      success: "#34D399",
+      info: "#60A5FA",
     },
     m3: {
       "surface": "#131313",

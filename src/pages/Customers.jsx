@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { db, setCustomerCompanies, getCustomerCompanies } from "@/api/dbClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useThemeMode } from "@/hooks/useThemeMode";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Users,
   Plus,
@@ -19,7 +20,7 @@ import {
   BookOpen,
   XCircle
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { format, parseISO, startOfDay } from "date-fns";
 import AsaasSubscriptionModal from "@/components/customers/AsaasSubscriptionModal";
 import { Button } from "@/components/ui/button";
@@ -80,18 +81,21 @@ export default function Customers() {
   const [currentUser, setCurrentUser] = useState(null);
   const [userReady, setUserReady] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const isMobile = useIsMobile();
 
   const effectiveViewMode = isMobile ? "grid" : viewMode;
 
   useEffect(() => {
     db.auth.me().then(u => { setCurrentUser(u); setUserReady(true); }).catch(() => setUserReady(true));
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.openNew) {
+      setShowForm(true);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, []);
 
   const rawRole = currentUser?.role;

@@ -388,7 +388,7 @@ export default function Plans() {
             <h2 className="text-xl font-bold text-on-surface mb-4">Planos Personalizados</h2>
             {viewMode === "list" ? (
               <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-x-auto">
-                <table className="w-full text-sm min-w-[600px]">
+                <table className="w-full text-sm min-w-[480px]">
                   <thead className="bg-background border-b border-outline-variant/30">
                     <tr>
                       <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Cliente</th>
@@ -488,7 +488,7 @@ export default function Plans() {
             </div>
           ) : viewMode === "list" ? (
             <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 overflow-x-auto">
-              <table className="w-full text-sm min-w-[750px]">
+              <table className="w-full text-sm min-w-[520px]">
                 <thead className="bg-background border-b border-outline-variant/30">
                   <tr>
                     <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Nome</th>

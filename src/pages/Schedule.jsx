@@ -43,12 +43,20 @@ export default function Schedule() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const [viewMode, setViewMode] = useState(urlParams.get("view") || "week"); // day, week, month
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const effectiveViewMode = isMobile && viewMode === "week" ? "day" : viewMode;
   const [currentUser, setCurrentUser] = useState(null);
   const [repeatAppointment, setRepeatAppointment] = useState(null);
   const [isCreatingRepeat, setIsCreatingRepeat] = useState(false);
   const [showBusinessHours, setShowBusinessHours] = useState(false);
   const [showBlockedTimes, setShowBlockedTimes] = useState(false);
   const [outOfHoursSlot, setOutOfHoursSlot] = useState(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     db.auth.me().then(async (user) => {
@@ -615,7 +623,7 @@ export default function Schedule() {
         </div>
 
         {/* Calendar */}
-        {viewMode === "day" && (
+        {effectiveViewMode === "day" && (
           <DayCalendar
             appointments={filteredAppointments}
             customers={customers}
@@ -625,7 +633,7 @@ export default function Schedule() {
             closingTime={currentCompany?.closing_time}
           />
         )}
-        {viewMode === "week" && (
+        {effectiveViewMode === "week" && (
           <WeeklyCalendar
             appointments={filteredAppointments}
             customers={customers}
@@ -635,7 +643,7 @@ export default function Schedule() {
             closingTime={currentCompany?.closing_time}
           />
         )}
-        {viewMode === "month" && (
+        {effectiveViewMode === "month" && (
           <MonthCalendar
             appointments={filteredAppointments}
             customers={customers}

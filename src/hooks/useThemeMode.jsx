@@ -24,11 +24,16 @@ function injectThemeCSS(mode) {
   const salonVars = [
     `  --salon-bg: ${toRgb(s.bg)};`,
     `  --salon-surface: ${toRgb(s.surface)};`,
+    `  --salon-surface-hover: ${toRgb(s["surface-hover"])};`,
     `  --salon-primary: ${toRgb(s.primary)};`,
     `  --salon-primary-hover: ${toRgb(s["primary-hover"])};`,
     `  --salon-text-main: ${toRgb(s["text-main"])};`,
     `  --salon-text-muted: ${toRgb(s["text-muted"])};`,
     `  --salon-border: ${toRgb(s.border)};`,
+    `  --salon-warning: ${toRgb(s.warning)};`,
+    `  --salon-error: ${toRgb(s.error)};`,
+    `  --salon-success: ${toRgb(s.success)};`,
+    `  --salon-info: ${toRgb(s.info)};`,
     "",
     `  --salon-bg-hex: ${s.bg};`,
     `  --salon-surface-hex: ${s.surface};`,
@@ -37,6 +42,10 @@ function injectThemeCSS(mode) {
     `  --salon-text-main-hex: ${s["text-main"]};`,
     `  --salon-text-muted-hex: ${s["text-muted"]};`,
     `  --salon-border-hex: ${s.border};`,
+    `  --salon-warning-hex: ${s.warning};`,
+    `  --salon-error-hex: ${s.error};`,
+    `  --salon-success-hex: ${s.success};`,
+    `  --salon-info-hex: ${s.info};`,
   ];
   const m3Vars = Object.entries(m)
     .map(([key, val]) => `  --${key}: ${toRgb(val)};`)
@@ -82,7 +91,7 @@ export function useThemeMode() {
     mode,
     sidebarBg: s.surface,
     sidebarBorder: s.border,
-    sidebarHover: s.border,
+    sidebarHover: s["surface-hover"],
     sidebarActive: `linear-gradient(135deg, ${s.primary}, ${s["primary-hover"]})`,
     sidebarText: s["text-muted"],
     sidebarTextActive: isDark ? s.bg : "#ffffff",
@@ -97,10 +106,10 @@ export function useThemeMode() {
       ? "linear-gradient(160deg, rgba(18,18,18,0.98), rgba(245,158,11,0.06))"
       : "linear-gradient(160deg, rgba(249,249,249,0.98), rgba(183,0,94,0.06))",
     accentGlow: isDark ? "rgba(245,158,11,0.10)" : "rgba(183,0,94,0.08)",
-    success: "#10B981",
-    warning: "#F59E0B",
-    danger: "#EF4444",
-    info: isDark ? "#F59E0B" : "#db2777",
+    success: s.success,
+    warning: s.warning,
+    danger: s.error,
+    info: s.info,
   };
 }
 

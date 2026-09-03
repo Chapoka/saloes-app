@@ -236,7 +236,7 @@ export default function DayCalendar({ appointments, customers = [], onAppointmen
                     )}
                   </div>
                 </HoverCardTrigger>
-                <HoverCardContent className="w-72 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/30">
+                <HoverCardContent className="w-56 sm:w-72 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/30">
                   <div className="space-y-3">
                     {appointment.isGroup ? (
                       <>

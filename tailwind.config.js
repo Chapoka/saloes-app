@@ -20,11 +20,16 @@ module.exports = {
         salon: {
           bg: 'rgb(var(--salon-bg) / <alpha-value>)',
           surface: 'rgb(var(--salon-surface) / <alpha-value>)',
+          'surface-hover': 'rgb(var(--salon-surface-hover) / <alpha-value>)',
           primary: 'rgb(var(--salon-primary) / <alpha-value>)',
           'primary-hover': 'rgb(var(--salon-primary-hover) / <alpha-value>)',
           'text-main': 'rgb(var(--salon-text-main) / <alpha-value>)',
           'text-muted': 'rgb(var(--salon-text-muted) / <alpha-value>)',
           border: 'rgb(var(--salon-border) / <alpha-value>)',
+          warning: 'rgb(var(--salon-warning) / <alpha-value>)',
+          error: 'rgb(var(--salon-error) / <alpha-value>)',
+          success: 'rgb(var(--salon-success) / <alpha-value>)',
+          info: 'rgb(var(--salon-info) / <alpha-value>)',
         },
         background: 'rgb(var(--salon-bg) / <alpha-value>)',
         foreground: 'rgb(var(--salon-text-main) / <alpha-value>)',
@@ -98,6 +103,7 @@ module.exports = {
           dim: 'rgb(var(--salon-bg) / <alpha-value>)',
           tint: 'rgb(var(--salon-primary) / <alpha-value>)',
           variant: 'rgb(var(--salon-border) / <alpha-value>)',
+          hover: 'rgb(var(--salon-surface-hover) / <alpha-value>)',
           container: {
             DEFAULT: 'rgb(var(--salon-surface) / <alpha-value>)',
             low: 'rgb(var(--salon-surface) / <alpha-value>)',
@@ -129,10 +135,12 @@ module.exports = {
         'inverse-surface': 'rgb(var(--salon-text-main) / <alpha-value>)',
         'inverse-on-surface': 'rgb(var(--salon-bg) / <alpha-value>)',
         branding: {
+          DEFAULT: 'rgb(var(--salon-primary) / <alpha-value>)',
           primary: 'rgb(var(--salon-primary) / <alpha-value>)',
           secondary: 'rgb(var(--salon-primary-hover) / <alpha-value>)',
           accent: 'rgb(var(--salon-primary) / <alpha-value>)',
           background: 'rgb(var(--salon-bg) / <alpha-value>)',
+          hover: 'rgb(var(--salon-primary-hover) / <alpha-value>)',
         },
         chart: {
           '1': 'rgb(var(--salon-primary) / <alpha-value>)',

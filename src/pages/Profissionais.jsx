@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { db } from "@/api/dbClient";
 import { supabase } from "@/lib/supabaseClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/components/auth/useCurrentUser";
 import { useThemeMode } from "@/hooks/useThemeMode";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { formatPhone } from "@/utils/formatters";
 import {
   UserCog,
@@ -17,6 +18,8 @@ import {
   MoreVertical,
   Power,
   PowerOff,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,9 +76,13 @@ const TABS = [
 export default function Profissionais() {
   const queryClient = useQueryClient();
   const theme = useThemeMode();
-  const { companyId, ready } = useCurrentUser();
+  const { companyId, isSuperAdmin, ready } = useCurrentUser();
+  const isMobile = useIsMobile();
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [viewMode, setViewMode] = useState("list");
+  const [companyFilter, setCompanyFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
   const [selectedProf, setSelectedProf] = useState(null);
   const [editingProf, setEditingProf] = useState(null);
@@ -126,13 +133,18 @@ export default function Profissionais() {
     enabled: ready,
   });
 
+  const effectiveViewMode = isMobile ? "grid" : viewMode;
+
   const professionals = allUsers.filter(u => {
     const rawRole = u.role || "";
     const role = rawRole === "teacher" ? "profissional" : rawRole;
     const isProf = role === "profissional" || u.is_professional === true;
-    const matchCompany = !effectiveCompanyId || u.company_id === effectiveCompanyId || (u.company_ids || []).includes(effectiveCompanyId);
+    const matchCompany = isSuperAdmin
+      ? (companyFilter === "all" || u.company_id === companyFilter || (u.company_ids || []).includes(companyFilter))
+      : (!effectiveCompanyId || u.company_id === effectiveCompanyId || (u.company_ids || []).includes(effectiveCompanyId));
     const matchSearch = !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase());
-    return isProf && matchCompany && matchSearch;
+    const matchStatus = statusFilter === "all" || (statusFilter === "active" && u.active !== false) || (statusFilter === "inactive" && u.active === false);
+    return isProf && matchCompany && matchSearch && matchStatus;
   });
 
   const services = effectiveCompanyId
@@ -345,6 +357,69 @@ export default function Profissionais() {
           <Input placeholder="Buscar profissional..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
 
+        {/* Filtros */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex bg-surface-container-low rounded-lg p-1 gap-1">
+            {[
+              { value: "all", label: "Todos" },
+              { value: "active", label: "Ativos" },
+              { value: "inactive", label: "Inativos" },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setStatusFilter(opt.value)}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+                  statusFilter === opt.value
+                    ? "bg-card text-on-surface shadow-sm"
+                    : "text-muted-foreground hover:text-on-surface"
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {isSuperAdmin && allCompanies.length > 0 && (
+            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+              <SelectTrigger className="w-48 rounded-lg h-9">
+                <SelectValue placeholder="Todos os salões" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os salões</SelectItem>
+                {allCompanies.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <div className="ml-auto flex bg-surface-container-low rounded-lg p-1 gap-1">
+            <button
+              onClick={() => setViewMode("list")}
+              className={cn(
+                "p-1.5 rounded-md transition-all",
+                effectiveViewMode === "list"
+                  ? "bg-card text-on-surface shadow-sm"
+                  : "text-muted-foreground hover:text-on-surface"
+              )}
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("grid")}
+              className={cn(
+                "p-1.5 rounded-md transition-all",
+                effectiveViewMode === "grid"
+                  ? "bg-card text-on-surface shadow-sm"
+                  : "text-muted-foreground hover:text-on-surface"
+              )}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
         {loadingUsers ? (
           <div className="text-center py-12 text-muted-foreground">Carregando...</div>
         ) : professionals.length === 0 ? (
@@ -352,7 +427,7 @@ export default function Profissionais() {
             <UserCog className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground">Nenhum profissional encontrado</p>
           </div>
-        ) : (
+        ) : effectiveViewMode === "list" ? (
           <div className="space-y-3">
             {professionals.map(prof => {
               const svcCount = proServByType(prof.id, "services").length;
@@ -403,6 +478,50 @@ export default function Profissionais() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {professionals.map(prof => {
+              const svcCount = proServByType(prof.id, "services").length;
+              return (
+                <div key={prof.id} onClick={() => { setSelectedProf(prof); setActiveTab("services"); }}
+                  className={cn("rounded-xl border p-4 transition-all hover:shadow-md cursor-pointer text-center", prof.active === false ? "opacity-60" : "")}
+                  style={{ background: theme.cardBg, borderColor: theme.cardBorder }}>
+                  {prof.photo_url ? (
+                    <img src={prof.photo_url} alt="" className="w-16 h-16 rounded-full object-cover mx-auto mb-3" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-branding-primary/10 flex items-center justify-center text-branding-primary font-bold text-2xl mx-auto mb-3">
+                      {(prof.full_name || prof.email || "?")[0].toUpperCase()}
+                    </div>
+                  )}
+                  <h3 className="font-semibold text-on-surface text-sm truncate">{prof.full_name || "Sem nome"}</h3>
+                  <p className="text-xs text-muted-foreground truncate">{prof.email}</p>
+                  {prof.company_id && (
+                    <p className="text-xs text-outline truncate mt-0.5">{allCompanies.find(c => c.id === prof.company_id)?.name || ""}</p>
+                  )}
+                  <div className="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
+                    <Badge variant="outline" className={cn("text-[10px]", prof.active !== false ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" : "bg-surface-container-low text-muted-foreground border-outline-variant")}>
+                      {prof.active !== false ? "Ativo" : "Inativo"}
+                    </Badge>
+                    {svcCount > 0 && <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-300 border-blue-500/30">{svcCount} svc</Badge>}
+                  </div>
+                  <div className="flex justify-center gap-1 mt-3">
+                    <Button variant="outline" size="sm" className="rounded-lg h-7 text-xs"
+                      onClick={(e) => { e.stopPropagation(); setEditingProf(prof); setProfForm({ name: prof.full_name || "", email: prof.email || "", phone: prof.phone || "", active: prof.active !== false, commission_pct: prof.commission_pct || 0, photo_url: prof.photo_url || "", work_days: prof.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: allProServ.filter(ps => ps.professional_id === prof.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id) }); setShowForm(true); }}>
+                      <Edit className="w-3 h-3" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-lg h-7 text-xs"
+                      onClick={(e) => { e.stopPropagation(); toggleActive.mutate({ id: prof.id, active: prof.active === false }); }}>
+                      {prof.active === false ? <Power className="w-3 h-3" /> : <PowerOff className="w-3 h-3" />}
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-lg h-7 text-xs text-red-400 border-red-500/30"
+                      onClick={(e) => { e.stopPropagation(); setDeletingProf(prof); }}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
                 </div>
               );
@@ -494,7 +613,7 @@ export default function Profissionais() {
               </div>
 
               {/* Telefone + Comissão */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium">Telefone</Label>
                   <Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: formatPhone(e.target.value) }))} placeholder="(00) 00000-0000" className="mt-1" />
@@ -801,7 +920,7 @@ export default function Profissionais() {
             </div>
 
             {/* Telefone + Comissão */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className="text-sm font-medium">Telefone</Label>
                 <Input value={profForm.phone} onChange={e => setProfForm(f => ({ ...f, phone: formatPhone(e.target.value) }))} placeholder="(00) 00000-0000" className="mt-1" />
