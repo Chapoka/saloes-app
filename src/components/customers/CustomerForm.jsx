@@ -79,29 +79,50 @@ export default function CustomerForm({ customer, plans, companies = [], customer
   const [cepLoading, setCepLoading] = useState(false);
 
   const initialCustomer = normalizeCustomer(customer);
-  const [formData, setFormData] = useState(initialCustomer || {
-    name: "",
-    cpf: "",
-    rg: "",
-    email: "",
-    whatsapp: "",
-    birth_date: "",
-    address_street: "",
-    address_number: "",
-    address_complement: "",
-    address_neighborhood: "",
-    address_city: "",
-    address_state: "",
-    address_zipcode: "",
-    plan_id: "",
-    company_ids: [],
-    notes: "",
-    medical_certificate_url: "",
-    custom_plan: null,
-    billing_mode: "individual",
-    guardian_id: "",
-    portal_enabled: true,
+  const [formData, setFormData] = useState(() => {
+    if (initialCustomer) return initialCustomer;
+    try {
+      const saved = localStorage.getItem("form_draft_customer");
+      return saved ? JSON.parse(saved) : {
+        name: "",
+        cpf: "",
+        rg: "",
+        email: "",
+        whatsapp: "",
+        birth_date: "",
+        address_street: "",
+        address_number: "",
+        address_complement: "",
+        address_neighborhood: "",
+        address_city: "",
+        address_state: "",
+        address_zipcode: "",
+        plan_id: "",
+        company_ids: [],
+        notes: "",
+        medical_certificate_url: "",
+        custom_plan: null,
+        billing_mode: "individual",
+        guardian_id: "",
+        portal_enabled: true,
+      };
+    } catch {
+      return {
+        name: "", cpf: "", rg: "", email: "", whatsapp: "", birth_date: "",
+        address_street: "", address_number: "", address_complement: "",
+        address_neighborhood: "", address_city: "", address_state: "", address_zipcode: "",
+        plan_id: "", company_ids: [], notes: "", medical_certificate_url: "",
+        custom_plan: null, billing_mode: "individual", guardian_id: "", portal_enabled: true,
+      };
+    }
   });
+
+  useEffect(() => {
+    if (!initialCustomer) {
+      localStorage.setItem("form_draft_customer", JSON.stringify(formData));
+    }
+  }, [formData, initialCustomer]);
+
   const [dependentIds, setDependentIds] = useState(
     initialCustomer ? customers.filter(c => (c.guardian_id ?? c.guardianId) === initialCustomer.id).map(c => c.id) : []
   );
@@ -331,6 +352,8 @@ logger.info("Guardian created via mini-form", guardian);
     logger.info("FINAL DATA to onSubmit", finalData);
     logger.info("dependentIds for guardian", customerType === "guardian" ? dependentIds : []);
     logger.groupEnd();
+    localStorage.removeItem("form_draft_customer");
+    localStorage.removeItem("form_draft_customer_open");
     onSubmit(finalData, customerType === "guardian" ? dependentIds : []);
   };
 

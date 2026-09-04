@@ -707,6 +707,7 @@ export const db = {
         testWhatsappConnection: "/api/whatsapp/test",
         "send-email": "/api/send-email",
         lookupCep: "/api/cep",
+        lookupCnpj: "/api/cnpj",
       };
 
       const apiPath = routeMap[functionName];

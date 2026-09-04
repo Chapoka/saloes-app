@@ -45,17 +45,37 @@ const getEstabelecimentoLabel = (tipo) => ESTABELECIMENTO_LABELS[tipo] || tipo |
 export default function Companies() {
   const queryClient = useQueryClient();
   const [currentUser, setCurrentUser] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(() => {
+    try { return localStorage.getItem("form_draft_company_open") === "true"; } catch { return false; }
+  });
   const [editing, setEditing] = useState(null);
   const [deletingCompany, setDeletingCompany] = useState(null);
   const [viewMode, setViewMode] = useState("cards");
-  const [form, setForm] = useState({
-    name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
-    data_abertura: "", capital_social: "", porte: "", cnae_principal: "",
-    natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
-    logradouro: "", numero: "", complemento: "", phone: "", email: "",
-    owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
+  const [form, setForm] = useState(() => {
+    try {
+      const saved = localStorage.getItem("form_draft_company");
+      return saved ? JSON.parse(saved) : {
+        name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
+        data_abertura: "", capital_social: "", porte: "", cnae_principal: "",
+        natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
+        logradouro: "", numero: "", complemento: "", phone: "", email: "",
+        owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
+      };
+    } catch { return {
+      name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
+      data_abertura: "", capital_social: "", porte: "", cnae_principal: "",
+      natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
+      logradouro: "", numero: "", complemento: "", phone: "", email: "",
+      owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
+    }; }
   });
+
+  useEffect(() => {
+    localStorage.setItem("form_draft_company_open", String(showModal));
+    if (showModal) {
+      localStorage.setItem("form_draft_company", JSON.stringify(form));
+    }
+  }, [form, showModal]);
 
   useEffect(() => {
     db.auth.me().then(setCurrentUser).catch(() => {});
@@ -137,7 +157,12 @@ export default function Companies() {
     setShowModal(true);
   };
 
-  const closeModal = () => { setShowModal(false); setEditing(null); };
+  const closeModal = () => {
+    setShowModal(false);
+    setEditing(null);
+    localStorage.removeItem("form_draft_company");
+    localStorage.removeItem("form_draft_company_open");
+  };
 
   const handleSave = () => {
     // Required fields validation

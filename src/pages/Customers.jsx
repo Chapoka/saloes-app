@@ -56,7 +56,9 @@ export default function Customers() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useState("list");
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(() => {
+    try { return localStorage.getItem("form_draft_customer_open") === "true"; } catch { return false; }
+  });
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [editingCompanyIds, setEditingCompanyIds] = useState([]);
 
@@ -97,6 +99,10 @@ export default function Customers() {
       window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("form_draft_customer_open", String(showForm));
+  }, [showForm]);
 
   const rawRole = currentUser?.role;
   const normalizedRole = rawRole === "teacher" ? "profissional" : rawRole === "user" ? "cliente" : rawRole;
@@ -511,6 +517,7 @@ export default function Customers() {
             onClick={() => {
               setShowForm(false);
               setEditingCustomer(null);
+              localStorage.removeItem("form_draft_customer_open");
             }}
             className="mb-6"
           >

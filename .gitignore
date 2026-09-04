@@ -36,3 +36,4 @@ dist-ssr
 *.sw?
 
 .env.vscode/
+.vscode/

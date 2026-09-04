@@ -8,6 +8,7 @@ import whatsappRouter from "./routes/whatsapp.js";
 import emailRouter from "./routes/email.js";
 import authRouter from "./routes/auth.js";
 import cepRouter from "./routes/cep.js";
+import cnpjRouter from "./routes/cnpj.js";
 import migrateRouter from "./routes/migrate.js";
 
 const PORT = process.env.PORT || 3001;
@@ -24,6 +25,9 @@ app.use(express.static(distPath));
 
 // CEP lookup is public (no auth needed)
 app.use("/api/cep", cepRouter);
+
+// CNPJ lookup is public (no auth needed)
+app.use("/api/cnpj", cnpjRouter);
 
 // Health endpoint is public
 app.get("/api/health", (req, res) => {

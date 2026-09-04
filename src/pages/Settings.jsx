@@ -40,7 +40,9 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const [showAsaasKey, setShowAsaasKey] = useState(false);
   const [showWhatsappToken, setShowWhatsappToken] = useState(false);
-  const [showUserModal, setShowUserModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(() => {
+    try { return localStorage.getItem("form_draft_user_open") === "true"; } catch { return false; }
+  });
   const [editingUser, setEditingUser] = useState(null);
   
   const [formData, setFormData] = useState({
@@ -54,18 +56,19 @@ export default function Settings() {
   });
   const [showMasterKey, setShowMasterKey] = useState(false);
 
-  const [userFormData, setUserFormData] = useState({
-    full_name: "",
-    email: "",
-    password: "",
-    whatsapp: "",
-    cpf: "",
-    rg: "",
-    birth_date: "",
-    role: "cliente",
-    company_ids: [],
-    is_master: false,
-    is_professional: false,
+  const [userFormData, setUserFormData] = useState(() => {
+    try {
+      const saved = localStorage.getItem("form_draft_user");
+      return saved ? JSON.parse(saved) : {
+        full_name: "", email: "", password: "", whatsapp: "", cpf: "", rg: "",
+        birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false,
+      };
+    } catch {
+      return {
+        full_name: "", email: "", password: "", whatsapp: "", cpf: "", rg: "",
+        birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false,
+      };
+    }
   });
 
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
@@ -82,6 +85,13 @@ export default function Settings() {
 
   const [currentUser, setCurrentUser] = useState(null);
   const [subaccountsCompany, setSubaccountsCompany] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem("form_draft_user_open", String(showUserModal));
+    if (showUserModal) {
+      localStorage.setItem("form_draft_user", JSON.stringify(userFormData));
+    }
+  }, [userFormData, showUserModal]);
 
   useEffect(() => {
     db.auth.me().then(async (user) => {
@@ -318,6 +328,8 @@ export default function Settings() {
       setShowUserModal(false);
       setEditingUser(null);
       setUserFormData({ full_name: "", email: "", password: "", whatsapp: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
+      localStorage.removeItem("form_draft_user");
+      localStorage.removeItem("form_draft_user_open");
     },
     onError: (error) => {
       console.error("saveUserMutation error:", error);
@@ -430,6 +442,8 @@ export default function Settings() {
       setShowUserModal(false);
       setEditingUser(null);
       setUserFormData({ full_name: "", email: "", password: "", whatsapp: "", cpf: "", rg: "", birth_date: "", role: "cliente", company_ids: [], is_master: false, is_professional: false });
+      localStorage.removeItem("form_draft_user");
+      localStorage.removeItem("form_draft_user_open");
       return;
     }
     saveUserMutation.mutate(userFormData);
@@ -1234,7 +1248,11 @@ export default function Settings() {
               <div className="flex gap-3 pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setShowUserModal(false)}
+                  onClick={() => {
+                    setShowUserModal(false);
+                    localStorage.removeItem("form_draft_user");
+                    localStorage.removeItem("form_draft_user_open");
+                  }}
                   className="flex-1 rounded-xl"
                 >
                   Cancelar

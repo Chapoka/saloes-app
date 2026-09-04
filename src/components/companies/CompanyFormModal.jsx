@@ -164,7 +164,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
             </select>
             <Input
               value={docType === "cnpj" ? formatCNPJ(docValue) : formatCPF(docValue)}
-              onChange={(e) => setDocValue(e.target.value)}
+              onChange={(e) => setDocValue(e.target.value.replace(/\D/g, ""))}
               placeholder={docType === "cnpj" ? "00.000.000/0000-00" : "000.000.000-00"}
               className="rounded-xl flex-1"
             />
@@ -190,7 +190,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1 col-span-2">
               <Label>CNPJ</Label>
-              <Input value={formatCNPJ(form.cnpj)} onChange={(e) => setForm((prev) => ({ ...prev, cnpj: e.target.value }))} placeholder="00.000.000/0000-00" className="rounded-xl" />
+              <Input value={formatCNPJ(form.cnpj)} onChange={(e) => setForm((prev) => ({ ...prev, cnpj: e.target.value.replace(/\D/g, "") }))} placeholder="00.000.000/0000-00" className="rounded-xl" />
             </div>
             <div className="space-y-1">
               <Label>Tipo</Label>
