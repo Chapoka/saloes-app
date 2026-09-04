@@ -576,20 +576,22 @@ logger.info("Guardian created via mini-form", guardian);
             onChange={(e) => handleChange("birth_date", e.target.value)}
           />
 
-          <InputWithIcon
-            icon={Mail}
-            label={`E-mail${isDependent || (!formData.portal_enabled && !formData.plan_id && !formData.custom_plan && formData.billing_mode !== "consolidated") ? "" : " *"}`}
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleChange("email", e.target.value)}
-            placeholder="email@exemplo.com"
-            required={!isDependent && (formData.portal_enabled || formData.plan_id || formData.custom_plan || formData.billing_mode === "consolidated")}
-          />
-          {!isDependent && !formData.email && (formData.portal_enabled || formData.plan_id || formData.custom_plan || formData.billing_mode === "consolidated") && (
-            <p className="text-xs text-amber-400 -mt-1 ml-1">
-              Sem e-mail o cliente perderá acesso ao Portal e à cobrança recorrente.
-            </p>
-          )}
+          <div>
+            <InputWithIcon
+              icon={Mail}
+              label={`E-mail${isDependent || (!formData.portal_enabled && !formData.plan_id && !formData.custom_plan && formData.billing_mode !== "consolidated") ? "" : " *"}`}
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleChange("email", e.target.value)}
+              placeholder="email@exemplo.com"
+              required={!isDependent && (formData.portal_enabled || formData.plan_id || formData.custom_plan || formData.billing_mode === "consolidated")}
+            />
+            {!isDependent && !formData.email && (formData.portal_enabled || formData.plan_id || formData.custom_plan || formData.billing_mode === "consolidated") && (
+              <p className="text-xs text-muted-foreground mt-1 ml-1">
+                Sem e-mail o cliente perderá acesso ao Portal e à cobrança recorrente.
+              </p>
+            )}
+          </div>
 
           <InputWithIcon
             icon={Phone}
