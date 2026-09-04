@@ -488,7 +488,7 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers", companyId, isProfissional],
-    queryFn: () => isProfissional && companyId
+    queryFn: () => companyId
       ? db.entities.Customer.filter({ company_id: companyId })
       : db.entities.Customer.list(),
   });
@@ -511,12 +511,12 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
   const customerIds = customers.map(s => s.id);
   const customerIdSet = new Set(customerIds);
 
-  const invoices = (isProfissional && companyId)
-    ? allInvoices.filter(inv => customerIdSet.has(inv.customer_id))
+  const invoices = companyId
+    ? allInvoices.filter(inv => customerIdSet.has(inv.customer_id) || inv.company_id === companyId)
     : allInvoices;
 
-  const appointments = (isProfissional && companyId)
-    ? allAppointments.filter(l => customerIdSet.has(l.customer_id))
+  const appointments = companyId
+    ? allAppointments.filter(l => customerIdSet.has(l.customer_id) || l.company_id === companyId)
     : allAppointments;
 
   const activeCustomers = customers.filter(s => s.status === "active").length;

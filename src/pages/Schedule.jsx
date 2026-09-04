@@ -128,11 +128,26 @@ export default function Schedule() {
     },
   });
 
+  const userCompanyIds = currentUser?.company_ids?.length ? currentUser.company_ids : (currentUser?.company_id ? [currentUser.company_id] : []);
+
   const { data: customers = [] } = useQuery({
-    queryKey: ["customers", effectiveCompanyId, isProfissional, isSuperAdmin],
-    queryFn: () => effectiveCompanyId
-      ? db.entities.Customer.filter({ company_id: effectiveCompanyId, status: "active" })
-      : db.entities.Customer.filter({ status: "active" }),
+    queryKey: ["customers", effectiveCompanyId, isProfissional, isSuperAdmin, ...userCompanyIds],
+    queryFn: async () => {
+      if (effectiveCompanyId) {
+        return db.entities.Customer.filter({ company_id: effectiveCompanyId, status: "active" });
+      }
+      if (isSuperAdmin) {
+        return db.entities.Customer.filter({ status: "active" });
+      }
+      if (userCompanyIds.length > 0) {
+        const allActive = await db.entities.Customer.filter({ status: "active" });
+        return allActive.filter(c => {
+          const sIds = c.company_ids?.length ? c.company_ids : (c.company_id ? [c.company_id] : []);
+          return sIds.some(id => userCompanyIds.includes(id));
+        });
+      }
+      return [];
+    },
     enabled: !!currentUser,
   });
 
@@ -176,7 +191,16 @@ export default function Schedule() {
       if (effectiveCompanyId) {
         return all.filter(l => l.company_id ? l.company_id === effectiveCompanyId : customerIds.includes(l.customer_id));
       }
-      return all;
+      if (isSuperAdmin) {
+        return all;
+      }
+      if (userCompanyIds.length > 0) {
+        return all.filter(l => {
+          if (l.company_id) return userCompanyIds.includes(l.company_id);
+          return customerIds.includes(l.customer_id);
+        });
+      }
+      return [];
     },
     enabled: !!currentUser && (!effectiveCompanyId || customerIds.length > 0),
   });

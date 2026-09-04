@@ -56,14 +56,14 @@ export default function WaitingList() {
     queryKey: ["waiting_list", companyId, isProfissional],
     queryFn: async () => {
       const all = await (db.entities.WaitingList?.list("-created_at") || Promise.resolve([]));
-      if (isProfissional && companyId && !isSuperAdmin) return all.filter(i => i.company_id === companyId);
+      if (companyId && !isSuperAdmin) return all.filter(i => i.company_id === companyId);
       return all;
     },
   });
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers", companyId, isProfissional],
-    queryFn: () => isProfissional && companyId && !isSuperAdmin
+    queryFn: () => companyId && !isSuperAdmin
       ? db.entities.Customer.filter({ status: "active", company_id: companyId })
       : db.entities.Customer.filter({ status: "active" }),
   });

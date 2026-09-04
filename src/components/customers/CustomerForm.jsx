@@ -276,12 +276,13 @@ logger.info("Guardian created via mini-form", guardian);
 
     const isIndependentOrGuardian = customerType === "independent" || customerType === "guardian";
     const hasPlanOrBilling = formData.plan_id || formData.custom_plan || formData.billing_mode === "consolidated";
+    const needsEmail = formData.portal_enabled || hasPlanOrBilling;
 
     if (customerType === "guardian" && !phoneValue) {
       return toast.error("WhatsApp é obrigatório para responsáveis.");
     }
 
-    if (isIndependentOrGuardian && hasPlanOrBilling) {
+    if (isIndependentOrGuardian && needsEmail) {
       if (!cpfValue) {
         return toast.error("CPF é obrigatório para clientes com plano ou cobrança.");
       }
@@ -289,7 +290,7 @@ logger.info("Guardian created via mini-form", guardian);
         return toast.error("WhatsApp é obrigatório para clientes com plano ou cobrança.");
       }
       if (!formData.email?.trim()) {
-        return toast.error("E-mail é obrigatório para clientes com plano ou cobrança.");
+        return toast.error("E-mail é obrigatório para clientes com plano, cobrança ou portal habilitado.");
       }
     }
 
@@ -577,13 +578,18 @@ logger.info("Guardian created via mini-form", guardian);
 
           <InputWithIcon
             icon={Mail}
-            label={`E-mail${isDependent ? "" : " *"}`}
+            label={`E-mail${isDependent || (!formData.portal_enabled && !formData.plan_id && !formData.custom_plan && formData.billing_mode !== "consolidated") ? "" : " *"}`}
             type="email"
             value={formData.email}
             onChange={(e) => handleChange("email", e.target.value)}
             placeholder="email@exemplo.com"
-            required={!isDependent}
+            required={!isDependent && (formData.portal_enabled || formData.plan_id || formData.custom_plan || formData.billing_mode === "consolidated")}
           />
+          {!isDependent && !formData.email && (formData.portal_enabled || formData.plan_id || formData.custom_plan || formData.billing_mode === "consolidated") && (
+            <p className="text-xs text-amber-400 -mt-1 ml-1">
+              Sem e-mail o cliente perderá acesso ao Portal e à cobrança recorrente.
+            </p>
+          )}
 
           <InputWithIcon
             icon={Phone}

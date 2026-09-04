@@ -112,7 +112,7 @@ export default function Plans() {
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers", companyId, isProfissional],
-    queryFn: () => isProfissional && companyId && !isSuperAdmin
+    queryFn: () => companyId && !isSuperAdmin
       ? db.entities.Customer.filter({ company_id: companyId })
       : db.entities.Customer.list(),
     enabled: ready,

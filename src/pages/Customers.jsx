@@ -118,7 +118,8 @@ export default function Customers() {
     enabled: userReady,
     select: (data) => {
       logger.data("RAW customers from DB", data);
-      const filtered = isProfissional && userCompanyIds.length && !isSuperAdmin
+      const shouldFilter = userCompanyIds.length > 0 && !isSuperAdmin;
+      const filtered = shouldFilter
         ? data.filter(s => {
             const sIds = s.company_ids?.length ? s.company_ids : (s.company_id ? [s.company_id] : []);
             return sIds.some(id => userCompanyIds.includes(id));

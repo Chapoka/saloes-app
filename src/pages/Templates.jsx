@@ -134,7 +134,7 @@ export default function Templates() {
     queryKey: ['templates', companyId, isProfissional],
     queryFn: async () => {
       const all = await db.entities.Template.list();
-      if (isProfissional && companyId && !isSuperAdmin) return all.filter(t => t.company_id === companyId);
+      if (companyId && !isSuperAdmin) return all.filter(t => t.company_id === companyId);
       return all;
     },
     enabled: ready,

@@ -138,9 +138,21 @@ export default function Settings() {
     queryFn: () => db.entities.StylistLevel.list(),
   });
 
+  const currentUserCompanyIds = currentUser?.company_ids?.length ? currentUser.company_ids : (currentUser?.company_id ? [currentUser.company_id] : []);
+
   const { data: allCustomers = [] } = useQuery({
     queryKey: ["customers"],
-    queryFn: () => db.entities.Customer.list(),
+    queryFn: async () => {
+      const all = await db.entities.Customer.list();
+      if (isSuperAdmin) return all;
+      if (currentUserCompanyIds.length > 0) {
+        return all.filter(c => {
+          const sIds = c.company_ids?.length ? c.company_ids : (c.company_id ? [c.company_id] : []);
+          return sIds.some(id => currentUserCompanyIds.includes(id));
+        });
+      }
+      return [];
+    },
   });
 
   const customerEmailSet = new Set(allCustomers.map(c => c.email).filter(Boolean));
@@ -154,7 +166,6 @@ export default function Settings() {
   // - Super admin: sees all users
   // - Admin: sees only professionals/clientes from their companies
   // - Profissional: sees only professionals/clientes from their company
-  const currentUserCompanyIds = currentUser?.company_ids?.length ? currentUser.company_ids : (currentUser?.company_id ? [currentUser.company_id] : []);
 
   const companyLevels = currentUserCompanyIds.length
     ? allStylistLevels.filter(l => currentUserCompanyIds.includes(l.company_id))
