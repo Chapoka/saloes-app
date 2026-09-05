@@ -189,8 +189,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              disabled={!!editing}
-              className={`rounded-xl border border-input bg-card px-3 text-sm h-9 ${editing ? "opacity-60 cursor-not-allowed" : ""}`}
+              className="rounded-xl border border-input bg-card px-3 text-sm h-9"
             >
               <option value="cnpj">CNPJ</option>
               <option value="cpf">CPF</option>
