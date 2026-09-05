@@ -69,13 +69,24 @@ export default function Layout({ children, currentPageName }) {
   // Fetch user's company branding (reacts to cache invalidation)
   const userCompanyIds = currentUser?.company_ids?.length ? currentUser.company_ids : (currentUser?.company_id ? [currentUser.company_id] : []);
   const userCompanyId = userCompanyIds[0];
+  const isSuperAdmin = currentUser?.role === "super_admin";
 
   const { data: userCompany, isLoading: companyLoading } = useQuery({
     queryKey: ["userCompany", userCompanyId],
     queryFn: () => db.entities.Company.get(userCompanyId),
     enabled: !!userCompanyId,
-    staleTime: 0, // always fresh after mutation
+    staleTime: 0,
   });
+
+  // Super admin sem empresa vinculada: buscar primeiro salão disponível
+  const { data: firstCompany } = useQuery({
+    queryKey: ["firstCompany"],
+    queryFn: () => db.entities.Company.list("-created_at", 1).then(c => c?.[0] || null),
+    enabled: isSuperAdmin && !userCompanyId,
+    staleTime: 0,
+  });
+
+  const effectiveCompany = userCompany || firstCompany;
 
   // Compute branding from company or defaults
   const defaultBranding = useMemo(() => ({
@@ -84,20 +95,20 @@ export default function Layout({ children, currentPageName }) {
     accentColor: "#1a1c1c", backgroundColor: "#f9f9f9",
   }), []);
 
-  const branding = userCompany
+  const branding = effectiveCompany
     ? {
-        appName: userCompany.branding_app_name || userCompany.name || "Gestão de Salões",
-        logoUrl: userCompany.branding_logo_url || null,
-        primaryColor: userCompany.branding_primary_color || "#0077b6",
-        secondaryColor: userCompany.branding_secondary_color || "#2a9d8f",
-        accentColor: userCompany.branding_accent_color || "#1e293b",
-        backgroundColor: userCompany.branding_background_color || "#f8fafc",
+        appName: effectiveCompany.branding_app_name || effectiveCompany.name || "Gestão de Salões",
+        logoUrl: effectiveCompany.branding_logo_url,
+        primaryColor: effectiveCompany.branding_primary_color || "#b7005e",
+        secondaryColor: effectiveCompany.branding_secondary_color || "#db2777",
+        accentColor: effectiveCompany.branding_accent_color || "#1a1c1c",
+        backgroundColor: effectiveCompany.branding_background_color || "#f9f9f9",
       }
     : defaultBranding;
 
   const theme = useThemeMode();
   const toggleTheme = useToggleTheme();
-  const loading = userLoading || (userCompanyId && companyLoading);
+  const loading = userLoading || (userCompanyId && companyLoading) || (isSuperAdmin && !userCompanyId && !firstCompany);
 
   useEffect(() => {
     const root = document.documentElement;
