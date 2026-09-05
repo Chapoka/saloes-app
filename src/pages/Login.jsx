@@ -194,7 +194,7 @@ export default function Login() {
               <div className="space-y-1">
                 <label className="block font-label-md text-label-md text-on-surface" htmlFor="email">E-mail</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline z-20">
                     <span className="material-symbols-outlined text-lg">mail</span>
                   </span>
                   <input
@@ -204,7 +204,8 @@ export default function Login() {
                     placeholder="voce@exemplo.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline focus:ring-2 focus:ring-primary focus:border-primary transition-all sm:text-sm"
+                    className="block w-full pl-10 pr-3 py-3 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline focus:ring-2 focus:ring-primary focus:border-primary transition-all sm:text-sm relative z-10 cursor-text"
+                    style={{ userSelect: "text", WebkitUserSelect: "text" }}
                     required
                   />
                 </div>
@@ -219,7 +220,7 @@ export default function Login() {
                   </Link>
                 </div>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline z-20">
                     <span className="material-symbols-outlined text-lg">lock</span>
                   </span>
                   <input
@@ -229,13 +230,14 @@ export default function Login() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-10 py-3 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline focus:ring-2 focus:ring-primary focus:border-primary transition-all sm:text-sm"
+                    className="block w-full pl-10 pr-10 py-3 bg-surface-container-highest border border-outline-variant/50 rounded-lg text-on-surface placeholder-outline focus:ring-2 focus:ring-primary focus:border-primary transition-all sm:text-sm relative z-10 cursor-text"
+                    style={{ userSelect: "text", WebkitUserSelect: "text" }}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors z-20 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-lg">
                       {showPassword ? "visibility_off" : "visibility"}
