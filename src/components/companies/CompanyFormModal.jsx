@@ -113,6 +113,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
         ...prev,
         cnpj: data.cnpj ?? prev.cnpj,
         owner_cpf: docType === "cpf" ? cleanDoc : prev.owner_cpf,
+        owner_name: docType === "cpf" && data.nome ? data.nome : prev.owner_name,
         tipo: data.tipo ?? prev.tipo,
         razao_social: data.razao_social ?? prev.razao_social,
         name: data.nome_fantasia ?? prev.name,

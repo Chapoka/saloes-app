@@ -2,6 +2,8 @@ import { Router } from "express";
 
 const router = Router();
 
+const CPF_API_KEY = process.env.CPF_API_KEY || "";
+
 router.post("/", async (req, res) => {
   try {
     const { document, type } = req.body;
@@ -14,7 +16,6 @@ router.post("/", async (req, res) => {
 
       const apiRes = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${clean}`);
       if (!apiRes.ok) {
-        const text = await apiRes.text();
         return res.status(404).json({ error: "CNPJ não encontrado na Receita Federal" });
       }
 
@@ -25,7 +26,7 @@ router.post("/", async (req, res) => {
         razao_social: data.razao_social || null,
         nome_fantasia: data.nome_fantasia || null,
         tipo: data.tipo || null,
-        estabelecimento_tipo: data porte || null,
+        estabelecimento_tipo: data.porte || null,
         situacao_cadastral: data.situacao_cadastral || null,
         data_abertura: data.data_abertura || null,
         capital_social: data.capital_social || null,
@@ -48,33 +49,43 @@ router.post("/", async (req, res) => {
       if (!clean || clean.length !== 11) {
         return res.status(400).json({ error: "CPF inválido. Use 11 dígitos." });
       }
+
+      if (!CPF_API_KEY) {
+        return res.status(200).json({
+          cpf: clean,
+          nome: null,
+          sexo: null,
+          data_nascimento: null,
+          situacao_cadastral: null,
+        });
+      }
+
+      const apiRes = await fetch(`https://api.cpf-brasil.org/cpf/${clean}`, {
+        headers: {
+          "X-API-Key": CPF_API_KEY,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!apiRes.ok) {
+        const errorData = await apiRes.json().catch(() => ({}));
+        return res.status(404).json({ error: errorData.message || "CPF não encontrado" });
+      }
+
+      const data = await apiRes.json();
+
       return res.json({
         cpf: clean,
-        razao_social: null,
-        nome_fantasia: null,
-        tipo: null,
-        estabelecimento_tipo: null,
+        nome: data.data?.NOME || null,
+        sexo: data.data?.SEXO || null,
+        data_nascimento: data.data?.NASC || null,
         situacao_cadastral: null,
-        data_abertura: null,
-        capital_social: null,
-        porte: null,
-        cnae_principal: null,
-        natureza_juridica: null,
-        cep: null,
-        uf: null,
-        cidade: null,
-        bairro: null,
-        logradouro: null,
-        numero: null,
-        complemento: null,
-        phone: null,
-        email: null,
       });
     }
 
     return res.status(400).json({ error: "Tipo de documento inválido. Use 'cnpj' ou 'cpf'." });
   } catch (err) {
-    console.error("CNPJ lookup error:", err);
+    console.error("CNPJ/CPF lookup error:", err);
     res.status(500).json({ error: "Erro ao consultar documento" });
   }
 });
