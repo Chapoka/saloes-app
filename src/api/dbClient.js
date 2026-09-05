@@ -568,7 +568,9 @@ export const db = {
       if (!user) return data.session.user;
       return {
         ...user,
-        company_ids: user.user_companies?.map(uc => uc.company_id) || (user.company_id ? [user.company_id] : []),
+        company_ids: user.user_companies?.length > 0
+          ? user.user_companies.map(uc => uc.company_id)
+          : (user.company_id ? [user.company_id] : []),
       };
     },
     logout: async () => {

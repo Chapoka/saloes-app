@@ -69,7 +69,9 @@ export const AuthProvider = ({ children }) => {
         const normalizedUser = {
           ...userData,
           role: normalizeRole(userData.role),
-          company_ids: userData.user_companies?.map(uc => uc.company_id) || (userData.company_id ? [userData.company_id] : []),
+          company_ids: userData.user_companies?.length > 0
+            ? userData.user_companies.map(uc => uc.company_id)
+            : (userData.company_id ? [userData.company_id] : []),
         };
         setUser(normalizedUser);
         setIsAuthenticated(true);
