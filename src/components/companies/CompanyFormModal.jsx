@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { db } from "@/api/dbClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,10 +51,31 @@ function formatCurrency(value) {
 }
 
 export default function CompanyFormModal({ editing, form, setForm, onClose, onSave, saving }) {
-  const [docType, setDocType] = useState("cnpj");
+  const [docType, setDocType] = useState(() => {
+    try { return localStorage.getItem("salon_doc_type") || "cnpj"; } catch { return "cnpj"; }
+  });
   const [docValue, setDocValue] = useState(editing?.cnpj || "");
   const [looking, setLooking] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  useEffect(() => {
+    try { localStorage.setItem("salon_doc_type", docType); } catch {}
+  }, [docType]);
+
+  useEffect(() => {
+    if (Object.keys(fieldErrors).length > 0) {
+      const newErrors = { ...fieldErrors };
+      let changed = false;
+      for (const key of Object.keys(newErrors)) {
+        if (form[key] && String(form[key]).trim() !== "") {
+          delete newErrors[key];
+          changed = true;
+        }
+      }
+      if (changed) setFieldErrors(newErrors);
+    }
+  }, [form]);
 
   const handleCepLookup = async (cepValue) => {
     const clean = cepValue.replace(/\D/g, "");
@@ -214,11 +235,15 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
               </select>
             </div>
             <div className="space-y-1 col-span-2">
-              <Label>Tipo de Estabelecimento *</Label>
+              <Label className={fieldErrors.estabelecimento_tipo ? "text-red-500" : ""}>Tipo de Estabelecimento *</Label>
               <select
                 value={form.estabelecimento_tipo}
                 onChange={(e) => setForm((prev) => ({ ...prev, estabelecimento_tipo: e.target.value }))}
-                className="rounded-xl border border-input bg-transparent px-3 h-9 text-sm w-full"
+                className={`rounded-xl border bg-card px-3 h-9 text-sm w-full ${
+                  fieldErrors.estabelecimento_tipo
+                    ? "border-red-500 text-red-500"
+                    : "border-input text-on-surface"
+                }`}
               >
                 <option value="">Selecione o tipo</option>
                 {Object.entries(ESTABLISHMENT_TYPES).map(([key, label]) => (
@@ -289,8 +314,13 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
               <Input value={form.razao_social} onChange={set("razao_social")} placeholder="Razão social" className="rounded-xl" />
             </div>
             <div className="space-y-1 col-span-2">
-              <Label>Nome Fantasia *</Label>
-              <Input value={form.name} onChange={set("name")} placeholder="Nome do salão" className="rounded-xl" />
+              <Label className={fieldErrors.name ? "text-red-500" : ""}>Nome Fantasia *</Label>
+              <Input
+                value={form.name}
+                onChange={set("name")}
+                placeholder="Nome do salão"
+                className={`rounded-xl ${fieldErrors.name ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              />
             </div>
             <div className="space-y-1">
               <Label>Data de Abertura</Label>
@@ -449,7 +479,29 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
 
         <div className="flex gap-3 pt-2 sticky bottom-0 bg-card pb-1">
           <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl">Cancelar</Button>
-          <Button onClick={onSave} disabled={saving} className="flex-1 btn-branding rounded-xl">
+          <Button
+            onClick={() => {
+              const required = {
+                name: "Nome Fantasia",
+                estabelecimento_tipo: "Tipo de Estabelecimento",
+              };
+              const errors = {};
+              for (const [key, label] of Object.entries(required)) {
+                if (!form[key] || String(form[key]).trim() === "") {
+                  errors[key] = label;
+                }
+              }
+              if (Object.keys(errors).length > 0) {
+                setFieldErrors(errors);
+                toast.error("Preencha os campos obrigatórios destacados");
+                return;
+              }
+              setFieldErrors({});
+              onSave();
+            }}
+            disabled={saving}
+            className="flex-1 btn-branding rounded-xl"
+          >
             {saving ? "Salvando..." : "Salvar"}
           </Button>
         </div>
