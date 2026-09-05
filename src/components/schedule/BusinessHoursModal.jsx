@@ -4,7 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+
+const DAYS_OF_WEEK = [
+  { key: "dom", label: "Dom", full: "Domingo" },
+  { key: "seg", label: "Seg", full: "Segunda" },
+  { key: "ter", label: "Ter", full: "Terça" },
+  { key: "qua", label: "Qua", full: "Quarta" },
+  { key: "qui", label: "Qui", full: "Quinta" },
+  { key: "sex", label: "Sex", full: "Sexta" },
+  { key: "sab", label: "Sáb", full: "Sábado" },
+];
 
 const generateTimeOptions = () => {
   const options = [];
@@ -20,6 +31,7 @@ const timeOptions = generateTimeOptions();
 export default function BusinessHoursModal({ open, onClose, company, companies = [], companyId, isSuperAdmin, onSave }) {
   const [openingTime, setOpeningTime] = useState("08:00");
   const [closingTime, setClosingTime] = useState("18:00");
+  const [openDays, setOpenDays] = useState(["seg", "ter", "qua", "qui", "sex", "sab"]);
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -31,19 +43,23 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
       if (company) {
         setOpeningTime(company.opening_time || "08:00");
         setClosingTime(company.closing_time || "18:00");
+        setOpenDays(company.open_days?.length ? company.open_days : ["seg", "ter", "qua", "qui", "sex", "sab"]);
         setSelectedCompanyId(company.id);
       } else if (companies.length === 1) {
         setSelectedCompanyId(companies[0].id);
         setOpeningTime(companies[0].opening_time || "08:00");
         setClosingTime(companies[0].closing_time || "18:00");
+        setOpenDays(companies[0].open_days?.length ? companies[0].open_days : ["seg", "ter", "qua", "qui", "sex", "sab"]);
       } else if (companyId && companies.find(c => c.id === companyId)) {
         const c = companies.find(co => co.id === companyId);
         setSelectedCompanyId(companyId);
         setOpeningTime(c?.opening_time || "08:00");
         setClosingTime(c?.closing_time || "18:00");
+        setOpenDays(c?.open_days?.length ? c.open_days : ["seg", "ter", "qua", "qui", "sex", "sab"]);
       } else {
         setOpeningTime("08:00");
         setClosingTime("18:00");
+        setOpenDays(["seg", "ter", "qua", "qui", "sex", "sab"]);
       }
     }
   }, [open, company, companyId, companies]);
@@ -54,7 +70,14 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
     if (c) {
       setOpeningTime(c.opening_time || "08:00");
       setClosingTime(c.closing_time || "18:00");
+      setOpenDays(c.open_days?.length ? c.open_days : ["seg", "ter", "qua", "qui", "sex", "sab"]);
     }
+  };
+
+  const toggleDay = (dayKey) => {
+    setOpenDays(prev =>
+      prev.includes(dayKey) ? prev.filter(d => d !== dayKey) : [...prev, dayKey]
+    );
   };
 
   const targetCompanyId = company?.id || selectedCompanyId;
@@ -68,9 +91,13 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
       toast.error("O horário de abertura deve ser anterior ao horário de fechamento");
       return;
     }
+    if (openDays.length === 0) {
+      toast.error("Selecione pelo menos um dia de funcionamento");
+      return;
+    }
     setSaving(true);
     try {
-      await onSave({ opening_time: openingTime, closing_time: closingTime }, targetCompanyId);
+      await onSave({ opening_time: openingTime, closing_time: closingTime, open_days: openDays }, targetCompanyId);
       toast.success("Horário de funcionamento atualizado!");
       onClose();
     } catch (err) {
@@ -118,6 +145,26 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
             )}
 
             <div className="space-y-2">
+              <Label className="text-sm font-medium text-on-surface">Dias de Funcionamento</Label>
+              <div className="flex gap-1.5 flex-wrap">
+                {DAYS_OF_WEEK.map(day => (
+                  <button
+                    key={day.key}
+                    type="button"
+                    onClick={() => toggleDay(day.key)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      openDays.includes(day.key)
+                        ? "bg-branding-primary text-white"
+                        : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                    }`}
+                  >
+                    {day.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <Label className="text-sm font-medium text-on-surface">Abertura</Label>
               <Select value={openingTime} onValueChange={setOpeningTime}>
                 <SelectTrigger className="rounded-xl">
@@ -148,7 +195,12 @@ export default function BusinessHoursModal({ open, onClose, company, companies =
             <div className="p-3 rounded-xl bg-branding-primary/5 border border-branding-primary/20 text-sm text-branding-primary flex items-center gap-2">
               <Clock className="w-4 h-4 flex-shrink-0" />
               <span>
-                Horário de funcionamento: <strong>{openingTime} - {closingTime}</strong>
+                Horário: <strong>{openingTime} - {closingTime}</strong>
+                {openDays.length < 7 && (
+                  <span className="block text-xs mt-0.5 opacity-70">
+                    {openDays.map(d => DAYS_OF_WEEK.find(day => day.key === d)?.full).filter(Boolean).join(", ")}
+                  </span>
+                )}
               </span>
             </div>
           </div>

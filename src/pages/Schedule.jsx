@@ -428,7 +428,18 @@ export default function Schedule() {
     return time < currentCompany.opening_time || time >= currentCompany.closing_time;
   };
 
+  const DAY_KEYS = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
+  const isDayOpen = (date) => {
+    if (!currentCompany?.open_days?.length) return true;
+    const dayKey = DAY_KEYS[date.getDay()];
+    return currentCompany.open_days.includes(dayKey);
+  };
+
   const handleSlotClick = (date, time) => {
+    if (!isDayOpen(date)) {
+      toast.info("Este salão não funciona neste dia da semana");
+      return;
+    }
     if (isSlotOutOfHours(time)) {
       setOutOfHoursSlot({ date, time });
       return;
@@ -655,6 +666,7 @@ export default function Schedule() {
             onSlotClick={handleSlotClick}
             openingTime={currentCompany?.opening_time}
             closingTime={currentCompany?.closing_time}
+            openDays={currentCompany?.open_days}
           />
         )}
         {effectiveViewMode === "week" && (
@@ -665,6 +677,7 @@ export default function Schedule() {
             onSlotClick={handleSlotClick}
             openingTime={currentCompany?.opening_time}
             closingTime={currentCompany?.closing_time}
+            openDays={currentCompany?.open_days}
           />
         )}
         {effectiveViewMode === "month" && (

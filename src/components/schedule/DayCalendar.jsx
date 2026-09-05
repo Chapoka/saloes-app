@@ -88,8 +88,15 @@ const groupAppointments = (appointments, customers) => {
   return grouped;
 };
 
-export default function DayCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime }) {
+export default function DayCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime, openDays }) {
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  const DAY_KEYS = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
+  const isDayOpen = (date) => {
+    if (!openDays?.length) return true;
+    return openDays.includes(DAY_KEYS[date.getDay()]);
+  };
+  const dayIsOpen = isDayOpen(currentDate);
 
   const dayAppointments = groupAppointments(
     appointments.filter(appointment => isSameDay(parseISO(appointment.date), currentDate)),
@@ -151,6 +158,9 @@ export default function DayCalendar({ appointments, customers = [], onAppointmen
       {openingTime && closingTime && (
         <div className="px-4 py-2 border-b border-outline-variant/10 flex items-center gap-4 text-xs text-on-surface-variant">
           <span className="font-medium text-on-surface">Horário: {openingTime} - {closingTime}</span>
+          {!dayIsOpen && (
+            <span className="font-medium text-error">Fechado neste dia</span>
+          )}
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-error/10 border border-error/20"></span>
             <span>Fora do expediente</span>
@@ -188,13 +198,24 @@ export default function DayCalendar({ appointments, customers = [], onAppointmen
                 key={i}
                 className={cn(
                   "h-[60px] border-b border-outline-variant/10 cursor-pointer transition-colors",
-                  isSlotOutOfHours(time)
-                    ? "bg-error/5 hover:bg-error/10"
-                    : "hover:bg-branding-primary/5"
+                  !dayIsOpen
+                    ? "bg-gray-100 dark:bg-gray-800/50 cursor-not-allowed"
+                    : isSlotOutOfHours(time)
+                      ? "bg-error/5 hover:bg-error/10"
+                      : "hover:bg-branding-primary/5"
                 )}
-                onClick={() => onSlotClick && onSlotClick(currentDate, time)}
+                onClick={() => dayIsOpen && onSlotClick && onSlotClick(currentDate, time)}
               />
             ))}
+
+            {/* Closed Day Overlay */}
+            {!dayIsOpen && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="bg-gray-200/80 dark:bg-gray-700/80 rounded-xl px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-300">
+                  Salão fechado
+                </div>
+              </div>
+            )}
 
             {/* Appointments */}
             {dayAppointments.map((appointment) => (

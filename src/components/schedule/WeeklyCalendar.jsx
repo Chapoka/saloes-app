@@ -103,11 +103,17 @@ const groupAppointments = (appointments, customers) => {
   return grouped;
 };
 
-export default function WeeklyCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime }) {
+export default function WeeklyCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime, openDays }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  const DAY_KEYS = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
+  const isDayOpen = (date) => {
+    if (!openDays?.length) return true;
+    return openDays.includes(DAY_KEYS[date.getDay()]);
+  };
 
   const isSlotOutOfHours = (time) => {
     if (!openingTime || !closingTime) return false;
@@ -190,7 +196,9 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
             <div className="p-3 text-center text-sm font-medium text-on-surface-variant border-r border-outline-variant/10">
               Horário
             </div>
-            {weekDays.map((day, i) => (
+            {weekDays.map((day, i) => {
+              const dayOpen = isDayOpen(day);
+              return (
               <div 
                 key={i} 
                 className={cn(
@@ -198,17 +206,19 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                   isSameDay(day, new Date()) && "bg-branding-primary/5"
                 )}
               >
-                <p className="text-xs font-medium text-on-surface-variant uppercase">
+                <p className={cn("text-xs font-medium uppercase", dayOpen ? "text-on-surface-variant" : "text-error")}>
                   {format(day, "EEE", { locale: ptBR })}
                 </p>
                 <p className={cn(
                   "text-lg font-semibold mt-1",
-                  isSameDay(day, new Date()) ? "text-branding-primary" : "text-on-surface"
+                  isSameDay(day, new Date()) ? "text-branding-primary" : dayOpen ? "text-on-surface" : "text-error/60"
                 )}>
                   {format(day, "d")}
                 </p>
+                {!dayOpen && <p className="text-[9px] text-error mt-0.5">Fechado</p>}
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Time Grid */}
@@ -231,6 +241,7 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
             {/* Day Columns */}
             {weekDays.map((day, dayIndex) => {
               const dayAppointments = getAppointmentsForDay(day);
+              const dayIsOpen = isDayOpen(day);
               
               return (
                 <div 
@@ -246,16 +257,27 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                       key={i}
                       className={cn(
                         "h-12 border-b border-outline-variant/10 cursor-pointer transition-colors",
-                        isSlotOutOfHours(time)
-                          ? "bg-error/5 hover:bg-error/10"
-                          : "hover:bg-branding-primary/5"
+                        !dayIsOpen
+                          ? "bg-gray-100 dark:bg-gray-800/50 cursor-not-allowed"
+                          : isSlotOutOfHours(time)
+                            ? "bg-error/5 hover:bg-error/10"
+                            : "hover:bg-branding-primary/5"
                       )}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSlotClick && onSlotClick(day, time);
+                        if (dayIsOpen) onSlotClick && onSlotClick(day, time);
                       }}
                     />
                   ))}
+
+                  {/* Closed Day Overlay */}
+                  {!dayIsOpen && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                      <div className="bg-gray-200/80 dark:bg-gray-700/80 rounded-lg px-3 py-1.5 text-[10px] font-medium text-gray-500 dark:text-gray-300">
+                        Fechado
+                      </div>
+                    </div>
+                  )}
 
                 {/* Appointments */}
                 {dayAppointments.map((appointment) => (

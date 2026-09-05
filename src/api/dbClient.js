@@ -44,6 +44,7 @@
  * @property {string} [branding_background_color]
  * @property {string} [opening_time]
  * @property {string} [closing_time]
+ * @property {string[]} [open_days]
  * @property {string} [created_at]
  * @property {string} [updated_at]
  */
