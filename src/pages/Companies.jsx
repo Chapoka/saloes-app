@@ -27,6 +27,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Building2, Plus, Edit, Trash2, MoreVertical, GitBranch, Copy, Check, LayoutGrid, List, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatCPF, formatCNPJ } from "@/utils/formatters";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -55,14 +56,14 @@ export default function Companies() {
     try {
       const saved = localStorage.getItem("form_draft_company");
       return saved ? JSON.parse(saved) : {
-        name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
+        name: "", cnpj: "", cpf_document: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
         data_abertura: "", capital_social: "", porte: "", cnae_principal: "",
         natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
         logradouro: "", numero: "", complemento: "", phone: "", email: "",
         owner_email: "", owner_name: "", owner_phone: "", owner_cpf: "", active: true, has_branch: false,
       };
     } catch { return {
-      name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
+      name: "", cnpj: "", cpf_document: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
       data_abertura: "", capital_social: "", porte: "", cnae_principal: "",
       natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
       logradouro: "", numero: "", complemento: "", phone: "", email: "",
@@ -130,7 +131,8 @@ export default function Companies() {
     if (company) {
       setEditing(company);
       setForm({
-        name: company.name || "", cnpj: company.cnpj || "", tipo: company.tipo || "",
+        name: company.name || "", cnpj: company.cnpj || "", cpf_document: company.cpf_document || "",
+        tipo: company.tipo || "",
         estabelecimento_tipo: company.estabelecimento_tipo || "",
         razao_social: company.razao_social || "", situacao_cadastral: company.situacao_cadastral || "",
         data_abertura: company.data_abertura || "", capital_social: company.capital_social || "",
@@ -147,7 +149,7 @@ export default function Companies() {
     } else {
       setEditing(null);
       setForm({
-        name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
+        name: "", cnpj: "", cpf_document: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
         data_abertura: "", capital_social: "", porte: "", cnae_principal: "",
         natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
         logradouro: "", numero: "", complemento: "", phone: "", email: "",
@@ -289,7 +291,8 @@ export default function Companies() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-on-surface">{company.name}</h3>
-                      {company.cnpj && <p className="text-xs text-muted-foreground">{company.cnpj}</p>}
+                      {company.cpf_document && <p className="text-xs text-muted-foreground">{formatCPF(company.cpf_document)}</p>}
+                      {!company.cpf_document && company.cnpj && <p className="text-xs text-muted-foreground">{formatCNPJ(company.cnpj)}</p>}
                     </div>
                   </div>
                   {(isSuperAdmin || isAdmin) && (
@@ -378,7 +381,7 @@ export default function Companies() {
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-on-surface truncate">{company.name}</p>
-                            <span className="text-xs text-muted-foreground md:hidden">{company.cnpj || "—"}</span>
+                            <span className="text-xs text-muted-foreground md:hidden">{company.cpf_document ? formatCPF(company.cpf_document) : (company.cnpj ? formatCNPJ(company.cnpj) : "—")}</span>
                           </div>
                         </div>
                       </td>
@@ -394,7 +397,7 @@ export default function Companies() {
                           </Badge>
                         ) : "—"}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{company.cnpj || "—"}</td>
+                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{company.cpf_document ? formatCPF(company.cpf_document) : (company.cnpj ? formatCNPJ(company.cnpj) : "—")}</td>
                       <td className="px-4 py-3 hidden lg:table-cell">
                         <div className="space-y-0.5 text-muted-foreground">
                           {company.phone && <p className="truncate">📞 {company.phone}</p>}
