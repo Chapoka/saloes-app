@@ -51,14 +51,15 @@ function formatCurrency(value) {
 }
 
 export default function CompanyFormModal({ editing, form, setForm, onClose, onSave, saving }) {
-  const [docType, setDocType] = useState(() => {
-    try {
-      const saved = localStorage.getItem("salon_doc_type");
-      if (saved) return saved;
-      if (editing?.cnpj && editing.cnpj.replace(/\D/g, "").length === 11) return "cpf";
+  const getInitialDocType = () => {
+    if (editing?.cnpj) {
+      const clean = editing.cnpj.replace(/\D/g, "");
+      if (clean.length === 11) return "cpf";
       return "cnpj";
-    } catch { return "cnpj"; }
-  });
+    }
+    return "cnpj";
+  };
+  const [docType, setDocType] = useState(getInitialDocType);
   const [docValue, setDocValue] = useState(() => {
     if (editing?.cnpj) return editing.cnpj;
     return "";
@@ -68,8 +69,11 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
   const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
-    try { localStorage.setItem("salon_doc_type", docType); } catch {}
-  }, [docType]);
+    if (editing) {
+      setDocType(getInitialDocType());
+      setDocValue(editing.cnpj || "");
+    }
+  }, [editing?.id]);
 
   useEffect(() => {
     if (Object.keys(fieldErrors).length > 0) {
@@ -141,8 +145,6 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
       setForm((prev) => ({
         ...prev,
         cnpj: docType === "cpf" ? cleanDoc : (data.cnpj ?? prev.cnpj),
-        owner_cpf: prev.owner_cpf,
-        owner_name: docType === "cpf" && data.nome ? data.nome : prev.owner_name,
         tipo: data.tipo ?? prev.tipo,
         razao_social: data.razao_social ?? prev.razao_social,
         name: data.nome_fantasia ?? prev.name,
@@ -187,7 +189,8 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              className="rounded-xl border border-input bg-card px-3 text-sm h-9"
+              disabled={!!editing}
+              className={`rounded-xl border border-input bg-card px-3 text-sm h-9 ${editing ? "opacity-60 cursor-not-allowed" : ""}`}
             >
               <option value="cnpj">CNPJ</option>
               <option value="cpf">CPF</option>
