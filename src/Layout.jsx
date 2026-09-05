@@ -79,14 +79,14 @@ export default function Layout({ children, currentPageName }) {
 
   // Compute branding from company or defaults
   const defaultBranding = useMemo(() => ({
-    appName: "Salon Management", logoUrl: null,
+    appName: "Gestão de Salões", logoUrl: null,
     primaryColor: "#b7005e", secondaryColor: "#db2777",
     accentColor: "#1a1c1c", backgroundColor: "#f9f9f9",
   }), []);
 
   const branding = userCompany
     ? {
-        appName: userCompany.branding_app_name || userCompany.name || "Salon Management",
+        appName: userCompany.branding_app_name || userCompany.name || "Gestão de Salões",
         logoUrl: userCompany.branding_logo_url || null,
         primaryColor: userCompany.branding_primary_color || "#0077b6",
         secondaryColor: userCompany.branding_secondary_color || "#2a9d8f",
@@ -261,7 +261,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
             <div className="min-w-0">
               <h1 className="font-bold text-sm leading-tight truncate" style={{ color: theme.cardText }}>{branding.appName}</h1>
-              <p className="text-xs mt-0.5" style={{ color: theme.sidebarText }}>{branding.appName === "Salon Management" ? "Gestão de Salões" : branding.appName}</p>
+              <p className="text-xs mt-0.5" style={{ color: theme.sidebarText }}>Gestão de Salões</p>
             </div>
           </Link>
 
