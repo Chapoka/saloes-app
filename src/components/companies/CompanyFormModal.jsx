@@ -190,8 +190,20 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
           </h4>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1 col-span-2">
-              <Label>CNPJ</Label>
-              <Input value={formatCNPJ(form.cnpj)} onChange={(e) => setForm((prev) => ({ ...prev, cnpj: e.target.value.replace(/\D/g, "") }))} placeholder="00.000.000/0000-00" className="rounded-xl" />
+              <Label>{docType === "cpf" ? "CPF" : "CNPJ"}</Label>
+              <Input
+                value={docType === "cpf" ? formatCPF(form.owner_cpf || "") : formatCNPJ(form.cnpj)}
+                onChange={(e) => {
+                  const clean = e.target.value.replace(/\D/g, "");
+                  if (docType === "cpf") {
+                    setForm((prev) => ({ ...prev, owner_cpf: clean }));
+                  } else {
+                    setForm((prev) => ({ ...prev, cnpj: clean }));
+                  }
+                }}
+                placeholder={docType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
+                className="rounded-xl"
+              />
             </div>
             <div className="space-y-1">
               <Label>Tipo</Label>
