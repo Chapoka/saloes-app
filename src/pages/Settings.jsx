@@ -1078,7 +1078,6 @@ export default function Settings() {
                     type="email"
                     value={userFormData.email}
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
-                    onBlur={(e) => handleCheckCustomerEmail(e.target.value)}
                     placeholder="joao@exemplo.com"
                     className="rounded-xl"
                   />

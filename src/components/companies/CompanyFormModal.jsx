@@ -52,9 +52,17 @@ function formatCurrency(value) {
 
 export default function CompanyFormModal({ editing, form, setForm, onClose, onSave, saving }) {
   const [docType, setDocType] = useState(() => {
-    try { return localStorage.getItem("salon_doc_type") || "cnpj"; } catch { return "cnpj"; }
+    try {
+      const saved = localStorage.getItem("salon_doc_type");
+      if (saved) return saved;
+      if (editing?.cnpj && editing.cnpj.replace(/\D/g, "").length === 11) return "cpf";
+      return "cnpj";
+    } catch { return "cnpj"; }
   });
-  const [docValue, setDocValue] = useState(editing?.cnpj || "");
+  const [docValue, setDocValue] = useState(() => {
+    if (editing?.cnpj) return editing.cnpj;
+    return "";
+  });
   const [looking, setLooking] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -132,8 +140,8 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
       }
       setForm((prev) => ({
         ...prev,
-        cnpj: data.cnpj ?? prev.cnpj,
-        owner_cpf: docType === "cpf" ? cleanDoc : prev.owner_cpf,
+        cnpj: docType === "cpf" ? cleanDoc : (data.cnpj ?? prev.cnpj),
+        owner_cpf: prev.owner_cpf,
         owner_name: docType === "cpf" && data.nome ? data.nome : prev.owner_name,
         tipo: data.tipo ?? prev.tipo,
         razao_social: data.razao_social ?? prev.razao_social,
@@ -211,16 +219,12 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
           </h4>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1 col-span-2">
-              <Label>{docType === "cpf" ? "CPF" : "CNPJ"}</Label>
+              <Label>{docType === "cpf" ? "CPF do Salão" : "CNPJ"}</Label>
               <Input
-                value={docType === "cpf" ? formatCPF(form.owner_cpf || "") : formatCNPJ(form.cnpj)}
+                value={docType === "cpf" ? formatCPF(form.cnpj || "") : formatCNPJ(form.cnpj)}
                 onChange={(e) => {
                   const clean = e.target.value.replace(/\D/g, "");
-                  if (docType === "cpf") {
-                    setForm((prev) => ({ ...prev, owner_cpf: clean }));
-                  } else {
-                    setForm((prev) => ({ ...prev, cnpj: clean }));
-                  }
+                  setForm((prev) => ({ ...prev, cnpj: clean }));
                 }}
                 placeholder={docType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
                 className="rounded-xl"
