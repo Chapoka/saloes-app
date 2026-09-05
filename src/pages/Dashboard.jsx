@@ -583,6 +583,14 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
     <div className="min-h-screen bg-bg">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-6 lg:space-y-8">
 
+        {/* Greeting */}
+        <div className="mb-2">
+          <h1 className="text-2xl lg:text-3xl font-bold text-on-surface">
+            Olá, {currentUser?.full_name || currentUser?.email?.split("@")[0] || "Usuário"} 👋
+          </h1>
+          <p className="text-muted-foreground mt-1">Seja bem-vindo!</p>
+        </div>
+
         {/* STAT CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {/* Total de Clientes */}

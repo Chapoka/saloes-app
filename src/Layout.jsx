@@ -261,7 +261,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
             <div className="min-w-0">
               <h1 className="font-bold text-sm leading-tight truncate" style={{ color: theme.cardText }}>{branding.appName}</h1>
-              <p className="text-xs mt-0.5" style={{ color: theme.sidebarText }}>Salon Management</p>
+              <p className="text-xs mt-0.5" style={{ color: theme.sidebarText }}>{branding.appName === "Salon Management" ? "Gestão de Salões" : branding.appName}</p>
             </div>
           </Link>
 
