@@ -177,7 +177,7 @@ export default function Companies() {
     }
     // Sanitize data: convert formatted strings to proper types
     const COMPANY_COLUMNS = [
-      "name", "cnpj", "tipo", "estabelecimento_tipo", "razao_social", "situacao_cadastral",
+      "name", "cnpj", "cpf_document", "tipo", "estabelecimento_tipo", "razao_social", "situacao_cadastral",
       "data_abertura", "capital_social", "porte", "cnae_principal", "natureza_juridica",
       "cep", "uf", "cidade", "bairro", "logradouro", "numero", "complemento",
       "phone", "email", "owner_email", "owner_name", "owner_phone", "owner_cpf",
@@ -192,6 +192,7 @@ export default function Companies() {
       }
       // Clean formatted documents to digits only
       if (out.cnpj) out.cnpj = String(out.cnpj).replace(/\D/g, "");
+      if (out.cpf_document) out.cpf_document = String(out.cpf_document).replace(/\D/g, "");
       if (out.cep) out.cep = String(out.cep).replace(/\D/g, "");
       if (out.phone) out.phone = String(out.phone).replace(/\D/g, "");
       if (out.owner_phone) out.owner_phone = String(out.owner_phone).replace(/\D/g, "");

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { formatPhone, formatCPF, formatCNPJ } from "@/utils/formatters";
 
 const emptyForm = {
-  name: "", cnpj: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
+  name: "", cnpj: "", cpf_document: "", tipo: "", estabelecimento_tipo: "", razao_social: "", situacao_cadastral: "",
   data_abertura: "", capital_social: "", porte: "", cnae_principal: "",
   natureza_juridica: "", cep: "", uf: "", cidade: "", bairro: "",
   logradouro: "", numero: "", complemento: "", phone: "", email: "",
@@ -52,15 +52,13 @@ function formatCurrency(value) {
 
 export default function CompanyFormModal({ editing, form, setForm, onClose, onSave, saving }) {
   const getInitialDocType = () => {
-    if (editing?.cnpj) {
-      const clean = editing.cnpj.replace(/\D/g, "");
-      if (clean.length === 11) return "cpf";
-      return "cnpj";
-    }
+    if (editing?.cpf_document) return "cpf";
+    if (editing?.cnpj) return "cnpj";
     return "cnpj";
   };
   const [docType, setDocType] = useState(getInitialDocType);
   const [docValue, setDocValue] = useState(() => {
+    if (editing?.cpf_document) return editing.cpf_document;
     if (editing?.cnpj) return editing.cnpj;
     return "";
   });
@@ -71,7 +69,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
   useEffect(() => {
     if (editing) {
       setDocType(getInitialDocType());
-      setDocValue(editing.cnpj || "");
+      setDocValue(editing.cpf_document || editing.cnpj || "");
     }
   }, [editing?.id]);
 
@@ -144,7 +142,8 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
       }
       setForm((prev) => ({
         ...prev,
-        cnpj: docType === "cpf" ? cleanDoc : (data.cnpj ?? prev.cnpj),
+        cnpj: docType === "cnpj" ? (data.cnpj ?? cleanDoc) : prev.cnpj,
+        cpf_document: docType === "cpf" ? cleanDoc : prev.cpf_document,
         tipo: data.tipo ?? prev.tipo,
         razao_social: data.razao_social ?? prev.razao_social,
         name: data.nome_fantasia ?? prev.name,
@@ -190,12 +189,10 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
               value={docType}
               onChange={(e) => {
                 const newType = e.target.value;
-                const clean = docValue.replace(/\D/g, "");
-                const isCpf = clean.length === 11;
-                const isCnpj = clean.length === 14;
-                if ((newType === "cpf" && !isCpf) || (newType === "cnpj" && !isCnpj)) {
-                  setDocValue("");
-                  setForm((prev) => ({ ...prev, cnpj: "" }));
+                if (newType === "cpf") {
+                  setDocValue(form.cpf_document || "");
+                } else {
+                  setDocValue(form.cnpj || "");
                 }
                 setDocType(newType);
               }}
@@ -233,10 +230,14 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
             <div className="space-y-1 col-span-2">
               <Label>{docType === "cpf" ? "CPF do Salão" : "CNPJ"}</Label>
               <Input
-                value={docType === "cpf" ? formatCPF(form.cnpj || "") : formatCNPJ(form.cnpj)}
+                value={docType === "cpf" ? formatCPF(form.cpf_document || "") : formatCNPJ(form.cnpj)}
                 onChange={(e) => {
                   const clean = e.target.value.replace(/\D/g, "");
-                  setForm((prev) => ({ ...prev, cnpj: clean }));
+                  if (docType === "cpf") {
+                    setForm((prev) => ({ ...prev, cpf_document: clean }));
+                  } else {
+                    setForm((prev) => ({ ...prev, cnpj: clean }));
+                  }
                 }}
                 placeholder={docType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
                 className="rounded-xl"
