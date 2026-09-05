@@ -86,7 +86,7 @@ export default function Layout({ children, currentPageName }) {
 
   const branding = userCompany
     ? {
-        appName: userCompany.branding_app_name || "Salon Management",
+        appName: userCompany.branding_app_name || userCompany.name || "Salon Management",
         logoUrl: userCompany.branding_logo_url || null,
         primaryColor: userCompany.branding_primary_color || "#0077b6",
         secondaryColor: userCompany.branding_secondary_color || "#2a9d8f",
