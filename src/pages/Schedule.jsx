@@ -67,7 +67,7 @@ export default function Schedule() {
           .eq("user_id", user.id);
         setCurrentUser({
           ...user,
-          company_ids: userCompanies?.map(uc => uc.company_id) || user.company_ids || (user.company_id ? [user.company_id] : []),
+          company_ids: userCompanies?.length > 0 ? userCompanies.map(uc => uc.company_id) : (user.company_ids?.length ? user.company_ids : (user.company_id ? [user.company_id] : [])),
         });
       }
     }).catch(() => {});

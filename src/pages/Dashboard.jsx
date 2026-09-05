@@ -21,7 +21,7 @@ export default function Dashboard() {
   const normalizedRole = rawRole === "teacher" ? "profissional" : rawRole === "user" ? "cliente" : rawRole;
   const isSuperAdmin = normalizedRole === "super_admin";
   const isProfissional = normalizedRole === "profissional";
-  const companyId = currentUser?.company_id;
+  const companyId = currentUser?.company_ids?.length ? currentUser.company_ids[0] : (currentUser?.company_id || null);
 
   if (!userReady) {
     return (
@@ -521,7 +521,7 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
 
   const activeCustomers = customers.filter(s => s.status === "active").length;
   const activeProfessionals = allUsers.filter(u =>
-    (u.role === "profissional" || u.role === "teacher") && u.active !== false && (!companyId || u.company_id === companyId)
+    (u.role === "profissional" || u.role === "teacher") && u.active !== false && (!companyId || u.company_id === companyId || (u.company_ids || []).includes(companyId))
   ).length;
 
   const periodRange = { start: startOfMonth(now), end: endOfMonth(now) };
