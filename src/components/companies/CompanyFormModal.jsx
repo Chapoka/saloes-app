@@ -207,7 +207,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
             </div>
             <div className="space-y-1">
               <Label>Tipo</Label>
-              <select value={form.tipo} onChange={set("tipo")} className="rounded-xl border border-input bg-transparent px-3 h-9 text-sm w-full">
+              <select value={form.tipo} onChange={set("tipo")} className="rounded-xl border border-input bg-card text-on-surface px-3 h-9 text-sm w-full">
                 <option value="">Selecione</option>
                 <option value="MATRIZ">Matriz</option>
                 <option value="FILIAL">Filial</option>

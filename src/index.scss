@@ -72,6 +72,11 @@
   box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.4), 0 4px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
+/* Fix native select dropdown in dark mode */
+.dark select {
+  color-scheme: dark;
+}
+
 /* Glass effect */
 .glass {
   backdrop-filter: blur(12px) saturate(180%);
