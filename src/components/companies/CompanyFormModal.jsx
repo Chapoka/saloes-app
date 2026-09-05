@@ -188,7 +188,17 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
           <div className="flex gap-2">
             <select
               value={docType}
-              onChange={(e) => setDocType(e.target.value)}
+              onChange={(e) => {
+                const newType = e.target.value;
+                const clean = docValue.replace(/\D/g, "");
+                const isCpf = clean.length === 11;
+                const isCnpj = clean.length === 14;
+                if ((newType === "cpf" && !isCpf) || (newType === "cnpj" && !isCnpj)) {
+                  setDocValue("");
+                  setForm((prev) => ({ ...prev, cnpj: "" }));
+                }
+                setDocType(newType);
+              }}
               className="rounded-xl border border-input bg-card px-3 text-sm h-9"
             >
               <option value="cnpj">CNPJ</option>
