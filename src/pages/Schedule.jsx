@@ -93,13 +93,12 @@ export default function Schedule() {
 
   // Company data for business hours
   const activeCompanyId = isSuperAdmin ? (selectedCompanyId !== "all" ? selectedCompanyId : null) : companyId;
-  const resolvedCompanyId = activeCompanyId || (companies.length === 1 ? companies[0].id : null);
+  const fallbackCompanyId = currentUser?.company_ids?.[0] || (companies.length === 1 ? companies[0].id : null);
+  const resolvedCompanyId = activeCompanyId || fallbackCompanyId;
 
-  const { data: currentCompany } = useQuery({
-    queryKey: ["company", resolvedCompanyId],
-    queryFn: () => db.entities.Company.get(resolvedCompanyId),
-    enabled: !!resolvedCompanyId,
-  });
+  const currentCompany = companies.find(c => c.id === resolvedCompanyId) || null;
+
+  console.log("[DEBUG] resolvedCompanyId:", resolvedCompanyId, "currentCompany:", currentCompany ? JSON.stringify({ opening_time: currentCompany.opening_time, closing_time: currentCompany.closing_time, open_days: currentCompany.open_days }) : "NULL");
 
   const updateCompanyMutation = useMutation({
     mutationFn: async ({ data, targetCompanyId }) => {
@@ -111,7 +110,6 @@ export default function Schedule() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["company"] });
       queryClient.invalidateQueries({ queryKey: ["companies"] });
     },
   });
@@ -718,6 +716,8 @@ export default function Schedule() {
           blockedTimes={blockedTimes}
           selectedDate={selectedDate}
           selectedTime={selectedTime}
+          openingTime={currentCompany?.opening_time}
+          closingTime={currentCompany?.closing_time}
           onSubmit={(data) => {
             const items = Array.isArray(data) ? data : [data];
             createAppointmentMutation.mutate(items.map(d => ({ ...d, company_id: d.company_id || companyId || undefined })));

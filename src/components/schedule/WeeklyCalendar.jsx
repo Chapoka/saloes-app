@@ -230,8 +230,9 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                   key={time} 
                   className={cn(
                     "h-12 px-3 flex items-start justify-end pt-1 text-xs border-b border-outline-variant/10",
-                    isSlotOutOfHours(time) ? "bg-error/5 text-error" : "text-on-surface-variant"
+                    isSlotOutOfHours(time) ? "text-red-400" : "text-on-surface-variant"
                   )}
+                  style={isSlotOutOfHours(time) ? { backgroundColor: "rgba(239,68,68,0.1)" } : {}}
                 >
                   {i % 2 === 0 && time}
                 </div>
@@ -252,23 +253,31 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                   )}
                 >
                   {/* Grid Lines */}
-                  {timeSlots.map((time, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "h-12 border-b border-outline-variant/10 cursor-pointer transition-colors",
-                        !dayIsOpen
-                          ? "bg-gray-100 dark:bg-gray-800/50 cursor-not-allowed"
-                          : isSlotOutOfHours(time)
-                            ? "bg-error/5 hover:bg-error/10"
-                            : "hover:bg-branding-primary/5"
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (dayIsOpen) onSlotClick && onSlotClick(day, time);
-                      }}
-                    />
-                  ))}
+                  {timeSlots.map((time, i) => {
+                    const outOfHours = isSlotOutOfHours(time);
+                    return (
+                      <div
+                        key={i}
+                        className={cn(
+                          "h-12 border-b border-outline-variant/10 transition-colors relative",
+                          !dayIsOpen
+                            ? "cursor-not-allowed"
+                            : "cursor-pointer"
+                        )}
+                        style={!dayIsOpen ? { backgroundColor: "rgba(128,128,128,0.15)" } : outOfHours ? { backgroundColor: "rgba(239,68,68,0.25)", borderBottom: "1px solid rgba(239,68,68,0.3)" } : {}}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (dayIsOpen) onSlotClick && onSlotClick(day, time);
+                        }}
+                      >
+                        {outOfHours && dayIsOpen && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Fechado</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
 
                   {/* Closed Day Overlay */}
                   {!dayIsOpen && (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { format, isToday, parseISO } from "date-fns";
-import { Calendar, Clock, User, Star, RotateCcw, Users, Check, Scissors, Package } from "lucide-react";
+import { Calendar, Clock, User, Star, RotateCcw, Users, Check, Scissors, Package, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,7 +21,7 @@ const APPOINTMENT_TYPES = [
   { value: "makeup", label: "Reposição", icon: RotateCcw, color: "border-purple-500/70 bg-purple-500/10 text-purple-400" },
 ];
 
-export default function NewAppointmentModal({ open, onClose, customers, plans = [], services = [], professionals = [], products = [], appointments = [], blockedTimes = [], selectedDate, selectedTime, onSubmit, isLoading }) {
+export default function NewAppointmentModal({ open, onClose, customers, plans = [], services = [], professionals = [], products = [], appointments = [], blockedTimes = [], selectedDate, selectedTime, onSubmit, isLoading, openingTime = "08:00", closingTime = "18:00" }) {
   const [appointmentType, setAppointmentType] = useState("normal");
   const [extraCustomerIds, setExtraCustomerIds] = useState([]);
   const [formData, setFormData] = useState({
@@ -163,6 +163,11 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const isSlotOutOfHours = useMemo(() => {
+    if (!openingTime || !closingTime) return false;
+    return formData.start_time < openingTime || formData.start_time >= closingTime;
+  }, [formData.start_time, openingTime, closingTime]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const [hours, minutes] = formData.start_time.split(':').map(Number);
@@ -212,6 +217,7 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
         service_performed: false,
         appointment_type: typeMap[appointmentType],
         service_category: (selectedService?.category || "outro").toLowerCase(),
+        is_out_of_hours: isSlotOutOfHours,
       };
       if (formData.original_appointment_id) submitData.original_appointment_id = formData.original_appointment_id;
       if (formData.service_id) submitData.service_id = formData.service_id;
@@ -517,18 +523,32 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-on-surface">Horário</Label>
               <Select value={formData.start_time} onValueChange={(v) => handleChange("start_time", v)}>
-                <SelectTrigger className="rounded-xl">
+                <SelectTrigger className={cn("rounded-xl", isSlotOutOfHours && "border-amber-500/70 bg-amber-500/10 text-amber-400")}>
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <Clock className={cn("w-4 h-4", isSlotOutOfHours ? "text-amber-400" : "text-muted-foreground")} />
                     <SelectValue />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  {timeOptions.map(time => (
-                    <SelectItem key={time} value={time}>{time}</SelectItem>
-                  ))}
+                  {timeOptions.map(time => {
+                    const isOutOfRange = openingTime && closingTime && (time < openingTime || time >= closingTime);
+                    return (
+                      <SelectItem key={time} value={time} className={cn(isOutOfRange && "text-amber-400")}>
+                        {time}
+                        {isOutOfRange && " (fechado)"}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
+              {isSlotOutOfHours && (
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-400">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>
+                    Este horário está fora do horário de funcionamento ({openingTime || "08:00"} - {closingTime || "18:00"}). O agendamento será criado como exceção.
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -561,12 +581,13 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
               type="submit"
               disabled={!formData.customer_id || isLoading}
               className={cn("flex-1 rounded-xl",
+                isSlotOutOfHours ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700" :
                 appointmentType === "trial" ? "bg-gradient-to-r from-amber-500 to-amber-600" :
                 appointmentType === "makeup" ? "bg-gradient-to-r from-purple-500 to-purple-600" :
                 "btn-branding"
               )}
             >
-              {isLoading ? "Agendando..." : allSelectedCustomers.length > 1 ? `Agendar ${allSelectedCustomers.length} Agendamentos` : "Agendar"}
+              {isLoading ? "Agendando..." : isSlotOutOfHours ? "Agendar (Exceção)" : allSelectedCustomers.length > 1 ? `Agendar ${allSelectedCustomers.length} Agendamentos` : "Agendar"}
             </Button>
           </div>
         </form>
