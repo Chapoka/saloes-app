@@ -173,20 +173,25 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
         </div>
       </div>
 
-      {/* Business Hours Legend */}
-      {openingTime && closingTime && (
-        <div className="px-4 py-2 border-b border-outline-variant/10 flex items-center gap-4 text-xs text-on-surface-variant">
+      {/* Business Hours Legend - sempre visível para debug */}
+      <div className="px-4 py-2 border-b border-outline-variant/10 flex items-center gap-4 text-xs text-on-surface-variant flex-wrap">
+        {openingTime && closingTime ? (
           <span className="font-medium text-on-surface">Horário: {openingTime} - {closingTime}</span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-error/10 border border-error/20"></span>
-            <span>Fora do expediente</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-surface-container-lowest border border-outline-variant/30"></span>
-            <span>Dentro do expediente</span>
-          </div>
+        ) : (
+          <span className="font-medium text-amber-400">Horário não configurado (usando 08:00-18:00)</span>
+        )}
+        <div className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-sm border" style={{ backgroundColor: "rgba(220,38,38,0.28)", borderColor: "rgba(220,38,38,0.45)" }}></span>
+          <span>Fora do expediente</span>
         </div>
-      )}
+        <div className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-sm border border-outline-variant/30" style={{ backgroundColor: "rgba(255,255,255,0.02)" }}></span>
+          <span>Dentro do expediente</span>
+        </div>
+        {openingTime && closingTime && (
+          <span className="text-[11px] text-amber-400 ml-2">• Exceções ficam em laranja</span>
+        )}
+      </div>
 
       {/* Calendar Grid */}
       <div className="overflow-x-auto">
@@ -225,18 +230,21 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
           <div className="relative grid grid-cols-8" style={{ height: timeSlots.length * 48 }}>
             {/* Time Labels */}
             <div className="border-r border-outline-variant/10">
-              {timeSlots.map((time, i) => (
-                <div 
-                  key={time} 
-                  className={cn(
-                    "h-12 px-3 flex items-start justify-end pt-1 text-xs border-b border-outline-variant/10",
-                    isSlotOutOfHours(time) ? "text-red-400" : "text-on-surface-variant"
-                  )}
-                  style={isSlotOutOfHours(time) ? { backgroundColor: "rgba(239,68,68,0.1)" } : {}}
-                >
-                  {i % 2 === 0 && time}
-                </div>
-              ))}
+              {timeSlots.map((time, i) => {
+                const outOfHours = isSlotOutOfHours(time);
+                return (
+                  <div 
+                    key={time} 
+                    className={cn(
+                      "h-12 px-3 flex items-start justify-end pt-1 text-xs border-b",
+                      outOfHours ? "text-red-300 font-semibold border-red-500/20" : "text-on-surface-variant border-outline-variant/10"
+                    )}
+                    style={outOfHours ? { backgroundColor: "rgba(220,38,38,0.22)" } : {}}
+                  >
+                    {i % 2 === 0 && time}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Day Columns */}
@@ -259,12 +267,16 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                       <div
                         key={i}
                         className={cn(
-                          "h-12 border-b border-outline-variant/10 transition-colors relative",
+                          "h-12 border-b transition-colors relative",
                           !dayIsOpen
-                            ? "cursor-not-allowed"
-                            : "cursor-pointer"
+                            ? "cursor-not-allowed border-outline-variant/10"
+                            : outOfHours ? "cursor-pointer border-red-500/20" : "cursor-pointer border-outline-variant/10 hover:bg-branding-primary/5"
                         )}
-                        style={!dayIsOpen ? { backgroundColor: "rgba(128,128,128,0.15)" } : outOfHours ? { backgroundColor: "rgba(239,68,68,0.25)", borderBottom: "1px solid rgba(239,68,68,0.3)" } : {}}
+                        style={
+                          !dayIsOpen ? { backgroundColor: "rgba(100,100,100,0.18)" } 
+                          : outOfHours ? { backgroundColor: "rgba(220,38,38,0.30)" } 
+                          : {}
+                        }
                         onClick={(e) => {
                           e.stopPropagation();
                           if (dayIsOpen) onSlotClick && onSlotClick(day, time);
@@ -272,7 +284,7 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                       >
                         {outOfHours && dayIsOpen && (
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Fechado</span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ backgroundColor: "rgba(220,38,38,0.45)", color: "#fecaca" }}>Fechado</span>
                           </div>
                         )}
                       </div>
@@ -289,13 +301,15 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                   )}
 
                 {/* Appointments */}
-                {dayAppointments.map((appointment) => (
+                {dayAppointments.map((appointment) => {
+                  const isException = appointment.is_out_of_hours || isSlotOutOfHours(appointment.start_time);
+                  return (
                     <HoverCard key={appointment.id} openDelay={200}>
                       <HoverCardTrigger asChild>
                         <div
                           className={cn(
                             "absolute left-1 right-1 rounded-lg border-l-4 px-2 py-1 cursor-pointer hover:shadow-md transition-shadow overflow-hidden",
-                            statusColors[appointment.status]
+                            isException ? "bg-amber-500/25 border-amber-500 text-amber-200" : statusColors[appointment.status]
                           )}
                           style={{
                             top: getSlotTop(appointment.start_time),
@@ -324,6 +338,7 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                           <div className="flex items-center gap-1 text-xs opacity-80 mt-0.5">
                             <Clock className="w-3 h-3 flex-shrink-0" />
                             <span>{appointment.start_time} • {serviceCategoryLabels[appointment.service_category] || appointment.service_category}</span>
+                            {appointment.is_out_of_hours && <span className="ml-1 text-[9px] font-bold bg-amber-500 text-white px-1 py-0.5 rounded">EXCEÇÃO</span>}
                           </div>
                         </div>
                       </HoverCardTrigger>
@@ -394,15 +409,21 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                           </div>
 
                           {appointment.notes && (
-                            <div className="pt-2 border-t border-outline-variant/10">
-                              <p className="text-xs text-on-surface-variant mb-1">Observações:</p>
-                              <p className="text-sm text-on-surface">{appointment.notes}</p>
-                            </div>
-                          )}
-                        </div>
-                      </HoverCardContent>
-                    </HoverCard>
-                  ))}
+                             <div className="pt-2 border-t border-outline-variant/10">
+                               <p className="text-xs text-on-surface-variant mb-1">Observações:</p>
+                               <p className="text-sm text-on-surface">{appointment.notes}</p>
+                             </div>
+                           )}
+                           {appointment.is_out_of_hours && (
+                             <div className="pt-2 border-t border-amber-500/20">
+                               <p className="text-xs font-semibold text-amber-400">⚠ Agendamento fora do horário (exceção)</p>
+                             </div>
+                           )}
+                         </div>
+                       </HoverCardContent>
+                     </HoverCard>
+                  );
+                })}
                 </div>
               );
             })}

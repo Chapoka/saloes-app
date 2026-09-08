@@ -96,7 +96,7 @@ export default function Schedule() {
   const fallbackCompanyId = currentUser?.company_ids?.[0] || (companies.length === 1 ? companies[0].id : null);
   const resolvedCompanyId = activeCompanyId || fallbackCompanyId;
 
-  const currentCompany = companies.find(c => c.id === resolvedCompanyId) || null;
+  const currentCompany = (resolvedCompanyId ? companies.find(c => c.id === resolvedCompanyId) : null) || companies[0] || null;
 
   console.log("[DEBUG] resolvedCompanyId:", resolvedCompanyId, "currentCompany:", currentCompany ? JSON.stringify({ opening_time: currentCompany.opening_time, closing_time: currentCompany.closing_time, open_days: currentCompany.open_days }) : "NULL");
 
@@ -771,16 +771,17 @@ export default function Schedule() {
                 Fora do Horário de Funcionamento
               </DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-on-surface-variant">
-              O horário <strong>{outOfHoursSlot?.time}</strong> está fora do horário de funcionamento do salão ({currentCompany?.opening_time || "08:00"} - {currentCompany?.closing_time || "18:00"}).
-            </p>
+            <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 flex items-start gap-2 text-sm text-amber-200">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
+              <span>O horário <strong>{outOfHoursSlot?.time}</strong> está fora do expediente (<strong>{currentCompany?.opening_time || "08:00"} - {currentCompany?.closing_time || "18:00"}</strong>). O agendamento será criado como <strong>exceção</strong> (cor laranja).</span>
+            </div>
             <p className="text-sm text-on-surface-variant">Deseja agendar mesmo assim?</p>
             <div className="flex gap-3 pt-2">
               <Button variant="outline" onClick={() => setOutOfHoursSlot(null)} className="flex-1 rounded-xl">
                 Cancelar
               </Button>
-              <Button onClick={handleConfirmOutOfHours} className="flex-1 rounded-xl btn-branding">
-                Agendar
+              <Button onClick={handleConfirmOutOfHours} className="flex-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white">
+                Agendar (Exceção)
               </Button>
             </div>
           </DialogContent>
