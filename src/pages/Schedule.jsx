@@ -98,8 +98,6 @@ export default function Schedule() {
 
   const currentCompany = (resolvedCompanyId ? companies.find(c => c.id === resolvedCompanyId) : null) || companies[0] || null;
 
-  console.log("[DEBUG] resolvedCompanyId:", resolvedCompanyId, "currentCompany:", currentCompany ? JSON.stringify({ opening_time: currentCompany.opening_time, closing_time: currentCompany.closing_time, open_days: currentCompany.open_days }) : "NULL");
-
   const updateCompanyMutation = useMutation({
     mutationFn: async ({ data, targetCompanyId }) => {
       if (!targetCompanyId) throw new Error("Nenhuma empresa selecionada");
@@ -204,16 +202,21 @@ export default function Schedule() {
   });
 
   const { data: blockedTimes = [] } = useQuery({
-    queryKey: ["blocked_times", effectiveCompanyId],
+    queryKey: ["blocked_times", effectiveCompanyId || resolvedCompanyId, ...userCompanyIds],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blocked_times")
-        .select("*")
-        .eq("company_id", effectiveCompanyId);
+      // Se filtro específico, busca só dele; senão busca de todas as empresas do usuário
+      const idsToFetch = effectiveCompanyId ? [effectiveCompanyId] : (resolvedCompanyId ? [resolvedCompanyId] : userCompanyIds);
+      if (idsToFetch.length === 0) return [];
+      if (idsToFetch.length === 1) {
+        const { data, error } = await supabase.from("blocked_times").select("*").eq("company_id", idsToFetch[0]);
+        if (error) throw error;
+        return data || [];
+      }
+      const { data, error } = await supabase.from("blocked_times").select("*").in("company_id", idsToFetch);
       if (error) throw error;
       return data || [];
     },
-    enabled: !!effectiveCompanyId,
+    enabled: !!currentUser && (!!effectiveCompanyId || !!resolvedCompanyId || userCompanyIds.length > 0),
   });
 
   const createAppointmentMutation = useMutation({
@@ -433,9 +436,26 @@ export default function Schedule() {
     return currentCompany.open_days.includes(dayKey);
   };
 
+  const isBlockedForDate = (bt, dateStr) => {
+    if (bt.recurrence_type === "daily") return true;
+    if (bt.recurrence_type === "weekly") return Number(bt.recurrence_day_of_week) === new Date(dateStr + "T12:00:00").getDay();
+    if (bt.recurrence_type === "period") return dateStr >= (bt.period_start_date || "") && dateStr <= (bt.period_end_date || "");
+    return bt.date === dateStr;
+  };
+  const isSlotBlocked = (date, time) => {
+    const dateStr = fnsFormat(date, "yyyy-MM-dd");
+    return blockedTimes.some(bt => isBlockedForDate(bt, dateStr) && time >= bt.start_time && time < bt.end_time);
+  };
+
   const handleSlotClick = (date, time) => {
     if (!isDayOpen(date)) {
       toast.info("Este salão não funciona neste dia da semana");
+      return;
+    }
+    if (isSlotBlocked(date, time)) {
+      const dateStr = fnsFormat(date, "yyyy-MM-dd");
+      const bt = blockedTimes.find(b => isBlockedForDate(b, dateStr) && time >= b.start_time && time < b.end_time);
+      toast.error(`Horário bloqueado (${bt?.start_time} - ${bt?.end_time})${bt?.description ? `: ${bt.description}` : ""}`);
       return;
     }
     if (isSlotOutOfHours(time)) {
@@ -665,6 +685,7 @@ export default function Schedule() {
             openingTime={currentCompany?.opening_time}
             closingTime={currentCompany?.closing_time}
             openDays={currentCompany?.open_days}
+            blockedTimes={blockedTimes}
           />
         )}
         {effectiveViewMode === "week" && (
@@ -676,6 +697,7 @@ export default function Schedule() {
             openingTime={currentCompany?.opening_time}
             closingTime={currentCompany?.closing_time}
             openDays={currentCompany?.open_days}
+            blockedTimes={blockedTimes}
           />
         )}
         {effectiveViewMode === "month" && (

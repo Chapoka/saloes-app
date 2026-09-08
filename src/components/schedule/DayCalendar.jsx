@@ -88,7 +88,7 @@ const groupAppointments = (appointments, customers) => {
   return grouped;
 };
 
-export default function DayCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime, openDays }) {
+export default function DayCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime, openDays, blockedTimes = [] }) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const DAY_KEYS = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
@@ -106,6 +106,17 @@ export default function DayCalendar({ appointments, customers = [], onAppointmen
   const isSlotOutOfHours = (time) => {
     if (!openingTime || !closingTime) return false;
     return time < openingTime || time >= closingTime;
+  };
+
+  const isBlockedForDate = (bt, dateStr) => {
+    if (bt.recurrence_type === "daily") return true;
+    if (bt.recurrence_type === "weekly") return Number(bt.recurrence_day_of_week) === new Date(dateStr + "T12:00:00").getDay();
+    if (bt.recurrence_type === "period") return dateStr >= (bt.period_start_date || "") && dateStr <= (bt.period_end_date || "");
+    return bt.date === dateStr;
+  };
+  const getBlockedForDay = (date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    return blockedTimes.filter(bt => isBlockedForDate(bt, dateStr));
   };
 
   const getSlotHeight = (duration) => {
@@ -233,6 +244,23 @@ export default function DayCalendar({ appointments, customers = [], onAppointmen
                 </div>
               </div>
             )}
+
+            {/* Blocked Times */}
+            {getBlockedForDay(currentDate).map((bt, idx) => (
+              <div
+                key={`bt-${bt.id || idx}`}
+                className="absolute left-2 right-2 rounded-lg border border-zinc-500/40 px-3 py-1 flex items-center gap-1.5 overflow-hidden pointer-events-none"
+                style={{
+                  top: getSlotTop(bt.start_time),
+                  height: Math.max(28, ((parseInt(bt.end_time.split(":")[0]) * 60 + parseInt(bt.end_time.split(":")[1]) - (parseInt(bt.start_time.split(":")[0]) * 60 + parseInt(bt.start_time.split(":")[1]))) / 30) * 60 - 4),
+                  backgroundColor: "rgba(113,113,122,0.28)",
+                  backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(255,255,255,0.06) 6px, rgba(255,255,255,0.06) 12px)",
+                }}
+              >
+                <Ban className="w-3.5 h-3.5 text-zinc-300 flex-shrink-0" />
+                <span className="text-xs font-medium text-zinc-200 truncate">{bt.description || "Bloqueado"} • {bt.start_time}-{bt.end_time}</span>
+              </div>
+            ))}
 
             {/* Appointments */}
             {dayAppointments.map((appointment) => {

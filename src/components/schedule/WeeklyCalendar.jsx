@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, User, Clock, Droplets } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, Clock, Droplets, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
@@ -103,7 +103,7 @@ const groupAppointments = (appointments, customers) => {
   return grouped;
 };
 
-export default function WeeklyCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime, openDays }) {
+export default function WeeklyCalendar({ appointments, customers = [], onAppointmentClick, onSlotClick, openingTime, closingTime, openDays, blockedTimes = [] }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   
@@ -118,6 +118,28 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
   const isSlotOutOfHours = (time) => {
     if (!openingTime || !closingTime) return false;
     return time < openingTime || time >= closingTime;
+  };
+
+  const isBlockedForDate = (bt, dateStr) => {
+    if (bt.recurrence_type === "daily") return true;
+    if (bt.recurrence_type === "weekly") return Number(bt.recurrence_day_of_week) === new Date(dateStr + "T12:00:00").getDay();
+    if (bt.recurrence_type === "period") return dateStr >= (bt.period_start_date || "") && dateStr <= (bt.period_end_date || "");
+    return bt.date === dateStr;
+  };
+  const getBlockedForDay = (date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    return blockedTimes.filter(bt => isBlockedForDate(bt, dateStr));
+  };
+  const getBlockedTop = (startTime) => {
+    const [h, m] = startTime.split(':').map(Number);
+    const idx = timeSlots.findIndex(s => s === `${String(h).padStart(2,'0')}:${m===0?'00':'30'}`);
+    return idx >=0 ? idx*48 : 0;
+  };
+  const getBlockedHeight = (start, end) => {
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    const mins = (eh*60+em)-(sh*60+sm);
+    return Math.max(24, (mins/30)*48 - 4);
   };
 
   const getAppointmentsForDay = (date) => {
@@ -299,6 +321,23 @@ export default function WeeklyCalendar({ appointments, customers = [], onAppoint
                       </div>
                     </div>
                   )}
+
+                  {/* Blocked Times */}
+                  {getBlockedForDay(day).map((bt, idx) => (
+                    <div
+                      key={`bt-${bt.id || idx}`}
+                      className="absolute left-1 right-1 rounded-md border border-zinc-500/30 px-1.5 py-0.5 flex items-center gap-1 overflow-hidden pointer-events-none"
+                      style={{
+                        top: getBlockedTop(bt.start_time),
+                        height: getBlockedHeight(bt.start_time, bt.end_time),
+                        backgroundColor: "rgba(113,113,122,0.30)",
+                        backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(255,255,255,0.06) 6px, rgba(255,255,255,0.06) 12px)",
+                      }}
+                    >
+                      <Ban className="w-3 h-3 text-zinc-200 flex-shrink-0" />
+                      <span className="text-[10px] font-medium text-zinc-100 truncate">{bt.description || "Bloqueado"}</span>
+                    </div>
+                  ))}
 
                 {/* Appointments */}
                 {dayAppointments.map((appointment) => {

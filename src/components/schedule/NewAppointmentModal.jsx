@@ -190,8 +190,19 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
       }
     }
 
+    const isBlockedForDate = (bt, dateStr) => {
+      if (bt.recurrence_type === "daily") return true;
+      if (bt.recurrence_type === "weekly") {
+        const dow = new Date(dateStr + "T12:00:00").getDay();
+        return Number(bt.recurrence_day_of_week) === dow;
+      }
+      if (bt.recurrence_type === "period") {
+        return dateStr >= (bt.period_start_date || "") && dateStr <= (bt.period_end_date || "");
+      }
+      return bt.date === dateStr;
+    };
     const blockedConflict = blockedTimes.find(bt =>
-      bt.date === formData.date &&
+      isBlockedForDate(bt, formData.date) &&
       formData.start_time < bt.end_time &&
       newEndTime > bt.start_time
     );
