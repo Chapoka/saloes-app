@@ -1,8 +1,16 @@
 {
-  "name": "Salões",
-  "short_name": "Salões",
+  "name": "Salão Rodrigo - Gestão de Salões",
+  "short_name": "Salão Rodrigo",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#0077b6",
-  "background_color": "#ffffff"
+  "theme_color": "#F59E0B",
+  "background_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
