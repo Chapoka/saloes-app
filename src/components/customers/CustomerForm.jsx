@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { db } from "@/api/dbClient";
+import { db, setCustomerCompanies } from "@/api/dbClient";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { logger } from "@/lib/debugLogger";
@@ -152,6 +152,11 @@ export default function CustomerForm({ customer, plans, companies = [], customer
     setGuardianLoading(true);
     try {
       const accessToken = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+      // Determina empresa do responsável: usa teacherCompanyId (admin de 1 salão) ou company_ids selecionados
+      const guardianCompanyIds = isTeacher
+        ? (teacherCompanyId ? [teacherCompanyId] : [])
+        : (formData.company_ids || []);
+      const guardianCompanyId = guardianCompanyIds[0] || null;
       const guardian = await db.entities.Customer.create({
         name: name.trim(),
         cpf: cpf.replace(/\D/g, ""),
@@ -160,9 +165,18 @@ export default function CustomerForm({ customer, plans, companies = [], customer
         access_token: accessToken,
         current_credits: 0,
         status: "active",
+        company_id: guardianCompanyId,
         billing_mode: "individual",
         portal_enabled: false,
       });
+      // Garante vínculo multi-tenant via junction (RLS usa customer_companies)
+      if (guardianCompanyIds.length > 0) {
+        try {
+          await setCustomerCompanies(guardian.id, guardianCompanyIds);
+        } catch (e) {
+          logger.warn("Falha ao vincular responsável à empresa", e);
+        }
+      }
       
 logger.info("Guardian created via mini-form", guardian);
       toast.success("Responsável cadastrado com sucesso!");

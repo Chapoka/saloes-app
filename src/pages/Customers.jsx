@@ -347,6 +347,10 @@ export default function Customers() {
       // Build company_id from company_ids array (table only has company_id, not company_ids)
       const allCompanyIds = [...new Set([...(data.company_ids || []), ...userCompanyIds])];
       const companyId = allCompanyIds[0] || null;
+      if (!companyId && !isSuperAdmin) {
+        toast.error("Selecione o salão para vincular o cliente. Se o problema persistir, recarregue a página.");
+        return;
+      }
 
       // Build payload with only columns that exist in the customers table
       const finalData = {

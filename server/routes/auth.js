@@ -96,6 +96,30 @@ router.post("/admin-create-user", async (req, res) => {
 
     await req.supabase.from("users").update(updateData).eq("id", userId);
 
+    // Garantir que user_companies seja preenchido para RLS (get_user_company_ids usa user_companies como fonte)
+    if (company_id) {
+      const { error: ucErr } = await req.supabase
+        .from("user_companies")
+        .upsert({ user_id: userId, company_id }, { onConflict: "user_id,company_id" });
+      if (ucErr) console.warn("user_companies upsert failed:", ucErr.message);
+
+      // Sincroniza users.company_ids para manter consistência com user_companies
+      try {
+        const { data: existing } = await req.supabase
+          .from("users")
+          .select("company_ids")
+          .eq("id", userId)
+          .single();
+        const currentIds = existing?.company_ids || [];
+        if (!currentIds.includes(company_id)) {
+          const newIds = [...new Set([...currentIds, company_id])];
+          await req.supabase.from("users").update({ company_ids: newIds }).eq("id", userId);
+        }
+      } catch (e) {
+        console.warn("company_ids sync failed:", e.message);
+      }
+    }
+
     res.json({ user_id: userId, email });
   } catch (err) {
     console.error("admin-create-user error:", err);
