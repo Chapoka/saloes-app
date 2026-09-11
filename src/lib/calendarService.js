@@ -9,7 +9,7 @@ export function generateICS(appointment, customer, company) {
   const now = formatICSDate(new Date().toISOString().split("T")[0], new Date().toTimeString().slice(0, 5));
 
   const modalityLabel = appointment.service_category === "corte" ? "Corte" : appointment.service_category === "barba" ? "Barba" : appointment.service_category || "Serviço";
-  const companyName = company?.name || "Salão";
+  const companyName = company?.name || "Empresa";
   const customerName = customer?.name || appointment.customer_name || "Cliente";
 
   const ics = [
@@ -61,7 +61,7 @@ export function downloadICS(appointment, customer, company) {
 export function generateGoogleCalendarUrl(appointment, customer, company) {
   const modalityLabel = appointment.service_category === "corte" ? "Corte" : appointment.service_category === "barba" ? "Barba" : appointment.service_category || "Serviço";
   const customerName = customer?.name || appointment.customer_name || "Cliente";
-  const companyName = company?.name || "Salão";
+  const companyName = company?.name || "Empresa";
 
   const dtStart = formatGoogleDate(appointment.date, appointment.start_time);
   const dtEnd = formatGoogleDate(appointment.date, appointment.end_time || addMinutes(appointment.start_time, appointment.duration_mins || 30));
@@ -103,7 +103,7 @@ export async function syncToGoogleCalendar(appointment, customer, company, googl
 
   const modalityLabel = appointment.service_category === "corte" ? "Corte" : appointment.service_category === "barba" ? "Barba" : appointment.service_category || "Serviço";
   const customerName = customer?.name || appointment.customer_name || "Cliente";
-  const companyName = company?.name || "Salão";
+  const companyName = company?.name || "Empresa";
 
   const event = {
     summary: `${modalityLabel} - ${customerName}`,

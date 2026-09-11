@@ -1,4 +1,4 @@
--- Fix: isola usuários por salão - admin só vê outros admins do mesmo salão
+-- Fix: isola usuários por empresa - admin só vê outros admins da mesma empresa
 -- Remove políticas permissivas antigas que vazavam todos os usuários
 DO $$
 DECLARE r RECORD;
@@ -8,7 +8,7 @@ BEGIN
   END LOOP;
 END $$;
 
--- SELECT: próprio, super_admin, ou admin/profissional do mesmo salão via user_companies
+-- SELECT: próprio, super_admin, ou admin/profissional da mesma empresa via user_companies
 CREATE POLICY "users_select" ON users
   FOR SELECT USING (
     auth.uid() = id
@@ -30,7 +30,7 @@ CREATE POLICY "users_insert" ON users
     OR public.is_super_admin()
   );
 
--- UPDATE: próprio, super_admin, ou admin do mesmo salão (mesma regra do select)
+-- UPDATE: próprio, super_admin, ou admin da mesma empresa (mesma regra do select)
 CREATE POLICY "users_update" ON users
   FOR UPDATE USING (
     auth.uid() = id
@@ -59,4 +59,4 @@ CREATE POLICY "users_update" ON users
 CREATE POLICY "users_delete" ON users
   FOR DELETE USING (public.is_super_admin());
 
-COMMENT ON POLICY "users_select" ON users IS '20260915: isola admin por salão, super_admin vê todos';
+COMMENT ON POLICY "users_select" ON users IS '20260915: isola admin por empresa, super_admin vê todos';

@@ -1,6 +1,6 @@
 -- =============================================
 -- FIX: get_user_company_ids() deve considerar TODAS as fontes (user_companies + users.company_ids + users.company_id)
--- Corrige bug onde Admin via Salão Rodrigo não via clientes (cliente aparecia só para super_admin)
+-- Corrige bug onde Admin via Empresa Rodrigo não via clientes (cliente aparecia só para super_admin)
 --
 -- HISTÓRICO:
 -- 20260730: get_user_company_ids() usava apenas users.company_ids
@@ -125,5 +125,5 @@ $$ LANGUAGE plpgsql;
 -- Se houver clientes órfãos (company_id NULL e sem junction), permanecerão invisíveis para admin (apenas super_admin vê) — evita vazamento
 
 -- 5. Comentário para debug
-COMMENT ON FUNCTION public.get_user_company_ids() IS '20260910: UNION user_companies + users.company_ids + users.company_id, corrige visibilidade Salão Rodrigo';
+COMMENT ON FUNCTION public.get_user_company_ids() IS '20260910: UNION user_companies + users.company_ids + users.company_id, corrige visibilidade Empresa Rodrigo';
 COMMENT ON FUNCTION public.user_owns_company(UUID) IS '20260910: NULL => FALSE para isolamento, super_admin bypass';

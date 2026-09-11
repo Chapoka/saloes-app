@@ -189,7 +189,7 @@ export default function Settings() {
       ? users.filter(u => {
           const uRole = u.role === "teacher" ? "profissional" : u.role === "user" ? "cliente" : u.role;
           const uIds = u.company_ids?.length ? u.company_ids : (u.company_id ? [u.company_id] : []);
-          // Admin não pode alterar a si mesmo, só outros admins do mesmo salão
+          // Admin não pode alterar a si mesmo, só outros admins da mesma empresa
           if (u.id === currentUser?.id) return false;
           return (uRole === "super_admin" || uRole === "admin") && currentUserCompanyIds.some(cid => uIds.includes(cid));
         })
@@ -240,7 +240,7 @@ export default function Settings() {
   const saveUserMutation = useMutation({
     mutationFn: async (userData) => {
       if (editingUser) {
-        // Admin editando outro admin do mesmo salão -> usar API que valida mesmo salão e bypassa RLS
+        // Admin editando outro admin da mesma empresa -> usar API que valida mesma empresa e bypassa RLS
         const isEditingSelf = editingUser.id === currentUser?.id;
         const shouldUseApi = !isSuperAdmin && isAdmin && !isEditingSelf;
         if (shouldUseApi) {
@@ -410,7 +410,7 @@ export default function Settings() {
 
   const toggleUserActiveMutation = useMutation({
     mutationFn: async ({ id, active }) => {
-      // Admin só pode alterar outro admin do mesmo salão -> usar API que valida
+      // Admin só pode alterar outro admin da mesma empresa -> usar API que valida
       if (!isSuperAdmin && isAdmin && id !== currentUser?.id) {
         const { data: { session } } = await supabase.auth.getSession();
         const res = await fetch(`${window.location.origin}/api/auth/admin-update-user`, {
@@ -779,8 +779,8 @@ export default function Settings() {
                       <Building2 className="w-5 h-5 text-branding-primary" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">Integrações por Salão</CardTitle>
-                      <CardDescription>Asaas e WhatsApp configurados individualmente para cada salão</CardDescription>
+                      <CardTitle className="text-lg">Integrações por Empresa</CardTitle>
+                      <CardDescription>Asaas e WhatsApp configurados individualmente para cada empresa</CardDescription>
                     </div>
                   </div>
                 </div>
@@ -812,8 +812,8 @@ export default function Settings() {
                     <Building2 className="w-5 h-5 text-branding-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Integrações do Salão</CardTitle>
-                    <CardDescription>Configurações Asaas e WhatsApp do seu salão</CardDescription>
+                    <CardTitle className="text-lg">Integrações da Empresa</CardTitle>
+                    <CardDescription>Configurações Asaas e WhatsApp da sua empresa</CardDescription>
                   </div>
                 </div>
               </CardHeader>

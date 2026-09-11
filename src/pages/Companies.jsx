@@ -37,7 +37,7 @@ import CompanyFormModal from "@/components/companies/CompanyFormModal";
 const ESTABELECIMENTO_LABELS = {
   barbearia: "Barbearia",
   clinica_estetica: "Clínica / Estética",
-  salao_beleza: "Salão de Beleza",
+  salao_beleza: "Empresa de Beleza",
   studio_manicure: "Studio / Manicure",
 };
 
@@ -91,7 +91,7 @@ export default function Companies() {
   const { data: allCompanies = [], isLoading, error: queryError } = useQuery({
     queryKey: ["companies"],
     queryFn: () => db.entities.Company.list("-created_at"),
-    onError: (err) => toast.error("Erro ao listar salões: " + (err?.message || "verifique sua conexão")),
+    onError: (err) => toast.error("Erro ao listar empresas: " + (err?.message || "verifique sua conexão")),
   });
 
   // Filter: super_admin sees all, admin/profissional see only linked companies
@@ -104,10 +104,10 @@ export default function Companies() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       if (result?.id) queryClient.invalidateQueries({ queryKey: ["userCompany", result.id] });
-      toast.success("Salão criado!");
+      toast.success("Empresa criada!");
       closeModal();
     },
-    onError: (err) => toast.error("Erro ao criar salão: " + (err?.message || "verifique os dados")),
+    onError: (err) => toast.error("Erro ao criar empresa: " + (err?.message || "verifique os dados")),
   });
 
   const updateMutation = useMutation({
@@ -115,16 +115,16 @@ export default function Companies() {
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       queryClient.invalidateQueries({ queryKey: ["userCompany", variables.id] });
-      toast.success("Salão atualizado!");
+      toast.success("Empresa atualizada!");
       closeModal();
     },
-    onError: (err) => toast.error("Erro ao atualizar salão: " + (err?.message || "verifique os dados")),
+    onError: (err) => toast.error("Erro ao atualizar empresa: " + (err?.message || "verifique os dados")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => db.entities.Company.delete(id),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["companies"] }); toast.success("Salão removido!"); },
-    onError: (err) => toast.error("Erro ao excluir salão: " + (err?.message || "verifique se não há dependências")),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["companies"] }); toast.success("Empresa removida!"); },
+    onError: (err) => toast.error("Erro ao excluir empresa: " + (err?.message || "verifique se não há dependências")),
   });
 
   const openModal = (company = null) => {
@@ -227,9 +227,9 @@ export default function Companies() {
               <div className="p-2 rounded-xl bg-gradient-to-br from-branding-primary to-branding-secondary">
                 <Building2 className="w-6 h-6 text-white" />
               </div>
-              Salões
+              Empresas
             </h1>
-            <p className="text-muted-foreground mt-1">{companies.length} salão(s) cadastrado(s)</p>
+            <p className="text-muted-foreground mt-1">{companies.length} empresa(s) cadastrada(s)</p>
           </div>
           <div className="flex items-center gap-3">
             {companies.length > 0 && (
@@ -252,7 +252,7 @@ export default function Companies() {
             )}
             {isSuperAdmin && (
               <Button onClick={() => openModal()} className="btn-branding rounded-xl shadow-lg shadow-branding-primary/20">
-                <Plus className="w-5 h-5 mr-2" /> Novo Salão
+                <Plus className="w-5 h-5 mr-2" /> Nova Empresa
               </Button>
             )}
           </div>
@@ -265,12 +265,12 @@ export default function Companies() {
         ) : companies.length === 0 ? (
           <div className="bg-card rounded-2xl shadow-sm border border-outline-variant/30 p-12 text-center">
             <Building2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-on-surface mb-2">Nenhum salão cadastrado</h3>
+            <h3 className="text-lg font-medium text-on-surface mb-2">Nenhuma empresa cadastrada</h3>
             {isSuperAdmin && (
               <>
-                <p className="text-muted-foreground mb-6">Crie seu primeiro salão para começar</p>
+                <p className="text-muted-foreground mb-6">Crie sua primeira empresa para começar</p>
                 <Button onClick={() => openModal()} className="btn-branding rounded-xl">
-                  <Plus className="w-5 h-5 mr-2" /> Novo Salão
+                  <Plus className="w-5 h-5 mr-2" /> Nova Empresa
                 </Button>
               </>
             )}
@@ -356,7 +356,7 @@ export default function Companies() {
               <table className="w-full text-sm">
                 <thead className="bg-background border-b border-outline-variant/30">
                   <tr className="text-left text-muted-foreground">
-                    <th className="px-4 py-3 font-medium">Salão</th>
+                    <th className="px-4 py-3 font-medium">Empresa</th>
                     <th className="px-4 py-3 font-medium hidden md:table-cell">Tipo</th>
                     <th className="px-4 py-3 font-medium hidden md:table-cell">CNPJ</th>
                     <th className="px-4 py-3 font-medium hidden lg:table-cell">Contato</th>
@@ -480,7 +480,7 @@ export default function Companies() {
       <AlertDialog open={!!deletingCompany} onOpenChange={() => setDeletingCompany(null)}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir salão?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir empresa?</AlertDialogTitle>
             <AlertDialogDescription>
               Tem certeza que deseja excluir <strong>{deletingCompany?.name}</strong>? Esta ação não pode ser desfeita.
             </AlertDialogDescription>

@@ -406,10 +406,10 @@ export default function Templates() {
               <div className="space-y-3">
                 {!isProfissional && companies.length > 0 && (
                   <div>
-                    <Label className="text-xs text-on-surface-variant mb-1 block">Salão (WhatsApp do salão)</Label>
+                    <Label className="text-xs text-on-surface-variant mb-1 block">Empresa (WhatsApp da empresa)</Label>
                     <Select value={testCompanyId || ""} onValueChange={setTestCompanyId}>
                       <SelectTrigger className="rounded-xl">
-                        <SelectValue placeholder="Selecione o salão" />
+                        <SelectValue placeholder="Selecione a empresa" />
                       </SelectTrigger>
                       <SelectContent>
                         {companies.map(c => (

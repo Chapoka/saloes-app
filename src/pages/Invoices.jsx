@@ -145,7 +145,7 @@ export default function Invoices() {
     const customer = customers.find(s => s.id === invoice.customer_id);
     const compId = customer?.company_id || (customer?.company_ids || [])[0];
     if (!customer?.whatsapp || !compId) {
-      toast.error("Cliente sem WhatsApp ou salão configurados");
+      toast.error("Cliente sem WhatsApp ou empresa configurados");
       return;
     }
     setSendingInvoice(invoice.id);
@@ -468,7 +468,7 @@ export default function Invoices() {
                   </TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Plano</TableHead>
-                  {isSuperAdmin && <TableHead>Salão</TableHead>}
+                  {isSuperAdmin && <TableHead>Empresa</TableHead>}
                   <TableHead>Valor</TableHead>
                   <TableHead>Vencimento</TableHead>
                   <TableHead>Status</TableHead>

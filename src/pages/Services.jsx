@@ -375,7 +375,7 @@ export default function Services() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: theme.cardText }}>Catálogo de Produtos e Serviços</h1>
-          <p className="text-sm mt-1" style={{ color: theme.mutedText }}>Gerencie os produtos e serviços oferecidos pelo seu salão</p>
+          <p className="text-sm mt-1" style={{ color: theme.mutedText }}>Gerencie os produtos e serviços oferecidos pela sua empresa</p>
         </div>
         <Button
           onClick={() => { setEditingService(null); setServiceForm(EMPTY_SERVICE); setShowServiceForm(true); }}

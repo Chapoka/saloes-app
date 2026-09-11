@@ -154,7 +154,7 @@ export default function CustomerForm({ customer, plans, companies = [], customer
     setGuardianLoading(true);
     try {
       const accessToken = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
-      // Determina empresa do responsável: usa teacherCompanyId (admin de 1 salão) ou company_ids selecionados
+      // Determina empresa do responsável: usa teacherCompanyId (admin de 1 empresa) ou company_ids selecionados
       const guardianCompanyIds = isTeacher
         ? (teacherCompanyId ? [teacherCompanyId] : [])
         : (formData.company_ids || []);
@@ -645,7 +645,7 @@ logger.info("Guardian created via mini-form", guardian);
             <div className="md:col-span-2 space-y-2">
               <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-muted-foreground" />
-                Salão
+                Empresa
               </Label>
               <div className="px-3 py-2 rounded-xl border border-outline-variant bg-muted/30 text-on-surface text-sm">
                 {companies.find((c) => c.id === teacherCompanyId)?.name || teacherCompanyId || "—"}
@@ -659,12 +659,12 @@ logger.info("Guardian created via mini-form", guardian);
                 <div className="md:col-span-2 space-y-2">
                   <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-muted-foreground" />
-                    Salão
+                    Empresa
                   </Label>
                   <div className="px-3 py-2 rounded-xl border border-outline-variant bg-muted/30 text-on-surface text-sm">
                     {assignedName}
                   </div>
-                  <p className="text-xs text-muted-foreground">Cliente vinculado automaticamente ao seu salão — somente super admin pode alterar para outras empresas</p>
+                  <p className="text-xs text-muted-foreground">Cliente vinculado automaticamente à sua empresa — somente super admin pode alterar para outras empresas</p>
                 </div>
               );
             })()
@@ -672,7 +672,7 @@ logger.info("Guardian created via mini-form", guardian);
             <div className="md:col-span-2 space-y-2">
               <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-muted-foreground" />
-                Salão / Filial *
+                Empresa / Filial *
               </Label>
               <CompanyMultiSelect
                 companies={companies}

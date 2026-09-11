@@ -185,11 +185,11 @@ function SuperAdminDashboard({ currentUser }) {
 
         {/* STAT CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-          {/* Total Salões */}
+          {/* Total Empresas */}
           <div className="bg-surface rounded-xl shadow-md border-l-4 border-l-branding p-5 flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">Total de Salões</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">Total de Empresas</p>
                 <h3 className="text-3xl font-extrabold text-text-main">{totalCompanies}</h3>
               </div>
               <div className="w-10 h-10 rounded-full bg-branding/10 flex items-center justify-center text-branding">
@@ -323,7 +323,7 @@ function SuperAdminDashboard({ currentUser }) {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-surface-container border-b border-border">
-                        <th className="text-left px-5 py-3 font-semibold text-text-muted">Salão</th>
+                        <th className="text-left px-5 py-3 font-semibold text-text-muted">Empresa</th>
                         <th className="text-center px-4 py-3 font-semibold text-text-muted hidden sm:table-cell">Clientes</th>
                         <th className="text-center px-4 py-3 font-semibold text-text-muted hidden md:table-cell">Profissionais</th>
                         <th className="text-center px-4 py-3 font-semibold text-text-muted hidden lg:table-cell">Faturamento</th>

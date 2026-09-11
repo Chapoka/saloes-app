@@ -437,10 +437,10 @@ export default function Profissionais() {
           {isSuperAdmin && allCompanies.length > 0 && (
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
               <SelectTrigger className="w-48 rounded-lg h-9">
-                <SelectValue placeholder="Todos os salões" />
+                <SelectValue placeholder="Todas as empresas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os salões</SelectItem>
+                <SelectItem value="all">Todas as empresas</SelectItem>
                 {allCompanies.map(c => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
@@ -737,7 +737,7 @@ export default function Profissionais() {
                   <CompanyMultiSelect companies={allCompanies} selectedIds={profForm.company_ids || []} onChange={(ids)=>setProfForm(f=>({...f, company_ids: ids}))} />
                 ) : (
                   <div className="px-3 py-2 rounded-xl border border-outline-variant bg-background text-on-surface text-sm">
-                    {allCompanies.find(c=>c.id===effectiveCompanyId)?.name || "Nenhum salão"}
+                    {allCompanies.find(c=>c.id===effectiveCompanyId)?.name || "Nenhuma empresa"}
                     <p className="text-xs text-muted-foreground mt-1">Somente super admin pode alterar empresa</p>
                   </div>
                 )}
@@ -1060,7 +1060,7 @@ export default function Profissionais() {
                 <CompanyMultiSelect companies={allCompanies} selectedIds={profForm.company_ids || []} onChange={(ids)=>setProfForm(f=>({...f, company_ids: ids}))} />
               ) : (
                 <div className="px-3 py-2 rounded-xl border border-outline-variant bg-background text-on-surface text-sm">
-                  {allCompanies.find(c=>c.id===effectiveCompanyId)?.name || "Nenhum salão"}
+                  {allCompanies.find(c=>c.id===effectiveCompanyId)?.name || "Nenhuma empresa"}
                   <p className="text-xs text-muted-foreground mt-1">Somente super admin pode alterar empresa</p>
                 </div>
               )}

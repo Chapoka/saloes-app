@@ -41,21 +41,21 @@ test("LOGIN", async ({ page }) => {
   expect(page.url()).not.toContain("/login");
 });
 
-test("CRUD: Saloes", async ({ page }) => {
+test("CRUD: Empresas", async ({ page }) => {
   const errors = trackApiErrors(page);
   await login(page);
   await page.goto("/Companies");
   await page.waitForTimeout(2000);
-  await expect(page.getByRole("heading", { name: "Salões" })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole("heading", { name: "Empresas" })).toBeVisible({ timeout: 10000 });
 
   await page.getByRole("button", { name: /novo/i }).first().click();
   await page.waitForTimeout(1500);
 
   const modal = page.locator('.fixed.inset-0');
-  const nameInput = modal.locator('input[placeholder*="sal"]').first();
+  const nameInput = modal.locator('input[placeholder*="empresa"], input[placeholder*="Nome"]').first();
   if (await nameInput.isVisible()) {
     await nameInput.clear();
-    await nameInput.fill("Salao Teste E2E");
+    await nameInput.fill("Empresa Teste E2E");
   }
 
   await page.waitForTimeout(500);

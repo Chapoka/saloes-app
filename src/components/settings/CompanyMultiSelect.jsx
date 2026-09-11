@@ -38,10 +38,10 @@ export default function CompanyMultiSelect({ companies, selectedIds, onChange })
       >
         <span className={selectedNames.length === 0 ? "text-on-surface-variant" : "text-on-surface"}>
           {selectedNames.length === 0
-            ? "Nenhum salão"
+            ? "Nenhuma empresa"
             : selectedNames.length === 1
               ? selectedNames[0]
-              : `${selectedNames.length} salões selecionados`}
+              : `${selectedNames.length} empresas selecionadas`}
         </span>
         <ChevronDown className={cn("w-4 h-4 text-on-surface-variant transition-transform", open && "rotate-180")} />
       </button>
@@ -49,7 +49,7 @@ export default function CompanyMultiSelect({ companies, selectedIds, onChange })
       {open && (
         <div className="absolute z-50 mt-1 w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-lg max-h-52 overflow-y-auto">
           {companies.length === 0 && (
-            <p className="px-3 py-4 text-sm text-on-surface-variant text-center">Nenhum salão cadastrado</p>
+            <p className="px-3 py-4 text-sm text-on-surface-variant text-center">Nenhuma empresa cadastrada</p>
           )}
           {companies.map((c) => {
             const isSelected = selectedIds.includes(c.id);

@@ -93,7 +93,7 @@ serve(async (req) => {
           </p>
         </div>
         <div style="text-align: center; color: #94a3b8; font-size: 12px;">
-          <p>${companyName || "Salão"} • ${companyAddress || ""}</p>
+          <p>${companyName || "Empresa"} • ${companyAddress || ""}</p>
           <p>Este é um e-mail automático. Em caso de dúvidas, entre em contato conosco.</p>
         </div>
       </div>
@@ -120,7 +120,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `${companyName || "Salão"} <noreply@resend.dev>`,
+        from: `${companyName || "Empresa"} <noreply@resend.dev>`,
         to: [to],
         subject: `📅 Agendamento Confirmado - ${serviceName || "Serviço"} em ${date}`,
         html,

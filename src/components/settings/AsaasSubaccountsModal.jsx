@@ -130,7 +130,7 @@ export default function AsaasSubaccountsModal({ company, onClose }) {
                 </div>
               ))}
               <div className="space-y-1">
-                <Label className="text-xs">Tipo de Salão</Label>
+                <Label className="text-xs">Tipo de Empresa</Label>
                 <select
                   value={form.companyType}
                   onChange={e => setForm(p => ({ ...p, companyType: e.target.value }))}

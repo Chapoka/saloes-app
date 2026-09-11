@@ -278,8 +278,8 @@ export default function CompanyIntegrationCard({ company }) {
 
                 <div className="grid grid-cols-1 gap-3">
                   {[
-                    { key: "name", label: "Nome / Razão Social *", placeholder: "Salão Aqua" },
-                    { key: "email", label: "E-mail *", placeholder: "contato@salao.com" },
+                    { key: "name", label: "Nome / Razão Social *", placeholder: "Empresa Aqua" },
+                    { key: "email", label: "E-mail *", placeholder: "contato@empresa.com" },
                     { key: "cpfCnpj", label: subaccountForm.personType === "JURIDICA" ? "CNPJ *" : "CPF *", placeholder: subaccountForm.personType === "JURIDICA" ? "00.000.000/0001-00" : "000.000.000-00" },
                     ...(subaccountForm.personType === "FISICA" ? [{ key: "birthDate", label: "Data de Nascimento *", placeholder: "YYYY-MM-DD" }] : []),
                     { key: "mobilePhone", label: "Celular *", placeholder: "(11) 99999-9999" },
@@ -301,7 +301,7 @@ export default function CompanyIntegrationCard({ company }) {
                     </div>
                   ))}
                   <div>
-                    <Label className="text-xs text-on-surface-variant mb-1 block">Tipo de Salão</Label>
+                    <Label className="text-xs text-on-surface-variant mb-1 block">Tipo de Empresa</Label>
                     <select
                       value={subaccountForm.companyType || "LIMITED"}
                       onChange={e => setSubaccountForm(f => ({ ...f, companyType: e.target.value }))}
@@ -369,7 +369,7 @@ export default function CompanyIntegrationCard({ company }) {
                   {showSecrets["asaas_api_key"] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 italic">Se preenchida, substitui a Chave Mestre para este salão.</p>
+              <p className="text-xs text-muted-foreground mt-1 italic">Se preenchida, substitui a Chave Mestre para esta empresa.</p>
             </div>
 
             <div className="space-y-2">

@@ -1,5 +1,5 @@
 -- =============================================
--- RENAME lessons -> appointments (salão context)
+-- RENAME lessons -> appointments (empresa context)
 -- =============================================
 
 -- 1. Rename table

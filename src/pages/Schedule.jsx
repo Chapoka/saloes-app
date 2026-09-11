@@ -449,7 +449,7 @@ export default function Schedule() {
 
   const handleSlotClick = (date, time) => {
     if (!isDayOpen(date)) {
-      toast.info("Este salão não funciona neste dia da semana");
+      toast.info("Esta empresa não funciona neste dia da semana");
       return;
     }
     if (isSlotBlocked(date, time)) {
@@ -582,10 +582,10 @@ export default function Schedule() {
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-36 sm:w-48 rounded-xl border-outline-variant/30">
                   <Building2 className="w-4 h-4 mr-2 text-on-surface-variant flex-shrink-0" />
-                  <SelectValue placeholder="Salões" />
+                  <SelectValue placeholder="Empresas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os salões</SelectItem>
+                  <SelectItem value="all">Todas as empresas</SelectItem>
                   {companies.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}

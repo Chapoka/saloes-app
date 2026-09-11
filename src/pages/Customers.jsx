@@ -346,25 +346,25 @@ export default function Customers() {
         }
       }
       // Lista suspensa (primário) + check filial/franquia (secundários)
-      // Cliente aparece no salão selecionado; se check marcado, também nos secundários
+      // Cliente aparece na empresa selecionada; se check marcado, também nas secundárias
       let allCompanyIds = data.company_ids || [];
-      // Profissional: força primário como seu salão, mas mantém extras se check filial marcado
+      // Profissional: força primário como sua empresa, mas mantém extras se check filial marcado
       if (isProfissional) {
         const primary = userCompanyIds[0] || allCompanyIds[0] || null;
         const extras = allCompanyIds.filter(id => id !== primary);
         allCompanyIds = primary ? [primary, ...extras] : extras;
       }
-      // Garante que admin só vincula a salões que possui (RLS também valida)
+      // Garante que admin só vincula a empresas que possui (RLS também valida)
       if (!isSuperAdmin) {
         allCompanyIds = allCompanyIds.filter(id => userCompanyIds.includes(id));
       }
-      // Validação: se admin só tem um salão aquele cliente será daquele salão que ele tem acesso
+      // Validação: se admin só tem uma empresa aquele cliente será daquela empresa que ele tem acesso
       if (allCompanyIds.length === 0 && !isSuperAdmin && userCompanyIds.length === 1) {
         allCompanyIds = [...userCompanyIds];
       }
       const companyId = allCompanyIds[0] || null;
       if (!companyId) {
-        toast.error("Selecione o salão para vincular o cliente. Cliente aparecerá somente no salão selecionado.");
+        toast.error("Selecione a empresa para vincular o cliente. Cliente aparecerá somente na empresa selecionada.");
         return;
       }
 
@@ -791,7 +791,7 @@ export default function Customers() {
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Cliente</th>
                   <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden sm:table-cell">Plano</th>
-                  {showCompanyColumn && <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Salão</th>}
+                  {showCompanyColumn && <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Empresa</th>}
                   <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden md:table-cell">WhatsApp</th>
                   <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Créditos</th>
                   <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden md:table-cell">Agendas</th>

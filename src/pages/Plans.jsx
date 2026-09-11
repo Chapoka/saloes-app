@@ -349,10 +349,10 @@ export default function Plans() {
             {isAdmin && (
               <Select value={filterCompany} onValueChange={setFilterCompany}>
                 <SelectTrigger className="rounded-xl w-48 bg-card">
-                  <SelectValue placeholder="Filtrar salão" />
+                  <SelectValue placeholder="Filtrar empresa" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os salões</SelectItem>
+                  <SelectItem value="all">Todas as empresas</SelectItem>
                   <SelectItem value="global">Global (Admin)</SelectItem>
                   {companies.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -478,7 +478,7 @@ export default function Plans() {
               <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-on-surface mb-2">Nenhum plano encontrado</h3>
               <p className="text-muted-foreground mb-6">
-                {isAdmin ? "Crie um plano e vincule a um salão ou deixe global." : "Nenhum plano disponível para seu salão."}
+                {isAdmin ? "Crie um plano e vincule a uma empresa ou deixe global." : "Nenhum plano disponível para sua empresa."}
               </p>
               {canManage && (
                 <Button onClick={handleOpenCreate} className="btn-branding rounded-xl">
@@ -493,7 +493,7 @@ export default function Plans() {
                   <tr>
                     <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Nome</th>
                     <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden sm:table-cell">Tipo</th>
-                    {isAdmin && <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden md:table-cell">Salão</th>}
+                    {isAdmin && <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden md:table-cell">Empresa</th>}
                     <th className="text-left px-4 py-3 font-medium text-on-surface-variant hidden lg:table-cell">Profissional</th>
                     <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Visitas</th>
                     <th className="text-left px-4 py-3 font-medium text-on-surface-variant">Preço/visita</th>
@@ -712,7 +712,7 @@ export default function Plans() {
                             const companiesInPlan = [...new Set(customersWithPlan.filter(s => s.company_id).map(s => s.company_id))];
                             return companiesInPlan.length > 0 ? (
                               <div>
-                                <p className="text-xs text-muted-foreground">Salões:</p>
+                                <p className="text-xs text-muted-foreground">Empresas:</p>
                                 <div className="flex flex-wrap gap-1 mt-1">
                                   {companiesInPlan.map(cid => (
                                     <span key={cid} className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-full border border-amber-500/30">{getCompanyName(cid)}</span>
@@ -744,27 +744,27 @@ export default function Plans() {
                 <Input value={formData.name} onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))} placeholder="Ex: Corte Mensal" className="rounded-xl" required />
               </div>
 
-              {/* 2. Salão */}
+              {/* 2. Empresa */}
               {isAdmin ? (
                 <div className="space-y-2">
-                  <Label>Salão</Label>
+                  <Label>Empresa</Label>
                   <Select value={formData.company_id || "global"} onValueChange={(v) => setFormData((prev) => ({ ...prev, company_id: v === "global" ? "" : v }))}>
                     <SelectTrigger className="rounded-xl">
-                      <SelectValue placeholder="Selecione o salão" />
+                      <SelectValue placeholder="Selecione a empresa" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="global">🌐 Global (visível para todos os salões)</SelectItem>
+                      <SelectItem value="global">🌐 Global (visível para todas as empresas)</SelectItem>
                       {companies.map(c => (
                         <SelectItem key={c.id} value={c.id}>🏢 {c.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">Global = disponível para todos. Salão específico = visível apenas para ele.</p>
+                  <p className="text-xs text-muted-foreground">Global = disponível para todos. Empresa específica = visível apenas para ele.</p>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10">
                   <Building2 className="w-4 h-4 text-amber-400" />
-                  <span className="text-sm text-amber-300 font-medium">Plano exclusivo do seu salão</span>
+                  <span className="text-sm text-amber-300 font-medium">Plano exclusivo da sua empresa</span>
                 </div>
               )}
 

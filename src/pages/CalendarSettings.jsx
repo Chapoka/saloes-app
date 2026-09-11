@@ -355,7 +355,7 @@ export default function CalendarSettings() {
             </div>
             <div>
               <CardTitle className="text-lg">Links Rápidos</CardTitle>
-              <CardDescription>Adicione o calendário do salão em qualquer aplicativo</CardDescription>
+              <CardDescription>Adicione o calendário da empresa em qualquer aplicativo</CardDescription>
             </div>
           </div>
         </CardHeader>

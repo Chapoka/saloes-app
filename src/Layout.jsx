@@ -41,7 +41,7 @@ const allNavItems = [
   { name: "Cobranças",       icon: CreditCard,      page: "Invoices",    roles: ["super_admin","admin"] },
   { name: "Fila de Espera",  icon: ListOrdered,     page: "WaitingList", roles: ["super_admin","admin","profissional"] },
   { name: "Templates",       icon: MessageSquare,   page: "Templates",   roles: ["super_admin","admin"] },
-  { name: "Salões",          icon: Building2,       page: "Companies",   roles: ["super_admin","admin"] },
+  { name: "Empresas",          icon: Building2,       page: "Companies",   roles: ["super_admin","admin"] },
   { name: "Calendário",       icon: Link2,           page: "CalendarSettings", roles: ["super_admin","admin"] },
   { name: "Logs",            icon: History,         page: "AuditLogs",   roles: ["super_admin"] },
   { name: "Configurações",   icon: Settings,        page: "Settings",    roles: ["super_admin","admin"] },
@@ -78,7 +78,7 @@ export default function Layout({ children, currentPageName }) {
     staleTime: 0,
   });
 
-  // Super admin sem empresa vinculada: buscar primeiro salão disponível
+  // Super admin sem empresa vinculada: buscar primeira empresa disponível
   const { data: firstCompany } = useQuery({
     queryKey: ["firstCompany"],
     queryFn: () => db.entities.Company.list("-created_at", 1).then(c => c?.[0] || null),
@@ -90,14 +90,14 @@ export default function Layout({ children, currentPageName }) {
 
   // Compute branding from company or defaults
   const defaultBranding = useMemo(() => ({
-    appName: "Gestão de Salões", logoUrl: null,
+    appName: "Gestão de Empresas", logoUrl: null,
     primaryColor: "#b7005e", secondaryColor: "#db2777",
     accentColor: "#1a1c1c", backgroundColor: "#f9f9f9",
   }), []);
 
   const branding = effectiveCompany
     ? {
-        appName: effectiveCompany.branding_app_name || effectiveCompany.name || "Gestão de Salões",
+        appName: effectiveCompany.branding_app_name || effectiveCompany.name || "Gestão de Empresas",
         logoUrl: effectiveCompany.branding_logo_url,
         primaryColor: effectiveCompany.branding_primary_color || "#b7005e",
         secondaryColor: effectiveCompany.branding_secondary_color || "#db2777",
@@ -272,7 +272,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
             <div className="min-w-0">
               <h1 className="font-bold text-sm leading-tight truncate" style={{ color: theme.cardText }}>{branding.appName}</h1>
-              <p className="text-xs mt-0.5" style={{ color: theme.sidebarText }}>Gestão de Salões</p>
+              <p className="text-xs mt-0.5" style={{ color: theme.sidebarText }}>Gestão de Empresas</p>
             </div>
           </Link>
 

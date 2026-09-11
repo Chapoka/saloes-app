@@ -603,7 +603,7 @@ export default function CustomerPortal() {
           <div className="space-y-4">
             {salonInfo && (
               <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                <h3 className="font-semibold text-gray-900 mb-2">{salonInfo.branding_app_name || "Salão"}</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">{salonInfo.branding_app_name || "Empresa"}</h3>
                 {salonInfo.address && <p className="text-sm text-gray-500">{salonInfo.address}</p>}
                 {salonInfo.phone && <p className="text-sm text-gray-500">Tel: {salonInfo.phone}</p>}
               </div>

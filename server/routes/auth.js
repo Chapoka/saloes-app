@@ -128,7 +128,7 @@ router.post("/admin-create-user", async (req, res) => {
 });
 
 // POST /api/auth/admin-update-user — atualizar dados de um usuário (service_role bypasses RLS)
-// Regra: super_admin pode editar qualquer um; admin NÃO pode editar a si mesmo e SÓ pode editar OUTROS admin/super_admin do MESMO salão
+// Regra: super_admin pode editar qualquer um; admin NÃO pode editar a si mesmo e SÓ pode editar OUTROS admin/super_admin do MESMA empresa
 router.post("/admin-update-user", async (req, res) => {
   try {
     const { user_id, full_name, phone, email, active, commission_pct, specialty, photo_url, work_days, whatsapp, cpf, rg, birth_date, role, is_master, is_professional, company_ids } = req.body;
@@ -164,9 +164,9 @@ router.post("/admin-update-user", async (req, res) => {
         .single();
       if (!target) return res.status(404).json({ error: "Usuário alvo não encontrado" });
       if (target.role !== "admin" && target.role !== "super_admin") {
-        return res.status(403).json({ error: "Admin só pode alterar outros admins do mesmo salão" });
+        return res.status(403).json({ error: "Admin só pode alterar outros admins do mesma empresa" });
       }
-      // Checar mesmo salão via user_companies
+      // Checar mesma empresa via user_companies
       const { data: callerCompanies } = await req.supabase
         .from("user_companies")
         .select("company_id")
@@ -179,7 +179,7 @@ router.post("/admin-update-user", async (req, res) => {
       const targetCompanyIds = (targetCompanies || []).map(c => c.company_id);
       const shared = callerCompanyIds.some(id => targetCompanyIds.includes(id));
       if (!shared) {
-        return res.status(403).json({ error: "Acesso negado: usuário não pertence ao seu salão" });
+        return res.status(403).json({ error: "Acesso negado: usuário não pertence à sua empresa" });
       }
       // Bloquear escalada de privilégio
       if (role === "super_admin") {
@@ -227,7 +227,7 @@ router.post("/admin-update-user", async (req, res) => {
         const allowedIds = new Set((callerCompanies || []).map(c => c.company_id));
         const invalid = company_ids.filter(id => !allowedIds.has(id));
         if (invalid.length > 0) {
-          return res.status(403).json({ error: "Admin só pode vincular a salões que pertence" });
+          return res.status(403).json({ error: "Admin só pode vincular a empresas que pertence" });
         }
       }
       await req.supabase.from("user_companies").delete().eq("user_id", user_id);

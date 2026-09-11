@@ -18,7 +18,7 @@ const emptyForm = {
 const ESTABLISHMENT_TYPES = {
   barbearia: "Barbearia",
   clinica_estetica: "Clínica / Estética",
-  salao_beleza: "Salão de Beleza",
+  salao_beleza: "Empresa de Beleza",
   studio_manicure: "Studio / Manicure",
 };
 
@@ -178,7 +178,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
       <div className="bg-card rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[92vh] overflow-y-auto">
         <h3 className="text-xl font-semibold text-on-surface flex items-center gap-2">
           <Building2 className="w-5 h-5 text-branding-primary" />
-          {editing ? "Editar Salão" : "Novo Salão"}
+          {editing ? "Editar Empresa" : "Nova Empresa"}
         </h3>
 
         {/* Consulta de documento */}
@@ -228,7 +228,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
           </h4>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1 col-span-2">
-              <Label>{docType === "cpf" ? "CPF do Salão" : "CNPJ"}</Label>
+              <Label>{docType === "cpf" ? "CPF da Empresa" : "CNPJ"}</Label>
               <Input
                 value={docType === "cpf" ? formatCPF(form.cpf_document || "") : formatCNPJ(form.cnpj)}
                 onChange={(e) => {
@@ -335,7 +335,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
               <Input
                 value={form.name}
                 onChange={set("name")}
-                placeholder="Nome do salão"
+                placeholder="Nome da empresa"
                 className={`rounded-xl ${fieldErrors.name ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               />
             </div>
@@ -425,7 +425,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
             </div>
             <div className="space-y-1">
               <Label>Email</Label>
-              <Input type="email" value={form.email} onChange={set("email")} placeholder="salao@email.com" className="rounded-xl" />
+              <Input type="email" value={form.email} onChange={set("email")} placeholder="empresa@email.com" className="rounded-xl" />
             </div>
           </div>
         </div>
@@ -485,7 +485,7 @@ export default function CompanyFormModal({ editing, form, setForm, onClose, onSa
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <input type="checkbox" id="active" checked={form.active} onChange={(e) => setForm((prev) => ({ ...prev, active: e.target.checked }))} className="w-4 h-4" />
-              <Label htmlFor="active">Salão ativo</Label>
+              <Label htmlFor="active">Empresa ativa</Label>
             </div>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="has_branch" checked={form.has_branch} onChange={(e) => setForm((prev) => ({ ...prev, has_branch: e.target.checked }))} className="w-4 h-4" />

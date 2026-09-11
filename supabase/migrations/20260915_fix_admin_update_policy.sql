@@ -1,5 +1,5 @@
 -- =============================================
--- FIX: Admin pode atualizar perfil/empresa de OUTRO admin do MESMO salão
+-- FIX: Admin pode atualizar perfil/empresa de OUTRO admin da MESMA empresa
 -- Bloqueia self-edit via RLS? Não, self-edit já é permitido via auth.uid()=id
 -- Mas permite admin atualizar outro admin se compartilhar empresa
 -- Também corrige WITH CHECK que antes bloqueava
@@ -36,4 +36,4 @@ CREATE POLICY "users_update" ON users
 -- Também permitir admin alternar active via mesmo critério (toggle)
 -- Já coberto pela política acima
 
-COMMENT ON POLICY "users_update" ON users IS '20260915: permite admin atualizar outro admin do mesmo salão; self-edit continua liberado mas frontend bloqueará admin self-edit';
+COMMENT ON POLICY "users_update" ON users IS '20260915: permite admin atualizar outro admin da mesma empresa; self-edit continua liberado mas frontend bloqueará admin self-edit';

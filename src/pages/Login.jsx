@@ -6,7 +6,7 @@ import { db } from "@/api/dbClient";
 const defaultSlides = [
   {
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCsk57F8qRlqQFzn_ZuMoRItbWcd2yjn6MtjV6ncA1H-UEEeXEIU1QJKZVo4MrYAQSY4D3ifZnSK4DKe_WMM0BMF7GCplFTXh2PbwNwld7uN8UJGQbz-891DWooD9EKI9vkxyxZM3L3ImSa0Vp2Esr8asHptAe9SIF6LfCxAvyfqBJANBFb1ZH4FJNTwiUvWQsdCiHRfyzJ0tqbUWIxnbSxKHtYV7Iv2sbnc_fOmyNhcZql1NH8Wktu6qKwidbIa3Jz6vS55k8jm8nA",
-    title: "Gestão Inteligente para o seu Salão",
+    title: "Gestão Inteligente para a sua Empresa",
     subtitle: "Transforme a experiência dos seus clientes com agendamentos simplificados e controle total da sua rotina."
   }
 ];

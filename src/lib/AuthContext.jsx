@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
-    // Salão fica logado o tempo todo - keep-alive a cada 10min + ao voltar para a aba
+    // Empresa fica logado o tempo todo - keep-alive a cada 10min + ao voltar para a aba
     const keepAlive = setInterval(() => {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session) supabase.auth.refreshSession().catch(()=>{});

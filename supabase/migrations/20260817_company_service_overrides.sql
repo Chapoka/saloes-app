@@ -1,4 +1,4 @@
--- Tabela de overrides: controla o status ativo de serviços globais por salão
+-- Tabela de overrides: controla o status ativo de serviços globais por empresa
 CREATE TABLE IF NOT EXISTS company_service_overrides (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,

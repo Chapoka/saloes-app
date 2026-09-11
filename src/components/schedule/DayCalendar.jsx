@@ -240,7 +240,7 @@ export default function DayCalendar({ appointments, customers = [], onAppointmen
             {!dayIsOpen && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="bg-gray-200/80 dark:bg-gray-700/80 rounded-xl px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-300">
-                  Salão fechado
+                  Empresa fechada
                 </div>
               </div>
             )}

@@ -77,7 +77,7 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
 
   const handleSave = async () => {
     if (!targetCompanyId) {
-      toast.error("Selecione um salão primeiro");
+      toast.error("Selecione uma empresa primeiro");
       return;
     }
     if (!selectedDate) {
@@ -134,17 +134,17 @@ export default function BlockedTimesModal({ open, onClose, company, companies = 
           <div className="py-4">
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-300 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-              <span>Nenhum salão vinculado à sua conta. Fale com o suporte.</span>
+              <span>Nenhuma empresa vinculada à sua conta. Fale com o suporte.</span>
             </div>
           </div>
         ) : (
           <div className="space-y-4 py-2">
             {showCompanySelect && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-on-surface">Salão</Label>
+                <Label className="text-sm font-medium text-on-surface">Empresa</Label>
                 <Select value={selectedCompanyId} onValueChange={handleCompanyChange}>
                   <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="Selecione o salão" />
+                    <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
                   <SelectContent>
                     {companies.map(c => (
