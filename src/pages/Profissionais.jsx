@@ -6,8 +6,10 @@ import { useCurrentUser } from "@/components/auth/useCurrentUser";
 import { useThemeMode } from "@/hooks/useThemeMode";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatPhone } from "@/utils/formatters";
+import CompanyMultiSelect from "@/components/settings/CompanyMultiSelect";
 import {
   UserCog,
+  Building2,
   Plus,
   Edit,
   Trash2,
@@ -55,6 +57,7 @@ const EMPTY_PROFESSIONAL = {
   commission_pct: 0, photo_url: "",
   work_days: ["seg", "ter", "qua", "qui", "sex", "sab"],
   service_ids: [],
+  company_ids: [],
 };
 
 const WORK_DAYS = [
@@ -98,6 +101,20 @@ export default function Profissionais() {
     enabled: ready,
   });
 
+  const { data: rawUserCompanies = [] } = useQuery({
+    queryKey: ["user_companies_prof"],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_companies").select("user_id, company_id");
+      return data || [];
+    },
+    enabled: ready,
+  });
+  const userCompanyMap = {};
+  rawUserCompanies.forEach(uc => {
+    if (!userCompanyMap[uc.user_id]) userCompanyMap[uc.user_id] = [];
+    userCompanyMap[uc.user_id].push(uc.company_id);
+  });
+
   const { data: allServices = [] } = useQuery({
     queryKey: ["services"],
     queryFn: () => db.entities.Service.list(),
@@ -139,9 +156,10 @@ export default function Profissionais() {
     const rawRole = u.role || "";
     const role = rawRole === "teacher" ? "profissional" : rawRole;
     const isProf = role === "profissional" || u.is_professional === true;
+    const uIds = userCompanyMap[u.id] || (u.company_ids || (u.company_id ? [u.company_id] : []));
     const matchCompany = isSuperAdmin
-      ? (companyFilter === "all" || u.company_id === companyFilter || (u.company_ids || []).includes(companyFilter))
-      : (!effectiveCompanyId || u.company_id === effectiveCompanyId || (u.company_ids || []).includes(effectiveCompanyId));
+      ? (companyFilter === "all" || uIds.includes(companyFilter))
+      : (!effectiveCompanyId || uIds.includes(effectiveCompanyId));
     const matchSearch = !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || (statusFilter === "active" && u.active !== false) || (statusFilter === "inactive" && u.active === false);
     return isProf && matchCompany && matchSearch && matchStatus;
@@ -168,7 +186,13 @@ export default function Profissionais() {
         photo_url: data.photo_url || "",
         work_days: data.work_days || [],
       };
-      if (effectiveCompanyId) {
+      if (isSuperAdmin) {
+        const ids = data.company_ids || [];
+        if (ids.length > 0) {
+          extra.company_id = ids[0];
+          extra.company_ids = ids;
+        }
+      } else if (effectiveCompanyId) {
         extra.company_id = effectiveCompanyId;
         extra.company_ids = [effectiveCompanyId];
       }
@@ -176,15 +200,22 @@ export default function Profissionais() {
       // Fallback: update fields on the client if server didn't handle them
       if (result?.user_id) {
         try {
+          const ids = isSuperAdmin ? (data.company_ids || []) : (effectiveCompanyId ? [effectiveCompanyId] : []);
           await supabase.from("users").update({
             phone: data.phone,
             commission_pct: data.commission_pct || 0,
             photo_url: data.photo_url || "",
             work_days: data.work_days || [],
             must_change_password: true,
-            company_id: effectiveCompanyId,
-            company_ids: effectiveCompanyId ? [effectiveCompanyId] : undefined,
+            company_id: ids[0] || effectiveCompanyId,
+            company_ids: ids.length ? ids : (effectiveCompanyId ? [effectiveCompanyId] : undefined),
           }).eq("id", result.user_id);
+          // Para super_admin, garantir user_companies multi
+          if (isSuperAdmin && ids.length > 1) {
+            await supabase.from("user_companies").delete().eq("user_id", result.user_id);
+            const rows = ids.map(company_id => ({ user_id: result.user_id, company_id }));
+            await supabase.from("user_companies").insert(rows);
+          }
         } catch {
           // RLS might block client-side update, that's OK — server already saved
         }
@@ -233,6 +264,19 @@ export default function Profissionais() {
           phone: data.phone,
           active: data.active,
         }).eq("id", id);
+      }
+      // Empresa - somente super_admin pode alterar (via CompanyMultiSelect)
+      if (isSuperAdmin && data.company_ids !== undefined) {
+        const ids = data.company_ids || [];
+        // valida: só super_admin pode vincular a qualquer empresa, mas garante que ids existem
+        await supabase.from("users").update({ company_id: ids[0] || null }).eq("id", id);
+        // sincroniza user_companies (fonte para get_user_company_ids)
+        await supabase.from("user_companies").delete().eq("user_id", id);
+        if (ids.length > 0) {
+          const rows = ids.map(company_id => ({ user_id: id, company_id }));
+          const { error: ucErr } = await supabase.from("user_companies").insert(rows);
+          if (ucErr) throw ucErr;
+        }
       }
       if (service_ids != null) {
         const { data: existing } = await supabase.from("professional_services").select("id, service_id").eq("professional_id", id);
@@ -379,6 +423,16 @@ export default function Profissionais() {
               </button>
             ))}
           </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-36 rounded-lg h-9">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="active">Ativos</SelectItem>
+              <SelectItem value="inactive">Inativos</SelectItem>
+            </SelectContent>
+          </Select>
 
           {isSuperAdmin && allCompanies.length > 0 && (
             <Select value={companyFilter} onValueChange={setCompanyFilter}>
@@ -446,19 +500,42 @@ export default function Profissionais() {
                         </div>
                       )}
                       <div>
-                        <h3 className="font-semibold text-on-surface">{prof.full_name || "Sem nome"}</h3>
+                        <h3 className="font-semibold text-on-surface flex items-center gap-1.5">
+                          {prof.full_name || "Sem nome"}
+                          <span className={cn("w-2 h-2 rounded-full", prof.active !== false ? "bg-emerald-500" : "bg-gray-400")} title={prof.active !== false ? "Ativo" : "Inativo"}></span>
+                        </h3>
                         <p className="text-xs text-muted-foreground">{prof.email}</p>
-                        {prof.company_id && (
-                          <p className="text-xs text-outline">{allCompanies.find(c => c.id === prof.company_id)?.name || ""}</p>
+                        {prof.phone && <p className="text-xs text-muted-foreground">{prof.phone} • {prof.commission_pct || 0}% comissão</p>}
+                        {(() => {
+                          const ids = userCompanyMap[prof.id] || (prof.company_ids || (prof.company_id ? [prof.company_id] : []));
+                          const names = ids.map(id => allCompanies.find(c => c.id === id)?.name).filter(Boolean).join(", ");
+                          return names ? <p className="text-xs text-branding-primary font-medium">{names}</p> : null;
+                        })()}
+                        {(prof.work_days || []).length > 0 && (
+                          <div className="flex gap-1 mt-1 flex-wrap">
+                            {(prof.work_days || []).slice(0,4).map(d => (
+                              <span key={d} className="text-[10px] px-1.5 py-0.5 rounded bg-surface-container-low border border-outline-variant text-muted-foreground">{d}</span>
+                            ))}
+                            {(prof.work_days || []).length > 4 && <span className="text-[10px] text-muted-foreground">+{prof.work_days.length-4}</span>}
+                          </div>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={cn("text-xs", prof.active !== false ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" : "bg-surface-container-low text-muted-foreground border-outline-variant")}>
+                      <Badge variant="outline" className={cn("text-xs font-medium", prof.active !== false ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-red-500/10 text-red-400 border-red-500/30")}>
                         {prof.active !== false ? "Ativo" : "Inativo"}
                       </Badge>
+                      <span className="text-xs text-muted-foreground hidden sm:inline">{prof.commission_pct || 0}%</span>
                       {svcCount > 0 && <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-300 border-blue-500/30">{svcCount} serviços</Badge>}
                       {prodCount > 0 && <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-300 border-purple-500/30">{prodCount} produtos</Badge>}
+                      <Switch
+                        checked={prof.active !== false}
+                        onCheckedChange={(checked) => {
+                          toggleActive.mutate({ id: prof.id, active: checked });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        title={prof.active !== false ? "Ativo - clique para inativar" : "Inativo - clique para ativar"}
+                      />
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button onClick={e => e.stopPropagation()} className="p-1 rounded-lg hover:bg-surface-container transition-colors">
@@ -466,7 +543,7 @@ export default function Profissionais() {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingProf(prof); setProfForm({ name: prof.full_name || "", email: prof.email || "", phone: prof.phone || "", active: prof.active !== false, commission_pct: prof.commission_pct || 0, photo_url: prof.photo_url || "", work_days: prof.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: allProServ.filter(ps => ps.professional_id === prof.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id) }); setShowForm(true); }}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingProf(prof); setProfForm({ name: prof.full_name || "", email: prof.email || "", phone: prof.phone || "", active: prof.active !== false, commission_pct: prof.commission_pct || 0, photo_url: prof.photo_url || "", work_days: prof.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: allProServ.filter(ps => ps.professional_id === prof.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id), company_ids: userCompanyMap[prof.id] || (prof.company_ids || (prof.company_id ? [prof.company_id] : [])) }); setShowForm(true); }}>
                             <Edit className="w-4 h-4 mr-2" /> Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); toggleActive.mutate({ id: prof.id, active: prof.active === false }); }}>
@@ -498,20 +575,43 @@ export default function Profissionais() {
                       {(prof.full_name || prof.email || "?")[0].toUpperCase()}
                     </div>
                   )}
-                  <h3 className="font-semibold text-on-surface text-sm truncate">{prof.full_name || "Sem nome"}</h3>
+                  <h3 className="font-semibold text-on-surface text-sm truncate flex items-center justify-center gap-1">
+                    {prof.full_name || "Sem nome"}
+                    <span className={cn("w-2 h-2 rounded-full", prof.active !== false ? "bg-emerald-500" : "bg-gray-400")}></span>
+                  </h3>
                   <p className="text-xs text-muted-foreground truncate">{prof.email}</p>
-                  {prof.company_id && (
-                    <p className="text-xs text-outline truncate mt-0.5">{allCompanies.find(c => c.id === prof.company_id)?.name || ""}</p>
+                  {prof.phone && <p className="text-xs text-muted-foreground truncate">{prof.phone} • {prof.commission_pct || 0}%</p>}
+                  {(() => {
+                    const ids = userCompanyMap[prof.id] || (prof.company_ids || (prof.company_id ? [prof.company_id] : []));
+                    const names = ids.map(id => allCompanies.find(c => c.id === id)?.name).filter(Boolean).join(", ");
+                    return names ? <p className="text-xs text-branding-primary font-medium truncate mt-0.5">{names}</p> : null;
+                  })()}
+                  {(prof.work_days || []).length > 0 && (
+                    <div className="flex gap-1 justify-center flex-wrap mt-1">
+                      {(prof.work_days || []).slice(0,4).map(d => (
+                        <span key={d} className="text-[10px] px-1 py-0.5 rounded bg-surface-container-low border border-outline-variant text-muted-foreground">{d}</span>
+                      ))}
+                    </div>
                   )}
                   <div className="flex items-center justify-center gap-1.5 mt-2 flex-wrap">
-                    <Badge variant="outline" className={cn("text-[10px]", prof.active !== false ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" : "bg-surface-container-low text-muted-foreground border-outline-variant")}>
+                    <Badge variant="outline" className={cn("text-[10px] font-medium", prof.active !== false ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-red-500/10 text-red-400 border-red-500/30")}>
                       {prof.active !== false ? "Ativo" : "Inativo"}
                     </Badge>
                     {svcCount > 0 && <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-300 border-blue-500/30">{svcCount} svc</Badge>}
                   </div>
+                  <div className="flex items-center justify-center gap-2 mt-3">
+                    <Switch
+                      checked={prof.active !== false}
+                      onCheckedChange={(checked) => {
+                        toggleActive.mutate({ id: prof.id, active: checked });
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span className="text-xs text-muted-foreground">{prof.active !== false ? "Ativo" : "Inativo"}</span>
+                  </div>
                   <div className="flex justify-center gap-1 mt-3">
                     <Button variant="outline" size="sm" className="rounded-lg h-7 text-xs"
-                      onClick={(e) => { e.stopPropagation(); setEditingProf(prof); setProfForm({ name: prof.full_name || "", email: prof.email || "", phone: prof.phone || "", active: prof.active !== false, commission_pct: prof.commission_pct || 0, photo_url: prof.photo_url || "", work_days: prof.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: allProServ.filter(ps => ps.professional_id === prof.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id) }); setShowForm(true); }}>
+                      onClick={(e) => { e.stopPropagation(); setEditingProf(prof); setProfForm({ name: prof.full_name || "", email: prof.email || "", phone: prof.phone || "", active: prof.active !== false, commission_pct: prof.commission_pct || 0, photo_url: prof.photo_url || "", work_days: prof.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: allProServ.filter(ps => ps.professional_id === prof.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id), company_ids: userCompanyMap[prof.id] || (prof.company_ids || (prof.company_id ? [prof.company_id] : [])) }); setShowForm(true); }}>
                       <Edit className="w-3 h-3" />
                     </Button>
                     <Button variant="outline" size="sm" className="rounded-lg h-7 text-xs"
@@ -628,6 +728,19 @@ export default function Profissionais() {
               <div>
                 <Label className="text-sm font-medium">E-mail</Label>
                 <Input type="email" value={profForm.email} onChange={e => setProfForm(f => ({ ...f, email: e.target.value }))} placeholder="email@exemplo.com" disabled={!!editingProf} className="mt-1" />
+              </div>
+
+              {/* Empresa - somente super_admin pode alterar */}
+              <div>
+                <Label className="text-sm font-medium flex items-center gap-2"><Building2 className="w-4 h-4" /> Empresa</Label>
+                {isSuperAdmin ? (
+                  <CompanyMultiSelect companies={allCompanies} selectedIds={profForm.company_ids || []} onChange={(ids)=>setProfForm(f=>({...f, company_ids: ids}))} />
+                ) : (
+                  <div className="px-3 py-2 rounded-xl border border-outline-variant bg-background text-on-surface text-sm">
+                    {allCompanies.find(c=>c.id===effectiveCompanyId)?.name || "Nenhum salão"}
+                    <p className="text-xs text-muted-foreground mt-1">Somente super admin pode alterar empresa</p>
+                  </div>
+                )}
               </div>
 
               {/* Serviços */}
@@ -753,11 +866,14 @@ export default function Profissionais() {
               <img src={selectedProf.photo_url} alt={selectedProf.full_name} className="w-20 h-20 rounded-full object-cover border-2 border-outline-variant" />
             </div>
           )}
-          {[["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Empresa", allCompanies.find(c => c.id === selectedProf.company_id)?.name || "-"], ["Serviços", allProServ.filter(ps => ps.professional_id === selectedProf.id).map(ps => allServices.find(s => s.id === ps.service_id)?.name).filter(Boolean).join(", ") || "-"], ["Comissão", `${selectedProf.commission_pct || 0}%`], ["Dias", (selectedProf.work_days || []).map(d => WORK_DAYS.find(w => w.key === d)?.label).filter(Boolean).join(", ") || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
+          {(() => {
+            const profIds = userCompanyMap[selectedProf.id] || (selectedProf.company_ids || (selectedProf.company_id ? [selectedProf.company_id] : []));
+            const profCompanyNames = profIds.map(id => allCompanies.find(c => c.id === id)?.name).filter(Boolean).join(", ") || "-";
+            return [["Nome", selectedProf.full_name], ["E-mail", selectedProf.email], ["Telefone", selectedProf.phone || "-"], ["Empresa", profCompanyNames], ["Serviços", allProServ.filter(ps => ps.professional_id === selectedProf.id).map(ps => allServices.find(s => s.id === ps.service_id)?.name).filter(Boolean).join(", ") || "-"], ["Comissão", `${selectedProf.commission_pct || 0}%`], ["Dias", (selectedProf.work_days || []).map(d => WORK_DAYS.find(w => w.key === d)?.label).filter(Boolean).join(", ") || "-"], ["Status", selectedProf.active !== false ? "Ativo" : "Inativo"]].map(([l, v]) => (
             <div key={l}><p className="text-xs text-muted-foreground">{l}</p><p className="text-sm font-medium">{v}</p></div>
-          ))}
+          ))})()}
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" onClick={() => { const profServiceIds = allProServ.filter(ps => ps.professional_id === selectedProf.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id); setEditingProf(selectedProf); setProfForm({ name: selectedProf.full_name || "", email: selectedProf.email || "", phone: selectedProf.phone || "", active: selectedProf.active !== false, commission_pct: selectedProf.commission_pct || 0, photo_url: selectedProf.photo_url || "", work_days: selectedProf.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: profServiceIds }); setShowForm(true); }}>
+            <Button variant="outline" onClick={() => { const profServiceIds = allProServ.filter(ps => ps.professional_id === selectedProf.id && services.some(s => s.id === ps.service_id)).map(ps => ps.service_id); const profCompanyIds = userCompanyMap[selectedProf.id] || (selectedProf.company_ids || (selectedProf.company_id ? [selectedProf.company_id] : [])); setEditingProf(selectedProf); setProfForm({ name: selectedProf.full_name || "", email: selectedProf.email || "", phone: selectedProf.phone || "", active: selectedProf.active !== false, commission_pct: selectedProf.commission_pct || 0, photo_url: selectedProf.photo_url || "", work_days: selectedProf.work_days || ["seg", "ter", "qua", "qui", "sex", "sab"], service_ids: profServiceIds, company_ids: profCompanyIds }); setShowForm(true); }}>
               <Edit className="w-4 h-4 mr-2" /> Editar
             </Button>
             <Button variant="outline" className="text-red-400 border-red-500/30 hover:bg-error-container/20" onClick={() => setDeletingProf(selectedProf)}>
@@ -935,6 +1051,19 @@ export default function Profissionais() {
             <div>
               <Label className="text-sm font-medium">E-mail</Label>
               <Input type="email" value={profForm.email} disabled className="mt-1" />
+            </div>
+
+            {/* Empresa - somente super_admin pode alterar */}
+            <div>
+              <Label className="text-sm font-medium flex items-center gap-2"><Building2 className="w-4 h-4" /> Empresa</Label>
+              {isSuperAdmin ? (
+                <CompanyMultiSelect companies={allCompanies} selectedIds={profForm.company_ids || []} onChange={(ids)=>setProfForm(f=>({...f, company_ids: ids}))} />
+              ) : (
+                <div className="px-3 py-2 rounded-xl border border-outline-variant bg-background text-on-surface text-sm">
+                  {allCompanies.find(c=>c.id===effectiveCompanyId)?.name || "Nenhum salão"}
+                  <p className="text-xs text-muted-foreground mt-1">Somente super admin pode alterar empresa</p>
+                </div>
+              )}
             </div>
 
             {/* Serviços */}

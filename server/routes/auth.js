@@ -128,9 +128,10 @@ router.post("/admin-create-user", async (req, res) => {
 });
 
 // POST /api/auth/admin-update-user — atualizar dados de um usuário (service_role bypasses RLS)
+// Regra: super_admin pode editar qualquer um; admin NÃO pode editar a si mesmo e SÓ pode editar OUTROS admin/super_admin do MESMO salão
 router.post("/admin-update-user", async (req, res) => {
   try {
-    const { user_id, full_name, phone, email, active, commission_pct, specialty, photo_url, work_days } = req.body;
+    const { user_id, full_name, phone, email, active, commission_pct, specialty, photo_url, work_days, whatsapp, cpf, rg, birth_date, role, is_master, is_professional, company_ids } = req.body;
     if (!user_id) return res.status(400).json({ error: "user_id é obrigatório" });
 
     const callerId = req.user.id;
@@ -142,21 +143,100 @@ router.post("/admin-update-user", async (req, res) => {
       .eq("id", callerId)
       .single();
 
-    if (profile?.role !== "super_admin" && profile?.role !== "admin") {
+    const isSuperAdmin = profile?.role === "super_admin";
+    const isAdmin = profile?.role === "admin";
+
+    if (!isSuperAdmin && !isAdmin) {
       return res.status(403).json({ error: "Acesso negado" });
+    }
+
+    // Admin não pode editar a si mesmo via este endpoint (deve usar perfil próprio)
+    if (isAdmin && !isSuperAdmin && callerId === user_id) {
+      return res.status(403).json({ error: "Admin não pode alterar o próprio perfil por aqui. Use seu perfil." });
+    }
+
+    // Se for admin (não super_admin), verificar que alvo é admin/super_admin e compartilha empresa
+    if (isAdmin && !isSuperAdmin) {
+      const { data: target } = await req.supabase
+        .from("users")
+        .select("role")
+        .eq("id", user_id)
+        .single();
+      if (!target) return res.status(404).json({ error: "Usuário alvo não encontrado" });
+      if (target.role !== "admin" && target.role !== "super_admin") {
+        return res.status(403).json({ error: "Admin só pode alterar outros admins do mesmo salão" });
+      }
+      // Checar mesmo salão via user_companies
+      const { data: callerCompanies } = await req.supabase
+        .from("user_companies")
+        .select("company_id")
+        .eq("user_id", callerId);
+      const { data: targetCompanies } = await req.supabase
+        .from("user_companies")
+        .select("company_id")
+        .eq("user_id", user_id);
+      const callerCompanyIds = (callerCompanies || []).map(c => c.company_id);
+      const targetCompanyIds = (targetCompanies || []).map(c => c.company_id);
+      const shared = callerCompanyIds.some(id => targetCompanyIds.includes(id));
+      if (!shared) {
+        return res.status(403).json({ error: "Acesso negado: usuário não pertence ao seu salão" });
+      }
+      // Bloquear escalada de privilégio
+      if (role === "super_admin") {
+        return res.status(403).json({ error: "Admin não pode promover a super_admin" });
+      }
+      if (is_master === true) {
+        return res.status(403).json({ error: "Apenas super_admin pode conceder Master" });
+      }
     }
 
     const updateData = {};
     if (full_name != null) updateData.full_name = full_name;
     if (phone != null) updateData.phone = phone;
+    if (email != null) updateData.email = email;
     if (active != null) updateData.active = active;
     if (commission_pct != null) updateData.commission_pct = commission_pct;
     if (specialty != null) updateData.specialty = specialty;
     if (photo_url != null) updateData.photo_url = photo_url;
     if (work_days != null) updateData.work_days = work_days;
+    if (whatsapp != null) updateData.whatsapp = whatsapp;
+    if (cpf != null) updateData.cpf = cpf;
+    if (rg != null) updateData.rg = rg;
+    if (birth_date != null) updateData.birth_date = birth_date;
+    if (role != null && isSuperAdmin) updateData.role = role; // só super_admin pode trocar role
+    else if (role != null && isAdmin) {
+      // admin pode manter admin ou mudar para profissional/cliente se quiser? manter restrito: só pode manter admin
+      if (["admin", "profissional", "cliente"].includes(role)) updateData.role = role;
+    }
+    if (is_master != null && isSuperAdmin) updateData.is_master = is_master;
+    if (is_professional != null) updateData.is_professional = is_professional;
 
-    const { error } = await req.supabase.from("users").update(updateData).eq("id", user_id);
-    if (error) throw error;
+    if (Object.keys(updateData).length > 0) {
+      const { error } = await req.supabase.from("users").update(updateData).eq("id", user_id);
+      if (error) throw error;
+    }
+
+    // Atualizar vínculo de empresas se enviado (company_ids: string[])
+    if (Array.isArray(company_ids)) {
+      // Validar que admin só pode vincular a empresas que ele próprio possui (se não for super_admin)
+      if (!isSuperAdmin) {
+        const { data: callerCompanies } = await req.supabase
+          .from("user_companies")
+          .select("company_id")
+          .eq("user_id", callerId);
+        const allowedIds = new Set((callerCompanies || []).map(c => c.company_id));
+        const invalid = company_ids.filter(id => !allowedIds.has(id));
+        if (invalid.length > 0) {
+          return res.status(403).json({ error: "Admin só pode vincular a salões que pertence" });
+        }
+      }
+      await req.supabase.from("user_companies").delete().eq("user_id", user_id);
+      if (company_ids.length > 0) {
+        const rows = company_ids.map(company_id => ({ user_id, company_id }));
+        const { error: insertError } = await req.supabase.from("user_companies").insert(rows);
+        if (insertError) throw insertError;
+      }
+    }
 
     res.json({ ok: true });
   } catch (err) {

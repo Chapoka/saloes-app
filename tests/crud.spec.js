@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 const EMAIL = "rodrigo.rocha@morumbisolutions.com.br";
-const PASSWORD = "Analyse01@!";
+const PASSWORD = "Test1234!";
 
 async function login(page) {
   await page.goto("/login");

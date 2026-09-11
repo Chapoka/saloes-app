@@ -127,7 +127,8 @@ export default function Customers() {
       const shouldFilter = userCompanyIds.length > 0 && !isSuperAdmin;
       const filtered = shouldFilter
         ? data.filter(s => {
-            const sIds = s.company_ids?.length ? s.company_ids : (s.company_id ? [s.company_id] : []);
+            const rawIds = s.company_ids ?? s.companyIds ?? s.company_id ?? s.companyId;
+            const sIds = Array.isArray(rawIds) ? rawIds : (rawIds ? [rawIds] : []);
             return sIds.some(id => userCompanyIds.includes(id));
           })
         : data;
@@ -344,11 +345,26 @@ export default function Customers() {
           return;
         }
       }
-      // Build company_id from company_ids array (table only has company_id, not company_ids)
-      const allCompanyIds = [...new Set([...(data.company_ids || []), ...userCompanyIds])];
+      // Lista suspensa (primário) + check filial/franquia (secundários)
+      // Cliente aparece no salão selecionado; se check marcado, também nos secundários
+      let allCompanyIds = data.company_ids || [];
+      // Profissional: força primário como seu salão, mas mantém extras se check filial marcado
+      if (isProfissional) {
+        const primary = userCompanyIds[0] || allCompanyIds[0] || null;
+        const extras = allCompanyIds.filter(id => id !== primary);
+        allCompanyIds = primary ? [primary, ...extras] : extras;
+      }
+      // Garante que admin só vincula a salões que possui (RLS também valida)
+      if (!isSuperAdmin) {
+        allCompanyIds = allCompanyIds.filter(id => userCompanyIds.includes(id));
+      }
+      // Validação: se admin só tem um salão aquele cliente será daquele salão que ele tem acesso
+      if (allCompanyIds.length === 0 && !isSuperAdmin && userCompanyIds.length === 1) {
+        allCompanyIds = [...userCompanyIds];
+      }
       const companyId = allCompanyIds[0] || null;
-      if (!companyId && !isSuperAdmin) {
-        toast.error("Selecione o salão para vincular o cliente. Se o problema persistir, recarregue a página.");
+      if (!companyId) {
+        toast.error("Selecione o salão para vincular o cliente. Cliente aparecerá somente no salão selecionado.");
         return;
       }
 
@@ -544,8 +560,9 @@ export default function Customers() {
               setEditingCustomer(null);
             }}
             isLoading={createMutation.isPending || updateMutation.isPending}
-            isTeacher={isProfissional || (!isSuperAdmin && userCompanyIds.length > 0)}
+            isTeacher={isProfissional}
             teacherCompanyId={userCompanyIds[0]}
+            isSuperAdmin={isSuperAdmin}
           />
         </div>
       </div>

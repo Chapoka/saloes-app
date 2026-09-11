@@ -189,6 +189,8 @@ export default function Settings() {
       ? users.filter(u => {
           const uRole = u.role === "teacher" ? "profissional" : u.role === "user" ? "cliente" : u.role;
           const uIds = u.company_ids?.length ? u.company_ids : (u.company_id ? [u.company_id] : []);
+          // Admin não pode alterar a si mesmo, só outros admins do mesmo salão
+          if (u.id === currentUser?.id) return false;
           return (uRole === "super_admin" || uRole === "admin") && currentUserCompanyIds.some(cid => uIds.includes(cid));
         })
       : [];
@@ -238,6 +240,37 @@ export default function Settings() {
   const saveUserMutation = useMutation({
     mutationFn: async (userData) => {
       if (editingUser) {
+        // Admin editando outro admin do mesmo salão -> usar API que valida mesmo salão e bypassa RLS
+        const isEditingSelf = editingUser.id === currentUser?.id;
+        const shouldUseApi = !isSuperAdmin && isAdmin && !isEditingSelf;
+        if (shouldUseApi) {
+          const { data: { session } } = await supabase.auth.getSession();
+          const res = await fetch(`${window.location.origin}/api/auth/admin-update-user`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${session?.access_token || ""}`,
+            },
+            body: JSON.stringify({
+              user_id: editingUser.id,
+              full_name: userData.full_name || null,
+              email: userData.email || null,
+              whatsapp: userData.whatsapp || null,
+              role: userData.role,
+              cpf: userData.cpf || null,
+              rg: userData.rg || null,
+              birth_date: userData.birth_date || null,
+              is_master: userData.is_master || false,
+              is_professional: userData.is_professional || false,
+              phone: userData.whatsapp || null,
+              company_ids: userData.company_ids || [],
+            }),
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || "Erro ao atualizar usuário");
+          return editingUser;
+        }
+        // Super_admin ou self-edit -> direto via RLS (super_admin bypassa, self-edit permitido por auth.uid()=id)
         const cleanData = {
           full_name: userData.full_name || null,
           email: userData.email || null,
@@ -376,13 +409,40 @@ export default function Settings() {
   });
 
   const toggleUserActiveMutation = useMutation({
-    mutationFn: ({ id, active }) => db.entities.User.update(id, { active }),
+    mutationFn: async ({ id, active }) => {
+      // Admin só pode alterar outro admin do mesmo salão -> usar API que valida
+      if (!isSuperAdmin && isAdmin && id !== currentUser?.id) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${window.location.origin}/api/auth/admin-update-user`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token || ""}`,
+          },
+          body: JSON.stringify({ user_id: id, active }),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Erro ao alterar status");
+        return result;
+      }
+      // Super_admin ou self (super_admin) usa RLS direto
+      if (!isSuperAdmin && id === currentUser?.id) {
+        throw new Error("Admin não pode alterar o próprio status");
+      }
+      return db.entities.User.update(id, { active });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const handleOpenUserModal = (user = null) => {
+    // Bloqueio: admin não pode editar a si mesmo nesta lista
+    if (user && !isSuperAdmin && isAdmin && user.id === currentUser?.id) {
+      toast.error("Admin não pode alterar o próprio perfil por aqui");
+      return;
+    }
     setImportEmailChecked("");
     setFoundCustomer(null);
     setFoundCustomerHasUser(false);

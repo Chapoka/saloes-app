@@ -56,6 +56,19 @@ function SuperAdminDashboard({ currentUser }) {
     queryFn: () => db.entities.User.list(),
   });
 
+  const { data: dashboardUserCompanies = [] } = useQuery({
+    queryKey: ["user-companies-dashboard"],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_companies").select("user_id, company_id");
+      return data || [];
+    },
+  });
+  const dashboardUserCompanyMap = {};
+  dashboardUserCompanies.forEach(uc => {
+    if (!dashboardUserCompanyMap[uc.user_id]) dashboardUserCompanyMap[uc.user_id] = [];
+    dashboardUserCompanyMap[uc.user_id].push(uc.company_id);
+  });
+
   const { data: customers = [] } = useQuery({
     queryKey: ["customers-sa"],
     queryFn: () => db.entities.Customer.list(),
@@ -89,9 +102,10 @@ function SuperAdminDashboard({ currentUser }) {
   const totalCompanies = companies.filter(c => c.active !== false).length;
   const totalCustomers = customers.length;
   const activeCustomers = customers.filter(s => s.status === "active").length;
-  const totalProfessionals = allUsers.filter(u =>
-    (u.role === "profissional" || u.role === "teacher") && u.active !== false
-  ).length;
+  const totalProfessionals = allUsers.filter(u => {
+    const isProf = (u.role === "profissional" || u.role === "teacher" || u.is_professional === true) && u.active !== false;
+    return isProf;
+  }).length;
 
   const totalRevenue = allInvoices
     .filter(inv => {
@@ -140,7 +154,11 @@ function SuperAdminDashboard({ currentUser }) {
       ...company,
       customerCount: coCustomers.length,
       activeCustomers: coCustomers.filter(s => s.status === "active").length,
-      teacherCount: allUsers.filter(u => (u.role === "profissional" || u.role === "teacher") && u.company_id === company.id && u.active !== false).length,
+      teacherCount: allUsers.filter(u => {
+        const isProf = (u.role === "profissional" || u.role === "teacher" || u.is_professional === true) && u.active !== false;
+        const uIds = dashboardUserCompanyMap[u.id] || (u.company_ids || (u.company_id ? [u.company_id] : []));
+        return isProf && uIds.includes(company.id);
+      }).length,
       monthlyRevenue: coRevenue,
       pendingInvoices: coInvoices.filter(inv => inv.status === "pending").length,
     };
@@ -498,6 +516,19 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
     queryFn: () => db.entities.User.list(),
   });
 
+  const { data: salonUserCompanies = [] } = useQuery({
+    queryKey: ["user-companies-salon"],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_companies").select("user_id, company_id");
+      return data || [];
+    },
+  });
+  const salonUserCompanyMap = {};
+  salonUserCompanies.forEach(uc => {
+    if (!salonUserCompanyMap[uc.user_id]) salonUserCompanyMap[uc.user_id] = [];
+    salonUserCompanyMap[uc.user_id].push(uc.company_id);
+  });
+
   const { data: allInvoices = [] } = useQuery({
     queryKey: ["invoices-salon"],
     queryFn: () => db.entities.Invoice.list(),
@@ -520,9 +551,11 @@ function SalonDashboard({ currentUser, isProfissional, companyId }) {
     : allAppointments;
 
   const activeCustomers = customers.filter(s => s.status === "active").length;
-  const activeProfessionals = allUsers.filter(u =>
-    (u.role === "profissional" || u.role === "teacher") && u.active !== false && (!companyId || u.company_id === companyId || (u.company_ids || []).includes(companyId))
-  ).length;
+  const activeProfessionals = allUsers.filter(u => {
+    const isProf = (u.role === "profissional" || u.role === "teacher" || u.is_professional === true) && u.active !== false;
+    const uIds = salonUserCompanyMap[u.id] || (u.company_ids || (u.company_id ? [u.company_id] : []));
+    return isProf && (!companyId || uIds.includes(companyId));
+  }).length;
 
   const periodRange = { start: startOfMonth(now), end: endOfMonth(now) };
 

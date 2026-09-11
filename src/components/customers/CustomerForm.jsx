@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { db, setCustomerCompanies } from "@/api/dbClient";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { logger } from "@/lib/debugLogger";
+import CompanyMultiSelect from "@/components/settings/CompanyMultiSelect";
 import { formatPhone, formatCPF, formatCEP } from "@/utils/formatters";
 
 const InputWithIcon = ({ icon: Icon, label, id, ...props }) => (
@@ -24,7 +26,7 @@ const InputWithIcon = ({ icon: Icon, label, id, ...props }) => (
   </div>
 );
 
-export default function CustomerForm({ customer, plans, companies = [], customers = [], onSubmit, onCancel, isLoading, isTeacher, teacherCompanyId, guardianMode = false, guardianName = "" }) {
+export default function CustomerForm({ customer, plans, companies = [], customers = [], onSubmit, onCancel, isLoading, isTeacher, teacherCompanyId, guardianMode = false, guardianName = "", isSuperAdmin = false }) {
   const queryClient = useQueryClient();
   
   useEffect(() => {
@@ -640,49 +642,43 @@ logger.info("Guardian created via mini-form", guardian);
           />
 
           {isTeacher ? (
-            teacherCompanyId && companies.length > 0 && (
-              <div className="md:col-span-2 space-y-2">
-                <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-muted-foreground" />
-                  Salão
-                </Label>
-                <div className="px-3 py-2 rounded-xl border border-outline-variant bg-background text-on-surface text-sm">
-                  {companies.find(c => c.id === teacherCompanyId)?.name || teacherCompanyId}
-                </div>
-              </div>
-            )
-          ) : companies.length > 0 && (
             <div className="md:col-span-2 space-y-2">
               <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-muted-foreground" />
-                Salões / Filiais
+                Salão
               </Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
-                {companies.map(c => {
-                  const isChecked = (formData.company_ids || []).includes(c.id);
-                  return (
-                    <label key={c.id} className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all",
-                      isChecked ? "border-branding-primary bg-branding-primary/5" : "border-outline-variant hover:border-outline"
-                    )}>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {
-                          const ids = formData.company_ids || [];
-                          handleChange("company_ids", isChecked ? ids.filter(id => id !== c.id) : [...ids, c.id]);
-                        }}
-                        className="w-4 h-4 rounded text-branding-primary focus:ring-branding-primary"
-                      />
-                      <span className="text-sm text-on-surface">{c.name}</span>
-                      {c.has_branch && <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto">Filial</Badge>}
-                    </label>
-                  );
-                })}
+              <div className="px-3 py-2 rounded-xl border border-outline-variant bg-muted/30 text-on-surface text-sm">
+                {companies.find((c) => c.id === teacherCompanyId)?.name || teacherCompanyId || "—"}
               </div>
-              {(formData.company_ids || []).length === 0 && (
-                <p className="text-xs text-muted-foreground">Selecione um ou mais salões</p>
-              )}
+            </div>
+          ) : !isSuperAdmin ? (
+            (() => {
+              const assignedId = formData.company_ids?.[0] || customer?.company_id || customer?.companyId || companies[0]?.id || teacherCompanyId;
+              const assignedName = companies.find((c) => c.id === assignedId)?.name || assignedId || "—";
+              return (
+                <div className="md:col-span-2 space-y-2">
+                  <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    Salão
+                  </Label>
+                  <div className="px-3 py-2 rounded-xl border border-outline-variant bg-muted/30 text-on-surface text-sm">
+                    {assignedName}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Cliente vinculado automaticamente ao seu salão — somente super admin pode alterar para outras empresas</p>
+                </div>
+              );
+            })()
+          ) : (
+            <div className="md:col-span-2 space-y-2">
+              <Label className="text-sm font-medium text-on-surface flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-muted-foreground" />
+                Salão / Filial *
+              </Label>
+              <CompanyMultiSelect
+                companies={companies}
+                selectedIds={formData.company_ids || []}
+                onChange={(ids) => handleChange("company_ids", ids)}
+              />
             </div>
           )}
         </div>

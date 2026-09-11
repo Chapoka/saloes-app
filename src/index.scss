@@ -163,3 +163,17 @@ html.dark select option {
     opacity: 0.9;
   }
 }
+
+/* Hide native password reveal eye (Edge/Chrome) that duplicates custom Eye button in all password fields */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input::-ms-reveal,
+input::-ms-clear {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}

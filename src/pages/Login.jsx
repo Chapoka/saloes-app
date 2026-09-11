@@ -302,6 +302,18 @@ export default function Login() {
           transform: scale(1.02);
           box-shadow: 0 0 15px rgba(87, 27, 193, 0.5);
         }
+        /* Esconde olho nativo do Edge/Chrome que duplicava o custom */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear,
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-contacts-auto-fill-button {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        input::-ms-reveal { display: none !important; }
       `}</style>
     </main>
   );
