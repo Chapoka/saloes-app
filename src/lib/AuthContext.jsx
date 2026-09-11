@@ -50,9 +50,28 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
+    // Salão fica logado o tempo todo - keep-alive a cada 10min + ao voltar para a aba
+    const keepAlive = setInterval(() => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) supabase.auth.refreshSession().catch(()=>{});
+      });
+    }, 10 * 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session) supabase.auth.refreshSession().catch(()=>{});
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+
     return () => {
       clearTimeout(authTimeout);
       subscription.unsubscribe();
+      clearInterval(keepAlive);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
   }, []);
 
