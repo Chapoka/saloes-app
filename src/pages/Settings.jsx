@@ -612,7 +612,13 @@ export default function Settings() {
       return;
     }
     try {
+      // Garante token fresco (evita Token inválido ou expirado)
+      await supabase.auth.refreshSession().catch(()=>{});
       const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) {
+        toast.error("Sessão expirada, faça login novamente");
+        return;
+      }
       const response = await fetch(`${window.location.origin}/api/auth/admin-reset-password`, {
         method: "POST",
         headers: {

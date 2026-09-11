@@ -1,12 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { format, isToday, parseISO } from "date-fns";
-import { Calendar, Clock, User, Star, RotateCcw, Users, Check, Scissors, Package, AlertTriangle } from "lucide-react";
+import { Calendar, Clock, User, Star, RotateCcw, Users, Check, Scissors, Package, AlertTriangle, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 
 const allTimeOptions = [];
@@ -24,6 +26,8 @@ const APPOINTMENT_TYPES = [
 export default function NewAppointmentModal({ open, onClose, customers, plans = [], services = [], professionals = [], products = [], appointments = [], blockedTimes = [], selectedDate, selectedTime, onSubmit, isLoading, openingTime = "08:00", closingTime = "18:00" }) {
   const [appointmentType, setAppointmentType] = useState("normal");
   const [extraCustomerIds, setExtraCustomerIds] = useState([]);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerOpen, setCustomerOpen] = useState(false);
   const [formData, setFormData] = useState({
     customer_id: "",
     service_id: "",
@@ -66,6 +70,19 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
     const role = rawRole === "teacher" ? "profissional" : rawRole;
     return p.active !== false && (role === "profissional" || p.is_professional === true);
   }), [professionals]);
+
+  const filteredCustomersForSearch = useMemo(() => {
+    if (!customerSearch) return customers;
+    const search = customerSearch.toLowerCase().trim();
+    const numericSearch = search.replace(/\D/g, "");
+    return customers.filter(c => {
+      const nameMatch = c.name?.toLowerCase().includes(search);
+      const emailMatch = c.email?.toLowerCase().includes(search);
+      const cpfMatch = numericSearch && c.cpf?.replace(/\D/g, "").includes(numericSearch);
+      const phoneMatch = numericSearch && (c.whatsapp?.replace(/\D/g, "").includes(numericSearch) || c.phone?.replace(/\D/g, "").includes(numericSearch));
+      return nameMatch || emailMatch || cpfMatch || phoneMatch;
+    });
+  }, [customers, customerSearch]);
 
   const timeOptions = useMemo(() => {
     if (!formData.date) return allTimeOptions;
@@ -310,24 +327,69 @@ export default function NewAppointmentModal({ open, onClose, customers, plans = 
             </div>
           )}
 
-          {/* Cliente */}
+          {/* Cliente - busca por nome, CPF, e-mail, telefone (igual ao de profissionais) */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-on-surface">Cliente</Label>
-            <Select value={formData.customer_id} onValueChange={handleCustomerChange}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue placeholder="Selecione o cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {customers?.map(cust => (
-                  <SelectItem key={cust.id} value={cust.id}>
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      {cust.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={customerOpen} onOpenChange={setCustomerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={customerOpen}
+                  className={cn("w-full justify-between rounded-xl text-left font-normal h-10", !formData.customer_id && "text-muted-foreground")}
+                >
+                  <span className="truncate">
+                    {formData.customer_id ? (customers.find(c => c.id === formData.customer_id)?.name || "Selecione o cliente") : "Selecione o cliente"}
+                  </span>
+                  <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-xl" align="start">
+                <Command shouldFilter={false}>
+                  <CommandInput placeholder="Buscar por nome, CPF, e-mail ou telefone..." value={customerSearch} onValueChange={setCustomerSearch} className="h-9" />
+                  <CommandList>
+                    <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
+                    <CommandGroup className="max-h-60 overflow-y-auto">
+                      {filteredCustomersForSearch.map((cust) => (
+                        <CommandItem
+                          key={cust.id}
+                          value={`${cust.name} ${cust.cpf || ""} ${cust.email || ""} ${cust.whatsapp || cust.phone || ""}`}
+                          onSelect={() => {
+                            handleCustomerChange(cust.id);
+                            setCustomerOpen(false);
+                            setCustomerSearch("");
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", formData.customer_id === cust.id ? "opacity-100" : "opacity-0")} />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{cust.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {[cust.cpf, cust.email, cust.whatsapp || cust.phone].filter(Boolean).join(" • ") || "Sem contato"}
+                            </p>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {formData.customer_id && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs text-muted-foreground"
+                onClick={() => {
+                  handleCustomerChange("");
+                  setCustomerSearch("");
+                }}
+              >
+                Limpar seleção
+              </Button>
+            )}
           </div>
 
           {/* Mesmo responsável */}
